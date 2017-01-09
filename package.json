@@ -1,0 +1,28 @@
+{
+  "name": "api-telegram-bot",
+  "version": "0.0.1",
+  "description": "client for telegram bots api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felipebergamin/api-telegram-bot.git"
+  },
+  "keywords": [
+    "node",
+    "telegram"
+  ],
+  "author": "Felipe Bergamin <felipebergamin6@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/felipebergamin/api-telegram-bot/issues"
+  },
+  "homepage": "https://github.com/felipebergamin/api-telegram-bot#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "telegram-bot-client": "^1.4.0"
+  }
+}
