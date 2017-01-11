@@ -76,11 +76,12 @@ class TelegramWebHook extends EventEmitter {
 		}
 	}
 
-	processMessageType (message) {
+	processMessageType (message, reply_cbk) {
+		
 		_messageTypes.forEach((msgType)=>{
 			if(message[msgType]) {
 				debug(`emitting ${msgType} event`);
-				this.emit(msgType, message[msgType]);
+				this.emit(msgType, message[msgType], reply_cbk);
 			}
 		});
 	}
