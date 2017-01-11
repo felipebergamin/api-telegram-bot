@@ -14,29 +14,24 @@ const _messageTypes = [
 
 class TelegramWebHook extends EventEmitter {
 
-	constructor(bot, options) {
+	constructor(options) {
 		super();
 
-		if(typeof bot === 'object') {
-			if (typeof options === 'object') {
-				debug('constructing TelegramWebHook');
-				
-				this.bot = new TelegramBotClient(options.token);
-				this.webhook = {};
-				this.webhook.port = options.webhook.port || 80;
-				this.webhook.path = options.webhook.path || '/';
+		if (typeof options === 'object') {
+			debug('constructing TelegramWebHook');
+			
+			this.bot = new TelegramBotClient(options.token);
+			this.webhook = {};
+			this.webhook.port = options.webhook.port || 80;
+			this.webhook.path = options.webhook.path || '/';
 
-				this.setupWebHook(options.expressApp)
-				this.startWebHook();
+			this.setupWebHook(options.expressApp)
+			this.startWebHook();
 
-				this.on('message', this.processMessageType);
-			} else {
-				throw new Error('options must be an object');
-			}
+			this.on('message', this.processMessageType);
 		} else {
-			throw new Error('bot object reference must be passed by parameter');
+			throw new Error('options must be an object');
 		}
-		
 	};
 
 	processUpdateType (update) {
