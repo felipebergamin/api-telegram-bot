@@ -14,6 +14,18 @@ const _messageTypes = [
 
 class TelegramWebHook extends EventEmitter {
 
+	/**
+	 * Construtor do WebHook, pooling não é suportado, apenas WebHook.
+	 *
+	 * @class TelegramWebHook
+	 * @constructor
+	 * @param {Object} [options]
+	 * @param {String} [options.token] Bot Token
+	 * @param {Object} [options.expressApp=express()] Objeto express personalizado
+	 * @param {Object} [options.webhook] Opções do WebHook
+	 * @param {Number} [options.webhook.port=80] Porta para o servidor http escutar
+	 * @param {String} [options.webhook.path='/'] Path do WebHook
+	 */
 	constructor(options) {
 		super();
 
