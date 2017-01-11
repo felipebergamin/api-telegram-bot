@@ -44,7 +44,7 @@ class TelegramWebHook extends EventEmitter {
 				options = options || {};
 				options.reply_to_message_id = update.message.message_id;
 
-				this.bot.sendMessage(update.message.chat.id, text, options);
+				return this.bot.sendMessage(update.message.chat.id, text, options);
 			};
 
 			this.emit('message', update.message, callback_reply);
@@ -81,7 +81,7 @@ class TelegramWebHook extends EventEmitter {
 		_messageTypes.forEach((msgType)=>{
 			if(message[msgType]) {
 				debug(`emitting ${msgType} event`);
-				this.emit(msgType, message[msgType], reply_cbk);
+				this.emit(msgType, message, reply_cbk);
 			}
 		});
 	}
