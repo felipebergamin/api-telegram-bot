@@ -3,7 +3,7 @@
 const express = require('express');
 const bodyparser = require('body-parser');
 const EventEmitter = require('events');
-const TelegramBotClient = require('telegram-bot-client');
+const TelegramBotClient = require('node-telegram-bot-api');
 const debug = require('debug')('api-telegram-bot');
 
 const _messageTypes = [

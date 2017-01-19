@@ -2,7 +2,7 @@
 
 Módulo escrito em Node.JS para interagir com a API oficial do Telegram [Telegram Bot API](https://core.telegram.org/bots/api).
 Você precisará do seu próprio token, se você ainda não possui um, inicie uma conversa com [@botfather](https://telegram.me/BotFather) para criar um Bot.
-Este pacote apenas implementa um WebHook que atenda às minhas necessidades, pois nenhum projeto que encontrei tinha o que eu precisava. O objeto `bot` e as funções de envio de mensagem, fotos, etc, é implementado por [m90/telegram-bot-client](https://www.npmjs.com/package/telegram-bot-client).
+Este pacote apenas implementa um WebHook que atenda às minhas necessidades, pois nenhum projeto que encontrei tinha o que eu precisava. O objeto `bot` e as funções de envio de mensagem, fotos, etc, é implementado por [yagop/node-telegram-bot-api](https://www.npmjs.com/package/node-telegram-bot-api).
 
 Instale:
 ```sh
@@ -10,7 +10,7 @@ npm install api-telegram-bot
 ```
 E então use:
 ```js
-var TelegramBot = require('api-telegram-bot');
+var TelegramWebHook = require('api-telegram-bot');
 
 const options = {
     token: YOUR_TOKEN,
