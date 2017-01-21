@@ -14,6 +14,7 @@ var TelegramWebHook = require('api-telegram-bot');
 
 const options = {
     token: YOUR_TOKEN,
+    onlyFirstMatch: true,
     webhook: {
         port: process.env.PORT,
         path: '/webhook'
@@ -26,6 +27,10 @@ const bot = webhook.bot;
 // reply é um callback que facilita responder a mensagem recebida
 webhook.on('text', (msg, reply)=>{
     reply('Hello');
+});
+
+webhook.onText(/^\/start/i, (msg, reply)=>{
+    reply('Welcome!');
 });
 ```
 
@@ -50,6 +55,11 @@ Suporte nativo à HTTPS será adicionado no futuro.
 TelegramWebHook
 
 **Kind**: global class  
+
+* [TelegramWebHook](#TelegramWebHook)
+    * [new TelegramWebHook([options])](#new_TelegramWebHook_new)
+    * [.onText([regex], callback)](#TelegramWebHook+onText)
+
 <a name="new_TelegramWebHook_new"></a>
 
 ### new TelegramWebHook([options])
@@ -60,9 +70,22 @@ Construtor do WebHook, pooling não é suportado, apenas WebHook.
 | --- | --- | --- | --- |
 | [options] | <code>Object</code> |  |  |
 | [options.token] | <code>String</code> |  | Bot Token |
+| [options.onlyFirstMatch] | <code>Boolean</code> | <code>false</code> | Se true, apenas a primeira regex válida definida em onText() será executada. Se false, todas as válidas serão executadas. |
 | [options.expressApp] | <code>Object</code> | <code>express()</code> | Objeto express personalizado |
 | [options.webhook] | <code>Object</code> |  | Opções do WebHook |
 | [options.webhook.port] | <code>Number</code> | <code>80</code> | Porta para o servidor http escutar |
 | [options.webhook.path] | <code>String</code> | <code>&#x27;/&#x27;</code> | Path do WebHook |
+
+<a name="TelegramWebHook+onText"></a>
+
+### telegramWebHook.onText([regex], callback)
+Define uma regex e uma callback que será executada quando uma mensagem cujo texto retornar true para regex.test()
+
+**Kind**: instance method of <code>[TelegramWebHook](#TelegramWebHook)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [regex] | <code>RegExp</code> | Regex que testará a mensagem recebida. |
+| callback | <code>function</code> | será chamada com dois parâmetros. O primeiro é a mensagem recebida, o segundo, é uma função `reply`. |
 
 * * *

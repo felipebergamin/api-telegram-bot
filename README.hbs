@@ -14,6 +14,7 @@ var TelegramWebHook = require('api-telegram-bot');
 
 const options = {
     token: YOUR_TOKEN,
+    onlyFirstMatch: true,
     webhook: {
         port: process.env.PORT,
         path: '/webhook'
@@ -26,6 +27,10 @@ const bot = webhook.bot;
 // reply é um callback que facilita responder a mensagem recebida
 webhook.on('text', (msg, reply)=>{
     reply('Hello');
+});
+
+webhook.onText(/^\/start/i, (msg, reply)=>{
+    reply('Welcome!');
 });
 ```
 

@@ -21,6 +21,7 @@ class TelegramWebHook extends EventEmitter {
 	 * @constructor
 	 * @param {Object} [options]
 	 * @param {String} [options.token] Bot Token
+	 * @param {Boolean}	[options.onlyFirstMatch=false] Se true, apenas a primeira regex válida definida em onText() será executada. Se false, todas as válidas serão executadas.
 	 * @param {Object} [options.expressApp=express()] Objeto express personalizado
 	 * @param {Object} [options.webhook] Opções do WebHook
 	 * @param {Number} [options.webhook.port=80] Porta para o servidor http escutar
@@ -39,12 +40,28 @@ class TelegramWebHook extends EventEmitter {
 
 			this.setupWebHook(options.expressApp)
 			this.startWebHook();
+			
+			this.regexCallbacks = [];
+			this.onlyFirstMatch = options.onlyFirstMatch || false;
 
 			this.on('message', this.processMessageType);
 		} else {
 			throw new Error('options must be an object');
 		}
 	};
+	
+	/**
+	 * Define uma regex e uma callback que será executada quando uma mensagem cujo texto retornar true para regex.test()
+	 * 
+	 * @param {RegExp} [regex] Regex que testará a mensagem recebida.
+	 * @param {function} callback será chamada com dois parâmetros. O primeiro é a mensagem recebida, o segundo, é uma função `reply`.
+	 */
+	onText (regex, callback) {
+		if(regex && callback)
+			this.regexCallbacks.push({regex, callback});
+		else
+			throw new Error('you must pass a regex and callback');
+	}
 
 	processUpdateType (update) {
 		debug('trying to process update and emit appropriate event');
@@ -61,6 +78,13 @@ class TelegramWebHook extends EventEmitter {
 
 			this.emit('message', update.message, callback_reply);
 			debug('Emitting message event');
+			
+			this.regexCallbacks.some((v)=>{
+				if (v.regex.test(update.message.text)) {
+					v.callback(update.message, callback_reply);
+					return this.onlyFirstMatch;
+				}
+			});
 		}
 		else if(update.edited_message) {
 			this.emit('edited_message', update.edited_message);
