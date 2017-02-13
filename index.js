@@ -11,6 +11,10 @@ const _messageTypes = [
 	'location', 'new_chat_participant', 'left_chat_participant', 'new_chat_title',
 	'new_chat_photo', 'delete_chat_photo', 'group_chat_created'
 ];
+const _updateTypes = [
+	'message', 'edited_message', 'channel_post', 'edited_channel_post',
+	'inline_query', 'chosen_inline_result', 'callback_query'
+];
 
 class TelegramWebHook extends EventEmitter {
 
@@ -45,6 +49,7 @@ class TelegramWebHook extends EventEmitter {
 			this.onlyFirstMatch = options.onlyFirstMatch || false;
 
 			this.on('message', this.processMessageType);
+			this.on('message', this._checkRegexCallbacks);
 		} else {
 			throw new Error('options must be an object');
 		}
@@ -56,7 +61,7 @@ class TelegramWebHook extends EventEmitter {
 	 * @param {RegExp} [regex] Regex que testará a mensagem recebida.
 	 * @param {function} callback será chamada com dois parâmetros. O primeiro é a mensagem recebida, o segundo, é uma função `reply`.
 	 */
-	onText (regex, callback) {
+	onRegex (regex, callback) {
 		if(regex && callback)
 			this.regexCallbacks.push({regex, callback});
 		else
@@ -68,56 +73,48 @@ class TelegramWebHook extends EventEmitter {
 		if(!update)
 			return debug('update is undefined');
 
-		if(update.message) {
-			const callback_reply = (text, options)=>{
-				options = options || {};
-				options.reply_to_message_id = update.message.message_id;
-
-				return this.bot.sendMessage(update.message.chat.id, text, options);
-			};
-
-			this.emit('message', update.message, callback_reply);
-			debug('Emitting message event');
-			
-			this.regexCallbacks.some((v)=>{
-				if (v.regex.test(update.message.text)) {
-					v.callback(update.message, callback_reply);
-					return this.onlyFirstMatch;
-				}
-			});
-		}
-		else if(update.edited_message) {
-			this.emit('edited_message', update.edited_message);
-			debug('Emitting edited_message event');
-		}
-		else if(update.channel_post) {
-			this.emit('channel_post', update.channel_post);
-			debug('Emitting channel_post event');
-		}
-		else if(update.edited_channel_post) {
-			this.emit('edited_channel_post', update.edited_channel_post);
-			debug('Emitting edited_channel_post event');
-		}
-		else if(update.inline_query) {
-			this.emit('inline_query', update.inline_query);
-			debug('Emitting inline_query event');
-		}
-		else if(update.chosen_inline_result) {
-			this.emit('chosen_inline_result', update.chosen_inline_result);
-			debug('Emitting chosen_inline_result event');
-		}
-		else if(update.callback_query) {
-			this.emit('callback_query', update.callback_query);
-			debug('Emitting callback_query event');
-		}
+		_updateTypes.forEach(type=>{
+			if(type in update) {
+				debug(`emitting ${type} event`);
+				this.emit(type, update[type]);
+			}
+		});
 	}
 
-	processMessageType (message, reply_cbk) {
+	processMessageType (message) {
+		
+		const reply_cbk = (text, optionals)=>{
+			debug('replying message');
+			optionals = optionals || {};
+			optionals.reply_to_message_id = message.message_id;
+			const to = message.chat.id;
+			
+			return this.sendMessage(to, text, optionals);
+		};
 		
 		_messageTypes.forEach((msgType)=>{
-			if(message[msgType]) {
+			if(msgType in message) {
 				debug(`emitting ${msgType} event`);
 				this.emit(msgType, message, reply_cbk);
+			}
+		});
+	}
+	
+	_checkRegexCallbacks (message) {
+		
+		const reply_cbk = (text, optionals)=>{
+			debug('replying message');
+			optionals = optionals || {};
+			optionals.reply_to_message_id = message.message_id;
+			const to = message.chat.id;
+			
+			return this.sendMessage(to, text, optionals);
+		};
+		
+		this.regexCallbacks.some(v=>{
+			if (v.regex.test(message.text)) {
+				v.callback(message, reply_cbk);
+				return this.onlyFirstMatch;
 			}
 		});
 	}
