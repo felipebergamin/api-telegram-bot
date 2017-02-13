@@ -3,8 +3,8 @@
 const express = require('express');
 const bodyparser = require('body-parser');
 const EventEmitter = require('events');
-const TelegramBotClient = require('node-telegram-bot-api');
 const debug = require('debug')('api-telegram-bot');
+const request = require('request-promise');
 
 const _messageTypes = [
 	'text', 'audio', 'document', 'photo', 'sticker', 'video', 'voice', 'contact',
@@ -33,7 +33,7 @@ class TelegramWebHook extends EventEmitter {
 		if (typeof options === 'object') {
 			debug('constructing TelegramWebHook');
 			
-			this.bot = new TelegramBotClient(options.token);
+			this.bot_token = options.token;
 			this.webhook = {};
 			this.webhook.port = options.webhook.port || 80;
 			this.webhook.path = options.webhook.path || '/';
@@ -143,6 +143,261 @@ class TelegramWebHook extends EventEmitter {
 		this.expressServer.listen(port, ()=>{
 			debug(`express listening on port ${port} path ${this.webhook.path}`);
 		});
+	}
+	
+	_makeRequest (api_method, params) {
+		if (!this.bot_token)
+			throw new Error('Telegram Bot Token undefined');
+		params = params || {};
+		const uri = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
+		const method = 'POST';
+		// const formData = params;
+		const json = true;
+		
+		const requestOptions = {
+			uri, method, /*formData,*/ json
+		};
+		
+		Object.assign(requestOptions, params);
+		
+		return request(requestOptions);
+	}
+	
+	getMe () {
+		return this.makeRequest('getMe');
+	}
+	
+	sendMessage(chat_id, text, optionals) {
+		const json = {};
+		const params = {chat_id, text};
+		
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('sendMessage', {json});
+	}
+	
+	forwardMessage (chat_id, from_chat_id, message_id, optionals) {
+		const json = {};
+		const params = {chat_id, from_chat_id, message_id};
+		Object.assign(json, params, optionals);
+		
+		return this.makeRequest('forwardMessage', {json});
+	}
+	
+	sendPhoto (chat_id, photo, optionals) {
+		const params = {chat_id, photo}
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('sendPhoto', {formData});
+	}
+	
+	sendAudio (chat_id, audio, optionals) {
+		const params = { chat_id, audio };
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('sendAudio', {formData});
+	}
+	
+	sendDocument (chat_id, doc, optionals) {
+		const params = { chat_id: chat_id, document: doc };
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('sendDocument', {formData})
+	}
+	
+	sendSticker (chat_id, sticker, optionals) {
+		const params = { chat_id, sticker };
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('sendSticker', {formData});
+	}
+	
+	sendVideo (chat_id, video, optionals) {
+		const params = { chat_id, video };
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('sendVideo', {formData});
+	}
+	
+	sendVoice (chat_id, voice, optionals) {
+		const params = { chat_id, voice };
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('sendVoice', {formData});
+	}
+	
+	sendLocation (chat_id, latitude, longitude, optionals) {
+		const params = { chat_id, latitude, longitude };
+		const json = {};
+		Object.assign(json, params);
+		
+		return this._makeRequest('sendLocation', {json});
+	}
+	
+	sendVenue (chat_id, latitude, longitude, title, address, optionals) {
+		const params = { chat_id, latitude, longitude, title, address };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('sendVenue', {json});
+	}
+	
+	sendContact (chat_id, phone_number, first_name, optionals) {
+		const params = { chat_id, phone_number, first_name };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('sendContact', {json});
+	}
+	
+	sendChatAction (chat_id, action) {
+		const json = { chat_id, action };
+		
+		return this._makeRequest('sendChatAction', {json});
+	}
+	
+	getUserProfilePhotos (user_id, optionals) {
+		const params = { user_id };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('getUserProfilePhotos', {json});
+	}
+	
+	getFile (file_id) {
+		const json = { file_id };
+		
+		return this._makeRequest('getFile', {json});
+	}
+	
+	kickChatMember (chat_id, user_id) {
+		const json = { chat_id, user_id };
+		
+		return this._makeRequest('kickChatMember', { json });
+	}
+	
+	leaveChat (chat_id) {
+		const json = { chat_id };
+		
+		return this._makeRequest('leaveChat', { json });
+	}
+	
+	unbanChatMember (chat_id, user_id) {
+		const json = { chat_id, user_id };
+		
+		return this._makeRequest('unbanChatMember', {json});
+	}
+	
+	getChat (chat_id) {
+		const json = { chat_id };
+		
+		return this._makeRequest('getChat', { json });
+	}
+	
+	getChatAdministrators (chat_id) {
+		const json = { chat_id };
+		
+		return this._makeRequest('getChatAdministrators', { json });
+	}
+	
+	getChatMembersCount (chat_id) {
+		const json = { chat_id };
+		
+		return this._makeRequest('getChatMembersCount', { json });
+	}
+	
+	getChatMember (chat_id, user_id) {
+		const json = { chat_id, user_id };
+		
+		return this._makeRequest('getChatMember', { json });
+	}
+	
+	answerCallbackQuery (callback_query_id, optionals) {
+		const params = { callback_query_id };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('answerCallbackQuery', { json });
+	}
+	
+	editMessageText (text, optionals) {
+		const params = { text };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('editMessageText', { json });
+	}
+	
+	editMessageCaption (optionals) {
+		const json = optionals;
+		
+		return this._makeRequest('editMessageCaption', { json });
+	}
+	
+	editMessageReplyMarkup (optionals) {
+		const json = optionals;
+		
+		return this._makeRequest('editMessageReplyMarkup', { json });
+	}
+	
+	answerInlineQuery (inline_query_id, results, optionals) {
+		const params = { inline_query_id, results };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('answerInlineQuery', { json });
+	}
+	
+	sendGame (chat_id, game_short_name, optionals) {
+		const params = { chat_id, game_short_name };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('sendGame', { json });
+	}
+	
+	setGameScore (user_id, score, optionals) {
+		const params = { user_id, score };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('setGameScore', {  json });
+	} 
+	
+	getGameHighScores (user_id, optionals) {
+		const params = { user_id };
+		const json = {};
+		Object.assign(json, params, optionals);
+		
+		return this._makeRequest('getGameHighScores', { json });
+	}
+	
+	getUpdates (optionals) {
+		const json = optionals || {};
+		
+		return this._makeRequest('getUpdates', { json });
+	}
+	
+	setWebhook (url, optionals) {
+		const params = { url };
+		const formData = {};
+		Object.assign(formData, params, optionals);
+		
+		return this._makeRequest('setWebhook', { formData });
+	}
+	
+	deleteWebhook () {
+		return this._makeRequest('deleteWebhook');
+	}
+	
+	getWebhookInfo () {
+		return this._makeRequest('getWebhookInfo');
 	}
 }
 
