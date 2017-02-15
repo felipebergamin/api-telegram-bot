@@ -91,8 +91,8 @@ Thank you! Feel free to collaborate as best you can. I'll really appreciate it.
 
 # API reference
 
-[Click here](https://github.com/felipebergamin/api-telegram-bot/blob/master/doc/api.md)
+[Click here](https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/api.md)
 
 # Reply Markup Classes
 
-[See here](https://github.com/felipebergamin/api-telegram-bot/blob/master/doc/reply_markup_examples.md)
+[See here](https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/reply_markup_examples.md)
