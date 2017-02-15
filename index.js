@@ -5,6 +5,10 @@ const bodyparser = require('body-parser');
 const EventEmitter = require('events');
 const debug = require('debug')('api-telegram-bot');
 const request = require('request-promise');
+const InlineKeyboardMarkup = require('./keyboards/InlineKeyboardMarkup');
+const ReplyKeyboardMarkup = require('./keyboards/ReplyKeyboardMarkup');
+const ReplyKeyboardRemove = require('./keyboards/ReplyKeyboardRemove');
+const ForceReply = require('./keyboards/ForceReply');
 
 const _messageTypes = [
 	'text', 'audio', 'document', 'photo', 'sticker', 'video', 'voice', 'contact',
@@ -37,6 +41,15 @@ class TelegramBotClient extends EventEmitter {
 		
 		this.regexCallbacks = [];
 		this.onlyFirstRegexMatch = onlyFirstRegexMatch || true;
+		
+		/** @member {InlineKeyboardMarkup} */
+		this.InlineKeyboardMarkup = InlineKeyboardMarkup;
+		/** @member {ReplyKeyboardMarkup} */
+		this.ReplyKeyboardMarkup = ReplyKeyboardMarkup;
+		/** @member {ReplyKeyboardRemove} */
+		this.ReplyKeyboardRemove = ReplyKeyboardRemove;
+		/** @member {force_reply} */
+		this.ForceReply = ForceReply;
 
 		this.on('message', this._processMessageType);
 		this.on('message', this._checkRegexCallbacks);

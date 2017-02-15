@@ -1,5 +1,36 @@
-## API Reference
+## Modules
 
+<dl>
+<dt><a href="#module_force_reply">force_reply</a></dt>
+<dd></dd>
+</dl>
+
+## Classes
+
+<dl>
+<dt><a href="#TelegramBotClient">TelegramBotClient</a></dt>
+<dd><p>TelegramBotClient</p>
+</dd>
+<dt><a href="#InlineKeyboardMarkup">InlineKeyboardMarkup</a></dt>
+<dd><p>{InlineKeyboardMarkup}</p>
+</dd>
+<dt><a href="#ReplyKeyboardMarkup">ReplyKeyboardMarkup</a></dt>
+<dd><p>ReplyKeyboardMarkup</p>
+</dd>
+<dt><a href="#ReplyKeyboardRemove">ReplyKeyboardRemove</a></dt>
+<dd><p>{ReplyKeyboardRemove}</p>
+</dd>
+<dt><a href="#InlineKeyboardButton">InlineKeyboardButton</a></dt>
+<dd><p>{InlineKeyboardButton}</p>
+</dd>
+<dt><a href="#KeyboardButton">KeyboardButton</a></dt>
+<dd><p>{KeyboardButton}</p>
+</dd>
+</dl>
+
+<a name="module_force_reply"></a>
+
+## force_reply
 <a name="TelegramBotClient"></a>
 
 ## TelegramBotClient
@@ -9,6 +40,10 @@ TelegramBotClient
 
 * [TelegramBotClient](#TelegramBotClient)
     * [new TelegramBotClient(token, [onlyFirstRegexMatch])](#new_TelegramBotClient_new)
+    * [.InlineKeyboardMarkup](#TelegramBotClient+InlineKeyboardMarkup) : <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>
+    * [.ReplyKeyboardMarkup](#TelegramBotClient+ReplyKeyboardMarkup) : <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>
+    * [.ReplyKeyboardRemove](#TelegramBotClient+ReplyKeyboardRemove) : <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>
+    * [.ForceReply](#TelegramBotClient+ForceReply) : <code>force_reply</code>
     * [.createWebhook(config, [expressApp])](#TelegramBotClient+createWebhook)
     * [.onRegex(regex, callback)](#TelegramBotClient+onRegex)
     * [.getMe()](#TelegramBotClient+getMe) ⇒ <code>Promise</code>
@@ -57,6 +92,22 @@ Constructs bot client
 | token | <code>String</code> |  | Bot token |
 | [onlyFirstRegexMatch] | <code>boolean</code> | <code>true</code> | `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex()) |
 
+<a name="TelegramBotClient+InlineKeyboardMarkup"></a>
+
+### telegramBotClient.InlineKeyboardMarkup : <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>
+**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+<a name="TelegramBotClient+ReplyKeyboardMarkup"></a>
+
+### telegramBotClient.ReplyKeyboardMarkup : <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>
+**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+<a name="TelegramBotClient+ReplyKeyboardRemove"></a>
+
+### telegramBotClient.ReplyKeyboardRemove : <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>
+**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+<a name="TelegramBotClient+ForceReply"></a>
+
+### telegramBotClient.ForceReply : <code>force_reply</code>
+**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
 <a name="TelegramBotClient+createWebhook"></a>
 
 ### telegramBotClient.createWebhook(config, [expressApp])
@@ -618,4 +669,305 @@ Use this method to get current webhook status. Requires no parameters.
 
 **Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
 **See**: [https://core.telegram.org/bots/api#deletewebhook](https://core.telegram.org/bots/api#deletewebhook)  
-* * *
+<a name="InlineKeyboardMarkup"></a>
+
+## InlineKeyboardMarkup
+{InlineKeyboardMarkup}
+
+**Kind**: global class  
+**See**: [https://core.telegram.org/bots/api#inlinekeyboardmarkup](https://core.telegram.org/bots/api#inlinekeyboardmarkup)  
+
+* [InlineKeyboardMarkup](#InlineKeyboardMarkup)
+    * _instance_
+        * [.appendRow()](#InlineKeyboardMarkup+appendRow) ↩︎
+        * [.addButton(button)](#InlineKeyboardMarkup+addButton) ↩︎
+        * [.distributeButtonsInRows(array_btn, [maxButtonsInRow])](#InlineKeyboardMarkup+distributeButtonsInRows) ↩︎
+    * _static_
+        * [.InlineKeyboardButton](#InlineKeyboardMarkup.InlineKeyboardButton) : <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>
+
+<a name="InlineKeyboardMarkup+appendRow"></a>
+
+### inlineKeyboardMarkup.appendRow() ↩︎
+Append a new row to keyboard. New buttons will be added on new row.
+
+**Kind**: instance method of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+**Chainable**  
+<a name="InlineKeyboardMarkup+addButton"></a>
+
+### inlineKeyboardMarkup.addButton(button) ↩︎
+Add a new button on last row
+
+**Kind**: instance method of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| button | <code>[InlineKeyboardButton](#InlineKeyboardButton)</code> | The button object |
+
+<a name="InlineKeyboardMarkup+distributeButtonsInRows"></a>
+
+### inlineKeyboardMarkup.distributeButtonsInRows(array_btn, [maxButtonsInRow]) ↩︎
+Distribute an array of Buttons in rows, respecting a limit of buttons for each row
+
+**Kind**: instance method of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+**Chainable**  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| array_btn | <code>Array</code> |  | The array of InlineKeyboardButton |
+| [maxButtonsInRow] | <code>Number</code> | <code>1</code> | Max buttons allowed on each row |
+
+<a name="InlineKeyboardMarkup.InlineKeyboardButton"></a>
+
+### InlineKeyboardMarkup.InlineKeyboardButton : <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>
+**Kind**: static property of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+<a name="ReplyKeyboardMarkup"></a>
+
+## ReplyKeyboardMarkup
+ReplyKeyboardMarkup
+
+**Kind**: global class  
+**See**: [https://core.telegram.org/bots/api#replykeyboardmarkup](https://core.telegram.org/bots/api#replykeyboardmarkup)  
+
+* [ReplyKeyboardMarkup](#ReplyKeyboardMarkup)
+    * _instance_
+        * [.setResizeKeyboard(resize_keyboard)](#ReplyKeyboardMarkup+setResizeKeyboard) ↩︎
+        * [.setOneTimeKeyboard(one_time_keyboard)](#ReplyKeyboardMarkup+setOneTimeKeyboard) ↩︎
+        * [.setSelective(selective)](#ReplyKeyboardMarkup+setSelective) ↩︎
+        * [.appendRow()](#ReplyKeyboardMarkup+appendRow) ↩︎
+        * [.addButton(button)](#ReplyKeyboardMarkup+addButton) ↩︎
+    * _static_
+        * [.KeyboardButton](#ReplyKeyboardMarkup.KeyboardButton) : <code>[KeyboardButton](#KeyboardButton)</code>
+
+<a name="ReplyKeyboardMarkup+setResizeKeyboard"></a>
+
+### replyKeyboardMarkup.setResizeKeyboard(resize_keyboard) ↩︎
+Set `resize_keyboard` property
+
+**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resize_keyboard | <code>boolean</code> | Requests clients to resize the keyboard vertically for optimal fit |
+
+<a name="ReplyKeyboardMarkup+setOneTimeKeyboard"></a>
+
+### replyKeyboardMarkup.setOneTimeKeyboard(one_time_keyboard) ↩︎
+Set `one_time_keyboard` property
+
+**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| one_time_keyboard | <code>boolean</code> | Requests clients to hide the keyboard as soon as it's been used. |
+
+<a name="ReplyKeyboardMarkup+setSelective"></a>
+
+### replyKeyboardMarkup.setSelective(selective) ↩︎
+Set `selective` property
+
+**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| selective | <code>boolean</code> | Use this parameter if you want to show the keyboard to specific users only. |
+
+<a name="ReplyKeyboardMarkup+appendRow"></a>
+
+### replyKeyboardMarkup.appendRow() ↩︎
+Append a new row to keyboard. New buttons will be added on new row.
+
+**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Chainable**  
+<a name="ReplyKeyboardMarkup+addButton"></a>
+
+### replyKeyboardMarkup.addButton(button) ↩︎
+Add a button to last row
+
+**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| button | <code>[KeyboardButton](#KeyboardButton)</code> | The button object |
+
+<a name="ReplyKeyboardMarkup.KeyboardButton"></a>
+
+### ReplyKeyboardMarkup.KeyboardButton : <code>[KeyboardButton](#KeyboardButton)</code>
+**Kind**: static property of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+<a name="ReplyKeyboardRemove"></a>
+
+## ReplyKeyboardRemove
+{ReplyKeyboardRemove}
+
+**Kind**: global class  
+**See**: [https://core.telegram.org/bots/api#replykeyboardremove](https://core.telegram.org/bots/api#replykeyboardremove)  
+
+* [ReplyKeyboardRemove](#ReplyKeyboardRemove)
+    * [.setRemoveKeyboard(remove_keyboard)](#ReplyKeyboardRemove+setRemoveKeyboard) ↩︎
+    * [.setSelective(selective)](#ReplyKeyboardRemove+setSelective) ↩︎
+
+<a name="ReplyKeyboardRemove+setRemoveKeyboard"></a>
+
+### replyKeyboardRemove.setRemoveKeyboard(remove_keyboard) ↩︎
+Set `remove_keyboard` property. Default is `true`
+
+**Kind**: instance method of <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| remove_keyboard | <code>Boolean</code> | Requests clients to remove the custom keyboard |
+
+<a name="ReplyKeyboardRemove+setSelective"></a>
+
+### replyKeyboardRemove.setSelective(selective) ↩︎
+Set `selective` property
+
+**Kind**: instance method of <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| selective | <code>Boolean</code> | Use this parameter if you want to remove the keyboard for specific users only. |
+
+<a name="InlineKeyboardButton"></a>
+
+## InlineKeyboardButton
+{InlineKeyboardButton}
+
+**Kind**: global class  
+**See**: [https://core.telegram.org/bots/api#inlinekeyboardbutton](https://core.telegram.org/bots/api#inlinekeyboardbutton)  
+
+* [InlineKeyboardButton](#InlineKeyboardButton)
+    * [.setText(text)](#InlineKeyboardButton+setText) ↩︎
+    * [.setUrl(url)](#InlineKeyboardButton+setUrl) ↩︎
+    * [.setCallbackData(callback_data)](#InlineKeyboardButton+setCallbackData) ↩︎
+    * [.setSwitchInlineQuery(switch_inline_query)](#InlineKeyboardButton+setSwitchInlineQuery) ↩︎
+    * [.setSwitchInlineQueryCurrentChat(switch_inline_query_current_chat)](#InlineKeyboardButton+setSwitchInlineQueryCurrentChat) ↩︎
+    * [.setCallbackGame(callback_game)](#InlineKeyboardButton+setCallbackGame) ↩︎
+
+<a name="InlineKeyboardButton+setText"></a>
+
+### inlineKeyboardButton.setText(text) ↩︎
+Set `text` property
+
+**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>String</code> | Label text on the button |
+
+<a name="InlineKeyboardButton+setUrl"></a>
+
+### inlineKeyboardButton.setUrl(url) ↩︎
+Set `url` property
+
+**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>String</code> | HTTP url to be opened when button is pressed |
+
+<a name="InlineKeyboardButton+setCallbackData"></a>
+
+### inlineKeyboardButton.setCallbackData(callback_data) ↩︎
+Set `callback_data` property
+
+**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback_data | <code>String</code> | Data to be sent in a `callback_query` to the bot when button is pressed, 1-64 bytes |
+
+<a name="InlineKeyboardButton+setSwitchInlineQuery"></a>
+
+### inlineKeyboardButton.setSwitchInlineQuery(switch_inline_query) ↩︎
+Set `switch_inline_query` property
+
+**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| switch_inline_query | <code>String</code> | If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot‘s username and the specified inline query in the input field. |
+
+<a name="InlineKeyboardButton+setSwitchInlineQueryCurrentChat"></a>
+
+### inlineKeyboardButton.setSwitchInlineQueryCurrentChat(switch_inline_query_current_chat) ↩︎
+Set `switch_inline_query_current_chat` property
+
+**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| switch_inline_query_current_chat | <code>String</code> | If set, pressing the button will insert the bot‘s username and the specified inline query in the current chat's input field. |
+
+<a name="InlineKeyboardButton+setCallbackGame"></a>
+
+### inlineKeyboardButton.setCallbackGame(callback_game) ↩︎
+Set `callback_game` property
+
+**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback_game | <code>Object</code> | Description of the game that will be launched when the user presses the button. |
+
+<a name="KeyboardButton"></a>
+
+## KeyboardButton
+{KeyboardButton}
+
+**Kind**: global class  
+**See**: [https://core.telegram.org/bots/api#keyboardbutton](https://core.telegram.org/bots/api#keyboardbutton)  
+
+* [KeyboardButton](#KeyboardButton)
+    * [.setText(text)](#KeyboardButton+setText) ↩︎
+    * [.setRequestContact(request_contact)](#KeyboardButton+setRequestContact) ↩︎
+    * [.setRequestLocation(request_location)](#KeyboardButton+setRequestLocation) ↩︎
+
+<a name="KeyboardButton+setText"></a>
+
+### keyboardButton.setText(text) ↩︎
+Set `text` property
+
+**Kind**: instance method of <code>[KeyboardButton](#KeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>String</code> | Text of the button |
+
+<a name="KeyboardButton+setRequestContact"></a>
+
+### keyboardButton.setRequestContact(request_contact) ↩︎
+Set `request_contact` property
+
+**Kind**: instance method of <code>[KeyboardButton](#KeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| request_contact | <code>boolean</code> | If `true`, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only |
+
+<a name="KeyboardButton+setRequestLocation"></a>
+
+### keyboardButton.setRequestLocation(request_location) ↩︎
+Set `request_location` property
+
+**Kind**: instance method of <code>[KeyboardButton](#KeyboardButton)</code>  
+**Chainable**  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| request_location | <code>boolean</code> | If `true`, the user's current location will be sent when the button is pressed. Available in private chats only |
+
