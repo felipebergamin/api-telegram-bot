@@ -182,7 +182,7 @@ class TelegramBotClient extends EventEmitter {
 	 * @returns	{Promise}
 	 */
 	getMe () {
-		return this.makeRequest('getMe');
+		return this._makeRequest('getMe');
 	}
 	
 	/**
@@ -225,7 +225,7 @@ class TelegramBotClient extends EventEmitter {
 		const params = {chat_id, from_chat_id, message_id};
 		Object.assign(json, params, optionals);
 		
-		return this.makeRequest('forwardMessage', {json});
+		return this._makeRequest('forwardMessage', {json});
 	}
 	
 	/**
