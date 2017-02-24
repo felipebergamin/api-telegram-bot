@@ -1,6 +1,6 @@
 {
   "name": "api-telegram-bot",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "client for telegram bots api",
   "main": "index.js",
   "scripts": {
