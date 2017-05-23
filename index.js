@@ -355,7 +355,12 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {};
 		Object.assign(formData, params, optionals);
 		
-		return this._makeRequest('sendVideo', {formData});
+		const _sendvideo = ()=>{
+			return this._makeRequest('sendVideo', {formData});
+		};
+		
+		return this.sendChatAction(chat_id, 'upload_video')
+			.then(_sendvideo);
 	}
 	
 	/**
@@ -448,6 +453,7 @@ class TelegramBotClient extends EventEmitter {
 	}
 	
 	/**
+	 * 
 	 * Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
 	 * 
 	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
