@@ -453,7 +453,7 @@ class TelegramBotClient extends EventEmitter {
 	}
 	
 	/**
-	 * 
+	 * Attention: the sendMessage, sendPhoto, sendDocument, sendAudio and sendVideo methods automatically sends their repective chat actions before send data.
 	 * Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
 	 * 
 	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
