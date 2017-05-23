@@ -206,7 +206,12 @@ class TelegramBotClient extends EventEmitter {
 		
 		Object.assign(json, params, optionals);
 		
-		return this._makeRequest('sendMessage', {json});
+		const _sendmsg = ()=>{
+			return this._makeRequest('sendMessage', {json});
+		}
+		
+		return this.sendChatAction(chat_id, 'typing')
+			.then(_sendmsg);
 	}
 	
 	/**
@@ -246,7 +251,12 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {};
 		Object.assign(formData, params, optionals);
 		
-		return this._makeRequest('sendPhoto', {formData});
+		const _sendphoto = ()=>{
+			return this._makeRequest('sendPhoto', {formData});
+		};
+		
+		return this.sendChatAction(chat_id, 'upload_photo')
+			.then(_sendphoto);
 	}
 	
 	/**
@@ -270,7 +280,12 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {};
 		Object.assign(formData, params, optionals);
 		
-		return this._makeRequest('sendAudio', {formData});
+		const _sendaudio = ()=>{
+			return this._makeRequest('sendAudio', {formData});
+		};
+		
+		return this.sendChatAction(chat_id, 'upload_audio')
+			.then(_sendaudio);
 	}
 	
 	/**
@@ -291,7 +306,12 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {};
 		Object.assign(formData, params, optionals);
 		
-		return this._makeRequest('sendDocument', {formData});
+		const _senddocument = ()=>{
+			return this._makeRequest('sendDocument', {formData});
+		};
+		
+		return this.sendChatAction(chat_id, 'upload_document')
+			.then(_senddocument);
 	}
 	
 	/**
