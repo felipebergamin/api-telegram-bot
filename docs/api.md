@@ -37,12 +37,13 @@
 TelegramBotClient
 
 **Kind**: global class  
+**See**: [https://www.npmjs.com/package/node-emoji](https://www.npmjs.com/package/node-emoji)  
 
 * [TelegramBotClient](#TelegramBotClient)
-    * [new TelegramBotClient(token, [onlyFirstRegexMatch])](#new_TelegramBotClient_new)
-    * [.InlineKeyboardMarkup](#TelegramBotClient+InlineKeyboardMarkup) : <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>
-    * [.ReplyKeyboardMarkup](#TelegramBotClient+ReplyKeyboardMarkup) : <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>
-    * [.ReplyKeyboardRemove](#TelegramBotClient+ReplyKeyboardRemove) : <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>
+    * [new TelegramBotClient(token, [config])](#new_TelegramBotClient_new)
+    * [.InlineKeyboardMarkup](#TelegramBotClient+InlineKeyboardMarkup) : [<code>InlineKeyboardMarkup</code>](#InlineKeyboardMarkup)
+    * [.ReplyKeyboardMarkup](#TelegramBotClient+ReplyKeyboardMarkup) : [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)
+    * [.ReplyKeyboardRemove](#TelegramBotClient+ReplyKeyboardRemove) : [<code>ReplyKeyboardRemove</code>](#ReplyKeyboardRemove)
     * [.ForceReply](#TelegramBotClient+ForceReply) : <code>force_reply</code>
     * [.createWebhook(config, [expressApp])](#TelegramBotClient+createWebhook)
     * [.onRegex(regex, callback)](#TelegramBotClient+onRegex)
@@ -83,37 +84,40 @@ TelegramBotClient
 
 <a name="new_TelegramBotClient_new"></a>
 
-### new TelegramBotClient(token, [onlyFirstRegexMatch])
+### new TelegramBotClient(token, [config])
 Constructs bot client
 
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | token | <code>String</code> |  | Bot token |
-| [onlyFirstRegexMatch] | <code>boolean</code> | <code>true</code> | `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex()) |
+| [config] | <code>object</code> | <code>{}</code> | Optional config object. See default configuration below |
+| [config.onlyFirstRegexMatch] | <code>boolean</code> | <code>true</code> | `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex()) |
+| [config.split_long_messages] | <code>boolean</code> | <code>false</code> | Telegram messages can't be longer than 4096 chars, if `true`, the sendMessage function will split long messages and send sequentially |
+| [config.emojify_texts] | <code>boolean</code> | <code>false</code> | `true` if you want the bot automatically call [emoji.emojify](https://www.npmjs.com/package/node-emoji) in texts |
 
 <a name="TelegramBotClient+InlineKeyboardMarkup"></a>
 
-### telegramBotClient.InlineKeyboardMarkup : <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>
-**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+### telegramBotClient.InlineKeyboardMarkup : [<code>InlineKeyboardMarkup</code>](#InlineKeyboardMarkup)
+**Kind**: instance property of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 <a name="TelegramBotClient+ReplyKeyboardMarkup"></a>
 
-### telegramBotClient.ReplyKeyboardMarkup : <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>
-**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+### telegramBotClient.ReplyKeyboardMarkup : [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)
+**Kind**: instance property of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 <a name="TelegramBotClient+ReplyKeyboardRemove"></a>
 
-### telegramBotClient.ReplyKeyboardRemove : <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>
-**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+### telegramBotClient.ReplyKeyboardRemove : [<code>ReplyKeyboardRemove</code>](#ReplyKeyboardRemove)
+**Kind**: instance property of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 <a name="TelegramBotClient+ForceReply"></a>
 
 ### telegramBotClient.ForceReply : <code>force_reply</code>
-**Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance property of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 <a name="TelegramBotClient+createWebhook"></a>
 
 ### telegramBotClient.createWebhook(config, [expressApp])
 Create Webhook
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -127,7 +131,7 @@ Create Webhook
 ### telegramBotClient.onRegex(regex, callback)
 Set a regex that will test every text message received. If regex.test() returns true, callback is called with two arguments: the message received and reply callback.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -139,19 +143,19 @@ Set a regex that will test every text message received. If regex.test() returns 
 ### telegramBotClient.getMe() ⇒ <code>Promise</code>
 Requires no parameters. Returns basic information about the bot in form of a `User` object.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getme](https://core.telegram.org/bots/api#getme)  
 <a name="TelegramBotClient+sendMessage"></a>
 
 ### telegramBotClient.sendMessage(chat_id, text, [optionals]) ⇒ <code>Promise</code>
 Send a simple text message.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendmessage](https://core.telegram.org/bots/api#sendmessage)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
 | text | <code>String</code> | Text to be sent. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.parse_mode] | <code>String</code> | Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width text or inline URLs in your bot's message. |
@@ -165,13 +169,13 @@ Send a simple text message.
 ### telegramBotClient.forwardMessage(chat_id, from_chat_id, message_id, [optionals]) ⇒ <code>Promise</code>
 Use this method to forward messages of any kind.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#forwardmessage](https://core.telegram.org/bots/api#forwardmessage)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
-| from_chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the chat where the original message was sent. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| from_chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the chat where the original message was sent. |
 | message_id | <code>Integer</code> | Message identifier in the chat specified in from_chat_id |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.disable_notification] | <code>Boolean</code> | Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound. |
@@ -181,13 +185,13 @@ Use this method to forward messages of any kind.
 ### telegramBotClient.sendPhoto(chat_id, photo, [optionals]) ⇒ <code>Promise</code>
 Use this method to send photos.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendphoto](https://core.telegram.org/bots/api#sendphoto)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
-| photo | <code>ReadStream</code> &#124; <code>String</code> | Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or pass read stream to upload your own file. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| photo | <code>ReadStream</code> \| <code>String</code> | Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or pass read stream to upload your own file. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.disable_notification] | <code>Boolean</code> | Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound. |
 | [optionals.caption] | <code>String</code> | Photo caption (may also be used when resending photos by file_id), 0-200 characters |
@@ -199,13 +203,13 @@ Use this method to send photos.
 ### telegramBotClient.sendAudio(chat_id, audio, [optionals]) ⇒ <code>Promise</code>
 Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .mp3 format.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendaudio](https://core.telegram.org/bots/api#sendaudio)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
-| audio | <code>ReadStream</code> &#124; <code>String</code> | Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or pass a read stream for upload your own. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| audio | <code>ReadStream</code> \| <code>String</code> | Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or pass a read stream for upload your own. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.disable_notification] | <code>Boolean</code> | Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound. |
 | [optionals.caption] | <code>String</code> | Audio caption, 0-200 characters |
@@ -220,13 +224,13 @@ Use this method to send audio files, if you want Telegram clients to display the
 ### telegramBotClient.sendDocument(chat_id, document, [optionals]) ⇒ <code>Promise</code>
 Use this method to send general files.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#senddocument](https://core.telegram.org/bots/api#senddocument)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
-| document | <code>ReadStream</code> &#124; <code>String</code> | File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one passing an read stream for file. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| document | <code>ReadStream</code> \| <code>String</code> | File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one passing an read stream for file. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.caption] | <code>String</code> | Document caption (may also be used when resending documents by file_id), 0-200 characters. |
 | [optionals.disable_notification] | <code>Boolean</code> | Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound. |
@@ -238,13 +242,13 @@ Use this method to send general files.
 ### telegramBotClient.sendSticker(chat_id, sticker, [optionals]) ⇒ <code>Promise</code>
 Use this method to send .webp stickers
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendsticker](https://core.telegram.org/bots/api#sendsticker)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
-| sticker | <code>ReadStream</code> &#124; <code>String</code> | Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .webp file from the Internet, or upload a new one passing a Read Stream for file. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel |
+| sticker | <code>ReadStream</code> \| <code>String</code> | Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .webp file from the Internet, or upload a new one passing a Read Stream for file. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.disable_notification] | <code>Boolean</code> | Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound. |
 | [optionals.reply_to_message_id] | <code>Integer</code> | If the message is a reply, ID of the original message |
@@ -255,13 +259,13 @@ Use this method to send .webp stickers
 ### telegramBotClient.sendVideo(chat_id, video, [optionals]) ⇒ <code>Promise</code>
 Use this method to send video files, Telegram clients support mp4 videos (other formats may be sent as Document).
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendvideo](https://core.telegram.org/bots/api#sendvideo)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
-| video | <code>ReadStream</code> &#124; <code>String</code> | Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video passing a read stream. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| video | <code>ReadStream</code> \| <code>String</code> | Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video passing a read stream. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.duration] | <code>Integer</code> | Duration of sent video in seconds |
 | [optionals.width] | <code>Integer</code> | Video width |
@@ -276,13 +280,13 @@ Use this method to send video files, Telegram clients support mp4 videos (other 
 ### telegramBotClient.sendVoice(chat_id, voice, [optionals]) ⇒ <code>Promise</code>
 Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .ogg file encoded with OPUS (other formats may be sent as Audio or Document).
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendvoice](https://core.telegram.org/bots/api#sendvoice)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
-| voice | <code>ReadStream</code> &#124; <code>String</code> | Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one passing a read stream. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| voice | <code>ReadStream</code> \| <code>String</code> | Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one passing a read stream. |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
 | [optionals.caption] | <code>String</code> | Voice message caption, 0-200 characters |
 | [optionals.duration] | <code>Integer</code> | Duration of the voice message in seconds |
@@ -295,12 +299,12 @@ Use this method to send audio files, if you want Telegram clients to display the
 ### telegramBotClient.sendLocation(chat_id, latitude, longitude, [optionals]) ⇒ <code>Promise</code>
 Use this method to send point on the map.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendlocation](https://core.telegram.org/bots/api#sendlocation)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
 | latitude | <code>Float</code> | Latitude of location |
 | longitude | <code>FLoat</code> | Longitude of location |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
@@ -313,12 +317,12 @@ Use this method to send point on the map.
 ### telegramBotClient.sendVenue(chat_id, latitude, longitude, title, address, [optionals]) ⇒ <code>Promise</code>
 Use this method to send information about a venue.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendvenue](https://core.telegram.org/bots/api#sendvenue)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel. |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel. |
 | latitude | <code>Float</code> | Latitude of location |
 | longitude | <code>FLoat</code> | Longitude of location |
 | title | <code>String</code> | Name of the venue |
@@ -334,12 +338,12 @@ Use this method to send information about a venue.
 ### telegramBotClient.sendContact(chat_id, phone_number, first_name, [optionals]) ⇒ <code>Promise</code>
 Use this method to send phone contacts.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendcontact](https://core.telegram.org/bots/api#sendcontact)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel |
 | phone_number | <code>String</code> | Contact's phone number |
 | first_name | <code>String</code> | Contact's first name |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
@@ -351,14 +355,15 @@ Use this method to send phone contacts.
 <a name="TelegramBotClient+sendChatAction"></a>
 
 ### telegramBotClient.sendChatAction(chat_id, action) ⇒ <code>Promise</code>
+Attention: the sendMessage, sendPhoto, sendDocument, sendAudio and sendVideo methods automatically sends their repective chat actions before send data.
 Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendchataction](https://core.telegram.org/bots/api#sendchataction)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target channel |
 | action | <code>String</code> | Type of action to broadcast. Choose one, depending on what the user is about to receive: `typing` for text messages, `upload_photo` for photos, `record_video` or `upload_video` for videos, `record_audio` or `upload_audio` for audio files, `upload_document` for general files, `find_location` for location data. |
 
 <a name="TelegramBotClient+getUserProfilePhotos"></a>
@@ -366,12 +371,12 @@ Use this method when you need to tell the user that something is happening on th
 ### telegramBotClient.getUserProfilePhotos(user_id, [optionals]) ⇒ <code>Promise</code>
 Use this method to get a list of profile pictures for a user.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getuserprofilephotos](https://core.telegram.org/bots/api#getuserprofilephotos)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| user_id | <code>Integer</code> &#124; <code>String</code> |  | Unique identifier of the target user |
+| user_id | <code>Integer</code> \| <code>String</code> |  | Unique identifier of the target user |
 | [optionals] | <code>Object</code> |  | An object with optional params that you want to send in request. |
 | [optionals.offset] | <code>Integer</code> |  | Sequential number of the first photo to be returned. By default, all photos are returned. |
 | [optionals.limit] | <code>Integer</code> | <code>100</code> | Limits the number of photos to be retrieved. Values between 1—100 are accepted. |
@@ -386,7 +391,7 @@ where `<file_path>` is taken from the response.
 It is guaranteed that the link will be valid for at least 1 hour. 
 When the link expires, a new one can be requested by calling getFile again.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getfile](https://core.telegram.org/bots/api#getfile)  
 
 | Param | Type | Description |
@@ -400,7 +405,7 @@ Use this method to kick a user from a group or a supergroup.
 In the case of supergroups, the user will not be able to return to the
 group on their own using invite links, etc., unless unbanned first.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#kickchatmember](https://core.telegram.org/bots/api#kickchatmember)  
 
 | Param | Type | Description |
@@ -413,24 +418,24 @@ group on their own using invite links, etc., unless unbanned first.
 ### telegramBotClient.leaveChat(chat_id) ⇒ <code>Promise</code>
 Use this method for your bot to leave a group, supergroup or channel.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#leavechat](https://core.telegram.org/bots/api#leavechat)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
 
 <a name="TelegramBotClient+unbanChatMember"></a>
 
 ### telegramBotClient.unbanChatMember(chat_id, user_id) ⇒ <code>Promise</code>
 Use this method to unban a previously kicked user in a supergroup.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#unbanchatmember](https://core.telegram.org/bots/api#unbanchatmember)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target group or username of the target supergroup |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target group or username of the target supergroup |
 | user_id | <code>Integer</code> | Unique identifier of the target user |
 
 <a name="TelegramBotClient+getChat"></a>
@@ -438,48 +443,48 @@ Use this method to unban a previously kicked user in a supergroup.
 ### telegramBotClient.getChat(chat_id) ⇒ <code>Promise</code>
 Use this method to get up to date information about the chat
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#unbanchatmember](https://core.telegram.org/bots/api#unbanchatmember)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
 
 <a name="TelegramBotClient+getChatAdministrators"></a>
 
 ### telegramBotClient.getChatAdministrators(chat_id) ⇒ <code>Promise</code>
 Use this method to get a list of administrators in a chat.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getchatadministrators](https://core.telegram.org/bots/api#getchatadministrators)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
 
 <a name="TelegramBotClient+getChatMembersCount"></a>
 
 ### telegramBotClient.getChatMembersCount(chat_id) ⇒ <code>Promise</code>
 Use this method to get the number of members in a chat.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getchatmemberscount](https://core.telegram.org/bots/api#getchatmemberscount)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
 
 <a name="TelegramBotClient+getChatMember"></a>
 
 ### telegramBotClient.getChatMember(chat_id, user_id) ⇒ <code>Promise</code>
 Use this method to get information about a member of a chat.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getchatmember](https://core.telegram.org/bots/api#getchatmember)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
+| chat_id | <code>Integer</code> \| <code>String</code> | Unique identifier for the target chat or username of the target supergroup or channel |
 | user_id | <code>Integer</code> | Unique identifier of the target user |
 
 <a name="TelegramBotClient+answerCallbackQuery"></a>
@@ -487,7 +492,7 @@ Use this method to get information about a member of a chat.
 ### telegramBotClient.answerCallbackQuery(callback_query_id, [optionals]) ⇒ <code>Promise</code>
 Use this method to send answers to callback queries sent from inline keyboards.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#answercallbackquery](https://core.telegram.org/bots/api#answercallbackquery)  
 
 | Param | Type | Default | Description |
@@ -504,14 +509,14 @@ Use this method to send answers to callback queries sent from inline keyboards.
 ### telegramBotClient.editMessageText(text, [optionals]) ⇒ <code>Promise</code>
 Use this method to edit text and game messages sent by the bot or via the bot (for inline bots).
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#editmessagetext](https://core.telegram.org/bots/api#editmessagetext)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>String</code> | New text of the message |
 | [optionals] | <code>Object</code> | An object with optional params that you want to send in request. |
-| [optionals.chat_id] | <code>Integer</code> &#124; <code>String</code> | Required if `inline_message_id` is not specified. Unique identifier for the target chat or username of the target channel |
+| [optionals.chat_id] | <code>Integer</code> \| <code>String</code> | Required if `inline_message_id` is not specified. Unique identifier for the target chat or username of the target channel |
 | [optionals.message_id] | <code>Integer</code> | Required if `inline_message_id` is not specified. Identifier of the sent message |
 | [optionals.inline_message_id] | <code>String</code> | Required if `chat_id` and `message_id` are not specified. Identifier of the inline message. |
 | [optionals.parse_mode] | <code>String</code> | Send Markdown or HTML. |
@@ -523,13 +528,13 @@ Use this method to edit text and game messages sent by the bot or via the bot (f
 ### telegramBotClient.editMessageCaption(optionals) ⇒ <code>Promise</code>
 Use this method to edit captions of messages sent by the bot or via the bot (for inline bots).
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#editmessagecaption](https://core.telegram.org/bots/api#editmessagecaption)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | optionals | <code>Object</code> | An object with optional params that you want to send in request. |
-| [optionals.chat_id] | <code>Integer</code> &#124; <code>String</code> | Required if `inline_message_id` is not specified. Unique identifier for the target chat or username of the target channel. |
+| [optionals.chat_id] | <code>Integer</code> \| <code>String</code> | Required if `inline_message_id` is not specified. Unique identifier for the target chat or username of the target channel. |
 | [optionals.message_id] | <code>Integer</code> | Required if `inline_message_id` is not specified. Identifier of the sent message |
 | [optionals.inline_message_id] | <code>String</code> | Required if `chat_id` and `message_id` are not specified. Identifier of the inline message |
 | [optionals.caption] | <code>String</code> | New caption of the message |
@@ -540,13 +545,13 @@ Use this method to edit captions of messages sent by the bot or via the bot (for
 ### telegramBotClient.editMessageReplyMarkup(optionals) ⇒ <code>Promise</code>
 Use this method to edit only the reply markup of messages sent by the bot or via the bot (for inline bots)
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#editmessagereplymarkup](https://core.telegram.org/bots/api#editmessagereplymarkup)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | optionals | <code>Object</code> | An object with optional params that you want to send in request. |
-| [optionals.chat_id] | <code>Integer</code> &#124; <code>String</code> | Required if `inline_message_id` is not specified. Unique identifier for the target chat or username of the target channel |
+| [optionals.chat_id] | <code>Integer</code> \| <code>String</code> | Required if `inline_message_id` is not specified. Unique identifier for the target chat or username of the target channel |
 | [optionals.message_id] | <code>Integer</code> | Required if `inline_message_id` is not specified. Identifier of the sent message |
 | [optioanls.inline_message_id] | <code>String</code> | Required if `chat_id` and `message_id` are not specified. Identifier of the inline message |
 | [optionals.reply_markup] | <code>Object</code> | A JSON-serialized object for an inline keyboard. |
@@ -557,7 +562,7 @@ Use this method to edit only the reply markup of messages sent by the bot or via
 Use this method to send answers to an inline query.
 No more than 50 results per query are allowed.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#answerinlinequery](https://core.telegram.org/bots/api#answerinlinequery)  
 
 | Param | Type | Default | Description |
@@ -576,7 +581,7 @@ No more than 50 results per query are allowed.
 ### telegramBotClient.sendGame(chat_id, game_short_name, [optionals]) ⇒ <code>Promise</code>
 Use this method to send a game.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#sendgame](https://core.telegram.org/bots/api#sendgame)  
 
 | Param | Type | Description |
@@ -593,7 +598,7 @@ Use this method to send a game.
 ### telegramBotClient.setGameScore(user_id, score, [optionals]) ⇒ <code>Promise</code>
 Use this method to set the score of the specified user in a game.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#setgamescore](https://core.telegram.org/bots/api#setgamescore)  
 
 | Param | Type | Description |
@@ -612,7 +617,7 @@ Use this method to set the score of the specified user in a game.
 ### telegramBotClient.getGameHighScores(user_id, [optionals]) ⇒ <code>Promise</code>
 Use this method to get data for high score tables.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getgamehighscores](https://core.telegram.org/bots/api#getgamehighscores)  
 
 | Param | Type | Description |
@@ -628,7 +633,7 @@ Use this method to get data for high score tables.
 ### telegramBotClient.getUpdates([optionals]) ⇒ <code>Promise</code>
 Use this method to receive incoming updates using long polling.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#getupdates](https://core.telegram.org/bots/api#getupdates)  
 
 | Param | Type | Default | Description |
@@ -644,7 +649,7 @@ Use this method to receive incoming updates using long polling.
 ### telegramBotClient.setWebhook(url, [optionals]) ⇒ <code>Promise</code>
 Use this method to specify a url and receive incoming updates via an outgoing webhook.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#setwebhook](https://core.telegram.org/bots/api#setwebhook)  
 
 | Param | Type | Default | Description |
@@ -660,14 +665,14 @@ Use this method to specify a url and receive incoming updates via an outgoing we
 ### telegramBotClient.deleteWebhook() ⇒ <code>Promise</code>
 Use this method to remove webhook integration if you decide to switch back to getUpdates. Requires no parameters.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#deletewebhook](https://core.telegram.org/bots/api#deletewebhook)  
 <a name="TelegramBotClient+getWebhookInfo"></a>
 
 ### telegramBotClient.getWebhookInfo() ⇒ <code>Promise</code>
 Use this method to get current webhook status. Requires no parameters.
 
-**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Kind**: instance method of [<code>TelegramBotClient</code>](#TelegramBotClient)  
 **See**: [https://core.telegram.org/bots/api#deletewebhook](https://core.telegram.org/bots/api#deletewebhook)  
 <a name="InlineKeyboardMarkup"></a>
 
@@ -683,33 +688,33 @@ Use this method to get current webhook status. Requires no parameters.
         * [.addButton(button)](#InlineKeyboardMarkup+addButton) ↩︎
         * [.distributeButtonsInRows(array_btn, [maxButtonsInRow])](#InlineKeyboardMarkup+distributeButtonsInRows) ↩︎
     * _static_
-        * [.InlineKeyboardButton](#InlineKeyboardMarkup.InlineKeyboardButton) : <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>
+        * [.InlineKeyboardButton](#InlineKeyboardMarkup.InlineKeyboardButton) : [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)
 
 <a name="InlineKeyboardMarkup+appendRow"></a>
 
 ### inlineKeyboardMarkup.appendRow() ↩︎
 Append a new row to keyboard. New buttons will be added on new row.
 
-**Kind**: instance method of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>InlineKeyboardMarkup</code>](#InlineKeyboardMarkup)  
 **Chainable**  
 <a name="InlineKeyboardMarkup+addButton"></a>
 
 ### inlineKeyboardMarkup.addButton(button) ↩︎
 Add a new button on last row
 
-**Kind**: instance method of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>InlineKeyboardMarkup</code>](#InlineKeyboardMarkup)  
 **Chainable**  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| button | <code>[InlineKeyboardButton](#InlineKeyboardButton)</code> | The button object |
+| button | [<code>InlineKeyboardButton</code>](#InlineKeyboardButton) | The button object |
 
 <a name="InlineKeyboardMarkup+distributeButtonsInRows"></a>
 
 ### inlineKeyboardMarkup.distributeButtonsInRows(array_btn, [maxButtonsInRow]) ↩︎
 Distribute an array of Buttons in rows, respecting a limit of buttons for each row
 
-**Kind**: instance method of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>InlineKeyboardMarkup</code>](#InlineKeyboardMarkup)  
 **Chainable**  
 
 | Param | Type | Default | Description |
@@ -719,8 +724,8 @@ Distribute an array of Buttons in rows, respecting a limit of buttons for each r
 
 <a name="InlineKeyboardMarkup.InlineKeyboardButton"></a>
 
-### InlineKeyboardMarkup.InlineKeyboardButton : <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>
-**Kind**: static property of <code>[InlineKeyboardMarkup](#InlineKeyboardMarkup)</code>  
+### InlineKeyboardMarkup.InlineKeyboardButton : [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)
+**Kind**: static property of [<code>InlineKeyboardMarkup</code>](#InlineKeyboardMarkup)  
 <a name="ReplyKeyboardMarkup"></a>
 
 ## ReplyKeyboardMarkup
@@ -737,14 +742,14 @@ ReplyKeyboardMarkup
         * [.appendRow()](#ReplyKeyboardMarkup+appendRow) ↩︎
         * [.addButton(button)](#ReplyKeyboardMarkup+addButton) ↩︎
     * _static_
-        * [.KeyboardButton](#ReplyKeyboardMarkup.KeyboardButton) : <code>[KeyboardButton](#KeyboardButton)</code>
+        * [.KeyboardButton](#ReplyKeyboardMarkup.KeyboardButton) : [<code>KeyboardButton</code>](#KeyboardButton)
 
 <a name="ReplyKeyboardMarkup+setResizeKeyboard"></a>
 
 ### replyKeyboardMarkup.setResizeKeyboard(resize_keyboard) ↩︎
 Set `resize_keyboard` property
 
-**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -756,7 +761,7 @@ Set `resize_keyboard` property
 ### replyKeyboardMarkup.setOneTimeKeyboard(one_time_keyboard) ↩︎
 Set `one_time_keyboard` property
 
-**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -768,7 +773,7 @@ Set `one_time_keyboard` property
 ### replyKeyboardMarkup.setSelective(selective) ↩︎
 Set `selective` property
 
-**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -780,24 +785,24 @@ Set `selective` property
 ### replyKeyboardMarkup.appendRow() ↩︎
 Append a new row to keyboard. New buttons will be added on new row.
 
-**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)  
 **Chainable**  
 <a name="ReplyKeyboardMarkup+addButton"></a>
 
 ### replyKeyboardMarkup.addButton(button) ↩︎
 Add a button to last row
 
-**Kind**: instance method of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)  
 **Chainable**  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| button | <code>[KeyboardButton](#KeyboardButton)</code> | The button object |
+| button | [<code>KeyboardButton</code>](#KeyboardButton) | The button object |
 
 <a name="ReplyKeyboardMarkup.KeyboardButton"></a>
 
-### ReplyKeyboardMarkup.KeyboardButton : <code>[KeyboardButton](#KeyboardButton)</code>
-**Kind**: static property of <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>  
+### ReplyKeyboardMarkup.KeyboardButton : [<code>KeyboardButton</code>](#KeyboardButton)
+**Kind**: static property of [<code>ReplyKeyboardMarkup</code>](#ReplyKeyboardMarkup)  
 <a name="ReplyKeyboardRemove"></a>
 
 ## ReplyKeyboardRemove
@@ -815,7 +820,7 @@ Add a button to last row
 ### replyKeyboardRemove.setRemoveKeyboard(remove_keyboard) ↩︎
 Set `remove_keyboard` property. Default is `true`
 
-**Kind**: instance method of <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardRemove</code>](#ReplyKeyboardRemove)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -827,7 +832,7 @@ Set `remove_keyboard` property. Default is `true`
 ### replyKeyboardRemove.setSelective(selective) ↩︎
 Set `selective` property
 
-**Kind**: instance method of <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>  
+**Kind**: instance method of [<code>ReplyKeyboardRemove</code>](#ReplyKeyboardRemove)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -855,7 +860,7 @@ Set `selective` property
 ### inlineKeyboardButton.setText(text) ↩︎
 Set `text` property
 
-**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Kind**: instance method of [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -867,7 +872,7 @@ Set `text` property
 ### inlineKeyboardButton.setUrl(url) ↩︎
 Set `url` property
 
-**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Kind**: instance method of [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -879,7 +884,7 @@ Set `url` property
 ### inlineKeyboardButton.setCallbackData(callback_data) ↩︎
 Set `callback_data` property
 
-**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Kind**: instance method of [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -891,7 +896,7 @@ Set `callback_data` property
 ### inlineKeyboardButton.setSwitchInlineQuery(switch_inline_query) ↩︎
 Set `switch_inline_query` property
 
-**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Kind**: instance method of [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -903,7 +908,7 @@ Set `switch_inline_query` property
 ### inlineKeyboardButton.setSwitchInlineQueryCurrentChat(switch_inline_query_current_chat) ↩︎
 Set `switch_inline_query_current_chat` property
 
-**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Kind**: instance method of [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -915,7 +920,7 @@ Set `switch_inline_query_current_chat` property
 ### inlineKeyboardButton.setCallbackGame(callback_game) ↩︎
 Set `callback_game` property
 
-**Kind**: instance method of <code>[InlineKeyboardButton](#InlineKeyboardButton)</code>  
+**Kind**: instance method of [<code>InlineKeyboardButton</code>](#InlineKeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -940,7 +945,7 @@ Set `callback_game` property
 ### keyboardButton.setText(text) ↩︎
 Set `text` property
 
-**Kind**: instance method of <code>[KeyboardButton](#KeyboardButton)</code>  
+**Kind**: instance method of [<code>KeyboardButton</code>](#KeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -952,7 +957,7 @@ Set `text` property
 ### keyboardButton.setRequestContact(request_contact) ↩︎
 Set `request_contact` property
 
-**Kind**: instance method of <code>[KeyboardButton](#KeyboardButton)</code>  
+**Kind**: instance method of [<code>KeyboardButton</code>](#KeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
@@ -964,7 +969,7 @@ Set `request_contact` property
 ### keyboardButton.setRequestLocation(request_location) ↩︎
 Set `request_location` property
 
-**Kind**: instance method of <code>[KeyboardButton](#KeyboardButton)</code>  
+**Kind**: instance method of [<code>KeyboardButton</code>](#KeyboardButton)  
 **Chainable**  
 
 | Param | Type | Description |
