@@ -88,6 +88,11 @@ Thank you! Feel free to collaborate as best you can. I'll really appreciate it.
 
 [Call me on Telegram.](https://t.me/felipe_tracker)
 
+### Donations
+
+If you like my work and want to buy me a cup of coffee, it helps me keep my projects on the road. Thank you! :D
+
+![bitcoin qrcode](http://i.imgur.com/a565f0H.png)
 
 # API reference
 
