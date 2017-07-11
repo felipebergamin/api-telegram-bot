@@ -28,9 +28,11 @@ class TelegramBotClient extends EventEmitter {
 	 * @class TelegramBotClient
 	 * @constructor
 	 * @param {String} token Bot token
-	 * @param {boolean} [onlyFirstRegexMatch=true] `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex())
+	 * @param {object} [config={}] Optional config object. See default configuration below
+	 * @param {boolean} [config.onlyFirstRegexMatch=true] `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex())
+	 * @param {boolean} [config.split_long_messages] Telegram messages can't be longer than 4096 chars, if `true`, the sendMessage function will split long messages and send sequentially
 	 */
-	constructor(token, onlyFirstRegexMatch) {
+	constructor(token, config={}/*onlyFirstRegexMatch, split_long_messages*/) {
 		super();
 		debug('constructing TelegramBotClient');
 		
@@ -39,8 +41,11 @@ class TelegramBotClient extends EventEmitter {
 		
 		this.bot_token = token;
 		
+		this.max_msg_length = 4096;
+		
 		this.regexCallbacks = [];
-		this.onlyFirstRegexMatch = onlyFirstRegexMatch || true;
+		this.onlyFirstRegexMatch = config.onlyFirstRegexMatch || true;
+		this.split_long_messages = config.split_long_messages || false;
 		
 		/** @member {InlineKeyboardMarkup} */
 		this.InlineKeyboardMarkup = InlineKeyboardMarkup;
@@ -201,6 +206,25 @@ class TelegramBotClient extends EventEmitter {
 	 * @see {@link https://core.telegram.org/bots/api#sendmessage}
 	 */
 	sendMessage(chat_id, text, optionals) {
+		// telegram message text can not be greater than 4096 characters
+		if (text.length > this.max_msg_length) {
+			
+			// if configuration does not allow message split, throw an error
+			if (!this.split_long_messages)
+				return Promise.reject(new Error(`text can\'t be longer than ${this.max_msg_length} chars`));
+			
+			// Wraps text in chunks of 4096 characters
+			const splited_text = this._split_text(text);
+			
+			// send sequentially
+			return splited_text.reduce((previous, chunk)=>{
+				// sendMessage call itself with a acceptable text length
+				return previous
+					.then(()=>this.sendMessage(chat_id, chunk, optionals));
+			}, Promise.resolve());
+		}
+
+		// from here on executes only if text <= 4096
 		const json = {};
 		const params = {chat_id, text};
 		
@@ -208,11 +232,28 @@ class TelegramBotClient extends EventEmitter {
 		
 		const _sendmsg = ()=>{
 			return this._makeRequest('sendMessage', {json});
-		}
+		};
 		
 		return this.sendChatAction(chat_id, 'typing')
 			.then(_sendmsg);
 	}
+	
+	_split_text (text) {
+	    const text_length = text.length;
+	    const times_greater = Math.ceil((text_length / this.max_msg_length));
+	    const splited_text = [];
+	    
+	    for (let i = 0; i < times_greater; i++) {
+	        let start = this.max_msg_length * i;
+	        let end = this.max_msg_length * (i + 1);
+	        
+	        let piece = text.substring(start, end);
+	        
+	        splited_text.push(piece);
+	    }
+	    
+	    return splited_text;
+	};
 	
 	/**
 	 * Use this method to forward messages of any kind.
