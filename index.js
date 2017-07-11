@@ -9,6 +9,7 @@ const InlineKeyboardMarkup = require('./keyboards/InlineKeyboardMarkup');
 const ReplyKeyboardMarkup = require('./keyboards/ReplyKeyboardMarkup');
 const ReplyKeyboardRemove = require('./keyboards/ReplyKeyboardRemove');
 const ForceReply = require('./keyboards/ForceReply');
+let emojify = require('node-emoji').emojify;
 
 const _messageTypes = [
 	'text', 'audio', 'document', 'photo', 'sticker', 'video', 'voice', 'contact',
@@ -30,7 +31,10 @@ class TelegramBotClient extends EventEmitter {
 	 * @param {String} token Bot token
 	 * @param {object} [config={}] Optional config object. See default configuration below
 	 * @param {boolean} [config.onlyFirstRegexMatch=true] `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex())
-	 * @param {boolean} [config.split_long_messages] Telegram messages can't be longer than 4096 chars, if `true`, the sendMessage function will split long messages and send sequentially
+	 * @param {boolean} [config.split_long_messages=false] Telegram messages can't be longer than 4096 chars, if `true`, the sendMessage function will split long messages and send sequentially
+	 * @param {boolean} [config.emojify_texts=false] `true` if you want the bot automatically call [emoji.emojify](https://www.npmjs.com/package/node-emoji) in texts
+	 * 
+	 * @see {@link https://www.npmjs.com/package/node-emoji}
 	 */
 	constructor(token, config={}/*onlyFirstRegexMatch, split_long_messages*/) {
 		super();
@@ -46,6 +50,10 @@ class TelegramBotClient extends EventEmitter {
 		this.regexCallbacks = [];
 		this.onlyFirstRegexMatch = config.onlyFirstRegexMatch || true;
 		this.split_long_messages = config.split_long_messages || false;
+		this.emojify_texts = config.emojify_texts || false;
+		
+		if (!this.emojify_texts)
+			emojify = text=>text;
 		
 		/** @member {InlineKeyboardMarkup} */
 		this.InlineKeyboardMarkup = InlineKeyboardMarkup;
@@ -165,11 +173,20 @@ class TelegramBotClient extends EventEmitter {
 	_makeRequest (api_method, params) {
 		if (!this.bot_token)
 			throw new Error('Telegram Bot Token undefined');
+			
 		params = params || {};
 		const uri = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
 		const method = 'POST';
 		// const formData = params;
 		const json = true;
+		
+		if (params.json && params.json.text)
+			params.json.text = emojify(params.json.text);
+			
+		if (params.formData && params.formData.caption)
+			params.formData.caption = emojify(params.formData.caption);
+			
+		console.log('- params ', params);
 		
 		const requestOptions = {
 			uri, method, /*formData,*/ json
@@ -287,8 +304,8 @@ class TelegramBotClient extends EventEmitter {
 	 * @returns {Promise}
 	 * @see {@link https://core.telegram.org/bots/api#sendphoto}
 	 */
-	sendPhoto (chat_id, photo, optionals) {
-		const params = {chat_id, photo}
+	sendPhoto (chat_id, photo, optionals={}) {
+		const params = {chat_id, photo};
 		const formData = {};
 		Object.assign(formData, params, optionals);
 		
