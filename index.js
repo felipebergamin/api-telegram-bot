@@ -885,6 +885,26 @@ class TelegramBotClient extends EventEmitter {
 	deleteMessage (chat_id, message_id) {
 		return this._makeRequest('deleteMessage', {formData: {chat_id, message_id}});
 	}
+
+	/**
+	 * 
+	 * @param {String|Integer} chat_id 
+	 * @param {String|Integer} user_id 
+	 * @param {Object} options 
+	 * @param {Integer} options.until_date
+	 * @param {Boolean} options.can_send_messages
+	 * @param {Boolean} options.can_send_media_messages
+	 * @param {Boolean} options.can_send_other_messages
+	 * @param {Boolean} options.can_add_web_page_previews
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#restrictchatmember}
+	 */
+	restrictChatMember (chat_id, user_id, options={}) {
+		const formData = {};
+		Object.assign(formData, options, {chat_id, user_id});
+
+		return _makeRequest('restrictChatMember', {formData});
+	}
 }
 
 module.exports = TelegramBotClient;

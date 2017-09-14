@@ -82,6 +82,7 @@ TelegramBotClient
     * [.deleteWebhook()](#TelegramBotClient+deleteWebhook) ⇒ <code>Promise</code>
     * [.getWebhookInfo()](#TelegramBotClient+getWebhookInfo) ⇒ <code>Promise</code>
     * [.deleteMessage(chat_id, message_id)](#TelegramBotClient+deleteMessage) ⇒ <code>Promise</code>
+    * [.restrictChatMember(chat_id, user_id, options)](#TelegramBotClient+restrictChatMember) ⇒ <code>Promise</code>
 
 <a name="new_TelegramBotClient_new"></a>
 
@@ -687,6 +688,23 @@ Use this method to delete a message, including service messages
 | --- | --- | --- |
 | chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
 | message_id | <code>Integer</code> &#124; <code>String</code> | Identifier of the message to delete |
+
+<a name="TelegramBotClient+restrictChatMember"></a>
+
+### telegramBotClient.restrictChatMember(chat_id, user_id, options) ⇒ <code>Promise</code>
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#restrictchatmember](https://core.telegram.org/bots/api#restrictchatmember)  
+
+| Param | Type |
+| --- | --- |
+| chat_id | <code>String</code> &#124; <code>Integer</code> | 
+| user_id | <code>String</code> &#124; <code>Integer</code> | 
+| options | <code>Object</code> | 
+| options.until_date | <code>Integer</code> | 
+| options.can_send_messages | <code>Boolean</code> | 
+| options.can_send_media_messages | <code>Boolean</code> | 
+| options.can_send_other_messages | <code>Boolean</code> | 
+| options.can_add_web_page_previews | <code>Boolean</code> | 
 
 <a name="InlineKeyboardMarkup"></a>
 
