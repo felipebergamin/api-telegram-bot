@@ -185,14 +185,14 @@ class TelegramBotClient extends EventEmitter {
 			
 		if (params.formData && params.formData.caption)
 			params.formData.caption = emojify(params.formData.caption);
-			
-		console.log('- params ', params);
 		
 		const requestOptions = {
 			uri, method, /*formData,*/ json
 		};
 		
 		Object.assign(requestOptions, params);
+
+		debug('Sending: ' + JSON.stringify(requestOptions));
 		
 		return request(requestOptions);
 	}
