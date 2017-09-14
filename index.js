@@ -873,6 +873,10 @@ class TelegramBotClient extends EventEmitter {
 	getWebhookInfo () {
 		return this._makeRequest('getWebhookInfo');
 	}
+
+	deleteMessage (chat_id, message_id) {
+		return this._makeRequest('deleteMessage', {formData: {chat_id, message_id}});
+	}
 }
 
 module.exports = TelegramBotClient;
