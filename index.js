@@ -874,6 +874,14 @@ class TelegramBotClient extends EventEmitter {
 		return this._makeRequest('getWebhookInfo');
 	}
 
+	/**
+	 * Use this method to delete a message, including service messages
+	 * 
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
+	 * @param {Integer|String} message_id Identifier of the message to delete
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#deletemessage}
+	 */
 	deleteMessage (chat_id, message_id) {
 		return this._makeRequest('deleteMessage', {formData: {chat_id, message_id}});
 	}
