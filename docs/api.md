@@ -85,6 +85,7 @@ TelegramBotClient
     * [.restrictChatMember(chat_id, user_id, options)](#TelegramBotClient+restrictChatMember) ⇒ <code>Promise</code>
     * [.promoteChatMember(chat_id, user_id, options)](#TelegramBotClient+promoteChatMember) ⇒ <code>Promise</code>
     * [.exportChatInviteLink(chat_id)](#TelegramBotClient+exportChatInviteLink) ⇒ <code>Promise</code>
+    * [.setChatPhoto(chat_id, photo)](#TelegramBotClient+setChatPhoto) ⇒ <code>Promise</code>
 
 <a name="new_TelegramBotClient_new"></a>
 
@@ -741,6 +742,19 @@ Use this method to export an invite link to a supergroup or a channel.
 | Param | Type | Description |
 | --- | --- | --- |
 | chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+
+<a name="TelegramBotClient+setChatPhoto"></a>
+
+### telegramBotClient.setChatPhoto(chat_id, photo) ⇒ <code>Promise</code>
+Use this method to set a new profile photo for the chat.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#setchatphoto](https://core.telegram.org/bots/api#setchatphoto)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+| photo | <code>ReadStream</code> | New chat photo. |
 
 <a name="InlineKeyboardMarkup"></a>
 

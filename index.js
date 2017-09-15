@@ -177,8 +177,9 @@ class TelegramBotClient extends EventEmitter {
 		params = params || {};
 		for (let property in params.formData)
 			if(params.formData.hasOwnProperty(property))
-				if(params.formData[property].toString)
-					params.formData[property] = params.formData[property].toString();
+				if(typeof params.formData[property] !== 'object')
+					if(params.formData[property].toString)
+						params.formData[property] = params.formData[property].toString();
 
 		const uri = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
 		const method = 'POST';
@@ -944,6 +945,19 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {chat_id};
 		
 		return this._makeRequest('exportChatInviteLink', {formData});
+	}
+
+	/**
+	 * Use this method to set a new profile photo for the chat. 
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel 
+	 * @param {ReadStream} photo New chat photo.
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#setchatphoto}
+	 */
+	setChatPhoto(chat_id, photo) {
+		const formData = {chat_id, photo};
+		
+		return this._makeRequest('setChatPhoto', {formData});
 	}
 }
 
