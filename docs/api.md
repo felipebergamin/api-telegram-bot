@@ -82,7 +82,7 @@ TelegramBotClient
     * [.deleteWebhook()](#TelegramBotClient+deleteWebhook) ⇒ <code>Promise</code>
     * [.getWebhookInfo()](#TelegramBotClient+getWebhookInfo) ⇒ <code>Promise</code>
     * [.deleteMessage(chat_id, message_id)](#TelegramBotClient+deleteMessage) ⇒ <code>Promise</code>
-    * [.restrictChatMember(chat_id, user_id, options)](#TelegramBotClient+restrictChatMember) ⇒ <code>Promise</code>
+    * [.restrictChatMember(chat_id, user_id, [options])](#TelegramBotClient+restrictChatMember) ⇒ <code>Promise</code>
     * [.promoteChatMember(chat_id, user_id, options)](#TelegramBotClient+promoteChatMember) ⇒ <code>Promise</code>
     * [.exportChatInviteLink(chat_id)](#TelegramBotClient+exportChatInviteLink) ⇒ <code>Promise</code>
     * [.setChatPhoto(chat_id, photo)](#TelegramBotClient+setChatPhoto) ⇒ <code>Promise</code>
@@ -91,6 +91,12 @@ TelegramBotClient
     * [.setChatDescription(chat_id, description)](#TelegramBotClient+setChatDescription) ⇒ <code>Promise</code>
     * [.pinChatMessage(chat_id, message_id, disable_notification)](#TelegramBotClient+pinChatMessage) ⇒ <code>Promise</code>
     * [.unpinChatMessage(chat_id)](#TelegramBotClient+unpinChatMessage) ⇒ <code>Promise</code>
+    * [.getStickerSet(name)](#TelegramBotClient+getStickerSet) ⇒ <code>Promise</code>
+    * [.uploadStickerFile(user_id, png_sticker)](#TelegramBotClient+uploadStickerFile) ⇒ <code>Promise</code>
+    * [.createNewStickerSet(user_id, name, title, png_sticker, emojis, options)](#TelegramBotClient+createNewStickerSet) ⇒ <code>Promise</code>
+    * [.addStickerToSet(user_id, name, png_sticker, emojis, options)](#TelegramBotClient+addStickerToSet) ⇒ <code>Promise</code>
+    * [.setStickerPositionInSet(sticker, position)](#TelegramBotClient+setStickerPositionInSet) ⇒ <code>Promise</code>
+    * [.deleteStickerFromSet(sticker)](#TelegramBotClient+deleteStickerFromSet) ⇒ <code>Promise</code>
 
 <a name="new_TelegramBotClient_new"></a>
 
@@ -699,20 +705,22 @@ Use this method to delete a message, including service messages
 
 <a name="TelegramBotClient+restrictChatMember"></a>
 
-### telegramBotClient.restrictChatMember(chat_id, user_id, options) ⇒ <code>Promise</code>
+### telegramBotClient.restrictChatMember(chat_id, user_id, [options]) ⇒ <code>Promise</code>
+Use this method to restrict a user in a supergroup.
+
 **Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
 **See**: [https://core.telegram.org/bots/api#restrictchatmember](https://core.telegram.org/bots/api#restrictchatmember)  
 
-| Param | Type |
-| --- | --- |
-| chat_id | <code>String</code> &#124; <code>Integer</code> | 
-| user_id | <code>String</code> &#124; <code>Integer</code> | 
-| options | <code>Object</code> | 
-| options.until_date | <code>Integer</code> | 
-| options.can_send_messages | <code>Boolean</code> | 
-| options.can_send_media_messages | <code>Boolean</code> | 
-| options.can_send_other_messages | <code>Boolean</code> | 
-| options.can_add_web_page_previews | <code>Boolean</code> | 
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>String</code> &#124; <code>Integer</code> | Unique identifier for the target chat or username of the target supergroup |
+| user_id | <code>String</code> &#124; <code>Integer</code> | Unique identifier of the target user |
+| [options] | <code>Object</code> | Object with optionals parameters |
+| [options.until_date] | <code>Integer</code> | Date when restrictions will be lifted for the user, unix time. |
+| [options.can_send_messages] | <code>Boolean</code> | Pass True, if the user can send text messages, contacts, locations and venues |
+| [options.can_send_media_messages] | <code>Boolean</code> | Pass True, if the user can send audios, documents, photos, videos, video notes and voice notes, implies can_send_messages |
+| [options.can_send_other_messages] | <code>Boolean</code> | Pass True, if the user can send animations, games, stickers and use inline bots, implies can_send_media_messages |
+| [options.can_add_web_page_previews] | <code>Boolean</code> | Pass True, if the user may add web page previews to their messages, implies can_send_media_messages |
 
 <a name="TelegramBotClient+promoteChatMember"></a>
 
@@ -726,7 +734,7 @@ Use this method to promote or demote a user in a supergroup or a channel.
 | --- | --- | --- |
 | chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
 | user_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier of the target user |
-| options | <code>object</code> |  |
+| options | <code>object</code> | Object with optionals parameters |
 | options.can_change_infoPass | <code>Boolean</code> | True, if the administrator can change chat title, photo and other settings |
 | options.can_post_messagesPass | <code>Boolean</code> | True, if the administrator can create channel posts, channels only |
 | options.can_edit_messages | <code>Boolean</code> | Pass True, if the administrator can edit messages of other users, channels only |
@@ -824,6 +832,92 @@ Use this method to unpin a message in a supergroup chat.
 | Param | Type | Description |
 | --- | --- | --- |
 | chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup |
+
+<a name="TelegramBotClient+getStickerSet"></a>
+
+### telegramBotClient.getStickerSet(name) ⇒ <code>Promise</code>
+Use this method to get a sticker set.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#getstickerset](https://core.telegram.org/bots/api#getstickerset)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>String</code> | Name of the sticker set |
+
+<a name="TelegramBotClient+uploadStickerFile"></a>
+
+### telegramBotClient.uploadStickerFile(user_id, png_sticker) ⇒ <code>Promise</code>
+Use this method to upload a .png file with a sticker for later use in createNewStickerSet and addStickerToSet methods (can be used multiple times).
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#uploadstickerfile](https://core.telegram.org/bots/api#uploadstickerfile)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| user_id | <code>Integer</code> | User identifier of sticker file owner |
+| png_sticker | <code>ReadStream</code> | Png image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. |
+
+<a name="TelegramBotClient+createNewStickerSet"></a>
+
+### telegramBotClient.createNewStickerSet(user_id, name, title, png_sticker, emojis, options) ⇒ <code>Promise</code>
+Use this method to create new sticker set owned by a user.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#createnewstickerset](https://core.telegram.org/bots/api#createnewstickerset)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| user_id | <code>Integer</code> &#124; <code>String</code> | User identifier of created sticker set owner |
+| name | <code>String</code> | Short name of sticker set, to be used in t.me/addstickers/ URLs |
+| title | <code>String</code> | Sticker set title, 1-64 characters |
+| png_sticker | <code>ReadStream</code> &#124; <code>String</code> | Png image with the sticker |
+| emojis | <code>String</code> | One or more emoji corresponding to the sticker |
+| options | <code>object</code> | Object with optionals parameters |
+| options.contains_masks | <code>boolean</code> | Pass True, if a set of mask stickers should be created |
+| options.mask_position | <code>object</code> | A JSON-serialized object for position where the mask should be placed on faces |
+
+<a name="TelegramBotClient+addStickerToSet"></a>
+
+### telegramBotClient.addStickerToSet(user_id, name, png_sticker, emojis, options) ⇒ <code>Promise</code>
+Use this method to add a new sticker to a set created by the bot.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#addstickertoset](https://core.telegram.org/bots/api#addstickertoset)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| user_id | <code>Integer</code> &#124; <code>String</code> | User identifier of sticker set owner |
+| name | <code>String</code> | Sticker set name |
+| png_sticker | <code>ReadStream</code> &#124; <code>String</code> | Png image with the sticker |
+| emojis | <code>String</code> | One or more emoji corresponding to the sticker |
+| options | <code>object</code> | Object with optionals parameters |
+| options.mask_position | <code>object</code> | A JSON-serialized object for position where the mask should be placed on faces |
+
+<a name="TelegramBotClient+setStickerPositionInSet"></a>
+
+### telegramBotClient.setStickerPositionInSet(sticker, position) ⇒ <code>Promise</code>
+Use this method to move a sticker in a set created by the bot to a specific position
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#setstickerpositioninset](https://core.telegram.org/bots/api#setstickerpositioninset)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| sticker | <code>String</code> | File identifier of the sticker |
+| position | <code>Integer</code> | New sticker position in the set, zero-based |
+
+<a name="TelegramBotClient+deleteStickerFromSet"></a>
+
+### telegramBotClient.deleteStickerFromSet(sticker) ⇒ <code>Promise</code>
+Use this method to delete a sticker from a set created by the bot.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#deletestickerfromset](https://core.telegram.org/bots/api#deletestickerfromset)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| sticker | <code>String</code> | File identifier of the sticker |
 
 <a name="InlineKeyboardMarkup"></a>
 

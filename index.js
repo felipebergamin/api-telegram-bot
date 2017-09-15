@@ -18,7 +18,8 @@ const _messageTypes = [
 ];
 const _updateTypes = [
 	'message', 'edited_message', 'channel_post', 'edited_channel_post',
-	'inline_query', 'chosen_inline_result', 'callback_query'
+	'inline_query', 'chosen_inline_result', 'callback_query', 'shipping_query',
+	'pre_checkout_query'
 ];
 
 class TelegramBotClient extends EventEmitter {
@@ -894,15 +895,15 @@ class TelegramBotClient extends EventEmitter {
 	}
 
 	/**
-	 * 
-	 * @param {String|Integer} chat_id 
-	 * @param {String|Integer} user_id 
-	 * @param {Object} options 
-	 * @param {Integer} options.until_date
-	 * @param {Boolean} options.can_send_messages
-	 * @param {Boolean} options.can_send_media_messages
-	 * @param {Boolean} options.can_send_other_messages
-	 * @param {Boolean} options.can_add_web_page_previews
+	 * Use this method to restrict a user in a supergroup.
+	 * @param {String|Integer} chat_id Unique identifier for the target chat or username of the target supergroup
+	 * @param {String|Integer} user_id Unique identifier of the target user
+	 * @param {Object} [options] Object with optionals parameters
+	 * @param {Integer} [options.until_date] Date when restrictions will be lifted for the user, unix time.
+	 * @param {Boolean} [options.can_send_messages] Pass True, if the user can send text messages, contacts, locations and venues
+	 * @param {Boolean} [options.can_send_media_messages] Pass True, if the user can send audios, documents, photos, videos, video notes and voice notes, implies can_send_messages
+	 * @param {Boolean} [options.can_send_other_messages] Pass True, if the user can send animations, games, stickers and use inline bots, implies can_send_media_messages
+	 * @param {Boolean} [options.can_add_web_page_previews] Pass True, if the user may add web page previews to their messages, implies can_send_media_messages
 	 * @returns {Promise}
 	 * @see {@link https://core.telegram.org/bots/api#restrictchatmember}
 	 */
@@ -917,7 +918,7 @@ class TelegramBotClient extends EventEmitter {
 	 * Use this method to promote or demote a user in a supergroup or a channel. 
 	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
 	 * @param {Integer|String} user_id Unique identifier of the target user
-	 * @param {object} options 
+	 * @param {object} options Object with optionals parameters
 	 * @param {Boolean} options.can_change_infoPass True, if the administrator can change chat title, photo and other settings
 	 * @param {Boolean} options.can_post_messagesPass True, if the administrator can create channel posts, channels only
 	 * @param {Boolean} options.can_edit_messages Pass True, if the administrator can edit messages of other users, channels only
@@ -1023,6 +1024,94 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {chat_id};
 
 		return this._makeRequest('unpinChatMessage', {formData});
+	}
+
+	/**
+	 * Use this method to get a sticker set.
+	 * @param {String} name Name of the sticker set
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#getstickerset}
+	 */
+	getStickerSet (name) {
+		const formData = {name};
+
+		return this._makeRequest('getStickerSet', {formData});
+	}
+
+	/**
+	 * Use this method to upload a .png file with a sticker for later use in createNewStickerSet and addStickerToSet methods (can be used multiple times).
+	 * @param {Integer} user_id User identifier of sticker file owner
+	 * @param {ReadStream} png_sticker Png image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px.
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#uploadstickerfile}
+	 */
+	uploadStickerFile (user_id, png_sticker) {
+		const formData = {user_id, png_sticker};
+
+		return this._makeRequest('uploadStickerFile', {formData});
+	}
+
+	/**
+	 * Use this method to create new sticker set owned by a user.
+	 * @param {Integer|String} user_id User identifier of created sticker set owner
+	 * @param {String} name Short name of sticker set, to be used in t.me/addstickers/ URLs
+	 * @param {String} title Sticker set title, 1-64 characters
+	 * @param {ReadStream|String} png_sticker Png image with the sticker
+	 * @param {String} emojis One or more emoji corresponding to the sticker
+	 * @param {object} options Object with optionals parameters
+	 * @param {boolean} options.contains_masks Pass True, if a set of mask stickers should be created
+	 * @param {object} options.mask_position A JSON-serialized object for position where the mask should be placed on faces
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#createnewstickerset}
+	 */
+	createNewStickerSet (user_id, name, title, png_sticker, emojis, options={}) {
+		const formData = {user_id, name, title, png_sticker, emojis};
+		Object.assign(formData, options);
+
+		return this._makeRequest('createNewStickerSet', {formData});
+	}
+
+	/**
+	 * Use this method to add a new sticker to a set created by the bot.
+	 * @param {Integer|String} user_id User identifier of sticker set owner
+	 * @param {String} name Sticker set name
+	 * @param {ReadStream|String} png_sticker Png image with the sticker
+	 * @param {String} emojis One or more emoji corresponding to the sticker
+	 * @param {object} options Object with optionals parameters
+	 * @param {object} options.mask_position A JSON-serialized object for position where the mask should be placed on faces
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#addstickertoset}
+	 */
+	addStickerToSet (user_id, name, png_sticker, emojis, options={}) {
+		const formData = {user_id, name, png_sticker, emojis};
+		Object.assign(formData, options);
+
+		return this._makeRequest('addStickerToSet', {formData});
+	}
+
+	/**
+	 * Use this method to move a sticker in a set created by the bot to a specific position
+	 * @param {String} sticker File identifier of the sticker
+	 * @param {Integer} position New sticker position in the set, zero-based
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#setstickerpositioninset}
+	 */
+	setStickerPositionInSet (sticker, position) {
+		const formData = {sticker, position};
+
+		return this._makeRequest('setStickerPositionInSet', {formData});
+	}
+
+	/**
+	 * Use this method to delete a sticker from a set created by the bot.
+	 * @param {String} sticker File identifier of the sticker
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#deletestickerfromset}
+	 */
+	deleteStickerFromSet (sticker) {
+		const formData = {sticker};
+
+		return this._makeRequest('deleteStickerFromSet', {formData});
 	}
 }
 
