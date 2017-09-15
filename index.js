@@ -910,6 +910,29 @@ class TelegramBotClient extends EventEmitter {
 		
 		return this._makeRequest('restrictChatMember', {formData});
 	}
+
+	/**
+	 * Use this method to promote or demote a user in a supergroup or a channel. 
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
+	 * @param {Integer|String} user_id Unique identifier of the target user
+	 * @param {object} options 
+	 * @param {Boolean} options.can_change_infoPass True, if the administrator can change chat title, photo and other settings
+	 * @param {Boolean} options.can_post_messagesPass True, if the administrator can create channel posts, channels only
+	 * @param {Boolean} options.can_edit_messages Pass True, if the administrator can edit messages of other users, channels only
+	 * @param {Boolean} options.can_delete_messages Pass True, if the administrator can delete messages of other users
+	 * @param {Boolean} options.can_invite_users Pass True, if the administrator can invite new users to the chat
+	 * @param {Boolean} options.can_restrict_members Pass True, if the administrator can restrict, ban or unban chat members
+	 * @param {Boolean} options.can_pin_messages Pass True, if the administrator can pin messages, supergroups only
+	 * @param {Boolean} options.can_promote_members 	Pass True, if the administrator can add new administrators with a subset of his own privileges
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#promotechatmember}
+	 */
+	promoteChatMember (chat_id, user_id, options={}) {
+		const formData = {chat_id, user_id};
+		Object.assign(formData, options);
+
+		return this._makeRequest('promoteChatMember', {formData});
+	}
 }
 
 module.exports = TelegramBotClient;
