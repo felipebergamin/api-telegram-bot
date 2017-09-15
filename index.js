@@ -902,8 +902,8 @@ class TelegramBotClient extends EventEmitter {
 	restrictChatMember (chat_id, user_id, options={}) {
 		const formData = {};
 		Object.assign(formData, options, {chat_id, user_id});
-
-		return _makeRequest('restrictChatMember', {formData});
+		
+		return this._makeRequest('restrictChatMember', {formData});
 	}
 }
 
