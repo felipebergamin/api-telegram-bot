@@ -933,6 +933,18 @@ class TelegramBotClient extends EventEmitter {
 
 		return this._makeRequest('promoteChatMember', {formData});
 	}
+
+	/**
+	 * Use this method to export an invite link to a supergroup or a channel.
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#exportchatinvitelink}
+	 */
+	exportChatInviteLink (chat_id) {
+		const formData = {chat_id};
+		
+		return this._makeRequest('exportChatInviteLink', {formData});
+	}
 }
 
 module.exports = TelegramBotClient;

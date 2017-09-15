@@ -84,6 +84,7 @@ TelegramBotClient
     * [.deleteMessage(chat_id, message_id)](#TelegramBotClient+deleteMessage) ⇒ <code>Promise</code>
     * [.restrictChatMember(chat_id, user_id, options)](#TelegramBotClient+restrictChatMember) ⇒ <code>Promise</code>
     * [.promoteChatMember(chat_id, user_id, options)](#TelegramBotClient+promoteChatMember) ⇒ <code>Promise</code>
+    * [.exportChatInviteLink(chat_id)](#TelegramBotClient+exportChatInviteLink) ⇒ <code>Promise</code>
 
 <a name="new_TelegramBotClient_new"></a>
 
@@ -728,6 +729,18 @@ Use this method to promote or demote a user in a supergroup or a channel.
 | options.can_restrict_members | <code>Boolean</code> | Pass True, if the administrator can restrict, ban or unban chat members |
 | options.can_pin_messages | <code>Boolean</code> | Pass True, if the administrator can pin messages, supergroups only |
 | options.can_promote_members | <code>Boolean</code> | Pass True, if the administrator can add new administrators with a subset of his own privileges |
+
+<a name="TelegramBotClient+exportChatInviteLink"></a>
+
+### telegramBotClient.exportChatInviteLink(chat_id) ⇒ <code>Promise</code>
+Use this method to export an invite link to a supergroup or a channel.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#exportchatinvitelink](https://core.telegram.org/bots/api#exportchatinvitelink)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
 
 <a name="InlineKeyboardMarkup"></a>
 
