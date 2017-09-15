@@ -175,6 +175,11 @@ class TelegramBotClient extends EventEmitter {
 			throw new Error('Telegram Bot Token undefined');
 			
 		params = params || {};
+		for (let property in params.formData)
+			if(params.formData.hasOwnProperty(property))
+				if(params.formData[property].toString)
+					params.formData[property] = params.formData[property].toString();
+
 		const uri = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
 		const method = 'POST';
 		// const formData = params;
