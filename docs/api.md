@@ -86,6 +86,11 @@ TelegramBotClient
     * [.promoteChatMember(chat_id, user_id, options)](#TelegramBotClient+promoteChatMember) ⇒ <code>Promise</code>
     * [.exportChatInviteLink(chat_id)](#TelegramBotClient+exportChatInviteLink) ⇒ <code>Promise</code>
     * [.setChatPhoto(chat_id, photo)](#TelegramBotClient+setChatPhoto) ⇒ <code>Promise</code>
+    * [.deleteChatPhoto(chat_id)](#TelegramBotClient+deleteChatPhoto) ⇒ <code>Promise</code>
+    * [.setChatTitle(chat_id, title)](#TelegramBotClient+setChatTitle) ⇒ <code>Promise</code>
+    * [.setChatDescription(chat_id, description)](#TelegramBotClient+setChatDescription) ⇒ <code>Promise</code>
+    * [.pinChatMessage(chat_id, message_id, disable_notification)](#TelegramBotClient+pinChatMessage) ⇒ <code>Promise</code>
+    * [.unpinChatMessage(chat_id)](#TelegramBotClient+unpinChatMessage) ⇒ <code>Promise</code>
 
 <a name="new_TelegramBotClient_new"></a>
 
@@ -755,6 +760,70 @@ Use this method to set a new profile photo for the chat.
 | --- | --- | --- |
 | chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
 | photo | <code>ReadStream</code> | New chat photo. |
+
+<a name="TelegramBotClient+deleteChatPhoto"></a>
+
+### telegramBotClient.deleteChatPhoto(chat_id) ⇒ <code>Promise</code>
+Use this method to delete a chat photo
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#deletechatphoto](https://core.telegram.org/bots/api#deletechatphoto)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+
+<a name="TelegramBotClient+setChatTitle"></a>
+
+### telegramBotClient.setChatTitle(chat_id, title) ⇒ <code>Promise</code>
+Use this method to change the title of a chat.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#setchattitle](https://core.telegram.org/bots/api#setchattitle)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+| title | <code>String</code> | New chat title, 1-255 characters |
+
+<a name="TelegramBotClient+setChatDescription"></a>
+
+### telegramBotClient.setChatDescription(chat_id, description) ⇒ <code>Promise</code>
+Use this method to change the description of a supergroup or a channel.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#setchatdescription](https://core.telegram.org/bots/api#setchatdescription)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target channel |
+| description | <code>String</code> | New chat description, 0-255 characters |
+
+<a name="TelegramBotClient+pinChatMessage"></a>
+
+### telegramBotClient.pinChatMessage(chat_id, message_id, disable_notification) ⇒ <code>Promise</code>
+Use this method to pin a message in a supergroup.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#pinchatmessage](https://core.telegram.org/bots/api#pinchatmessage)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> |  | Unique identifier for the target chat or username of the target supergroup |
+| message_id | <code>Integer</code> &#124; <code>String</code> |  | Identifier of a message to pin |
+| disable_notification | <code>Boolean</code> | <code>false</code> | Pass True, if it is not necessary to send a notification to all group members about the new pinned message. Default false |
+
+<a name="TelegramBotClient+unpinChatMessage"></a>
+
+### telegramBotClient.unpinChatMessage(chat_id) ⇒ <code>Promise</code>
+Use this method to unpin a message in a supergroup chat.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**See**: [https://core.telegram.org/bots/api#unpinchatmessage](https://core.telegram.org/bots/api#unpinchatmessage)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| chat_id | <code>Integer</code> &#124; <code>String</code> | Unique identifier for the target chat or username of the target supergroup |
 
 <a name="InlineKeyboardMarkup"></a>
 

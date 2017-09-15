@@ -178,9 +178,10 @@ class TelegramBotClient extends EventEmitter {
 		for (let property in params.formData)
 			if(params.formData.hasOwnProperty(property))
 				if(typeof params.formData[property] !== 'object')
-					if(params.formData[property].toString)
+					if(params.formData[property].toString) {
+						console.log(property);
 						params.formData[property] = params.formData[property].toString();
-
+					}
 		const uri = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
 		const method = 'POST';
 		// const formData = params;
@@ -958,6 +959,70 @@ class TelegramBotClient extends EventEmitter {
 		const formData = {chat_id, photo};
 		
 		return this._makeRequest('setChatPhoto', {formData});
+	}
+
+	/**
+	 * Use this method to delete a chat photo
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#deletechatphoto}
+	 */
+	deleteChatPhoto(chat_id) {
+		const formData = {chat_id};
+		
+		return this._makeRequest('deleteChatPhoto', {formData});
+	}
+
+	/**
+	 * Use this method to change the title of a chat.
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
+	 * @param {String} title New chat title, 1-255 characters
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#setchattitle}
+	 */
+	setChatTitle (chat_id, title) {
+		const formData = {chat_id, title};
+
+		return this._makeRequest('setChatTitle', {formData});
+	}
+
+	/**
+	 * Use this method to change the description of a supergroup or a channel. 
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target channel
+	 * @param {String} description New chat description, 0-255 characters
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#setchatdescription}
+	 */
+	setChatDescription (chat_id, description) {
+		const formData = {chat_id, description};
+
+		return this._makeRequest('setChatDescription', {formData});
+	}
+
+	/**
+	 * Use this method to pin a message in a supergroup. 
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target supergroup
+	 * @param {Integer|String} message_id Identifier of a message to pin
+	 * @param {Boolean} disable_notification Pass True, if it is not necessary to send a notification to all group members about the new pinned message. Default false
+	 * @returns {Promise}
+	 * @see {@link https://core.telegram.org/bots/api#pinchatmessage}
+	 */
+	pinChatMessage (chat_id, message_id, disable_notification=false) {
+		const formData = {chat_id,message_id,disable_notification};
+
+		return this._makeRequest('pinChatMessage', {formData});
+	}
+
+	/**
+	 * Use this method to unpin a message in a supergroup chat.
+	 * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target supergroup
+	 * @returns {Promise} 
+	 * @see {@link https://core.telegram.org/bots/api#unpinchatmessage}
+	 */
+	unpinChatMessage (chat_id) {
+		const formData = {chat_id};
+
+		return this._makeRequest('unpinChatMessage', {formData});
 	}
 }
 
