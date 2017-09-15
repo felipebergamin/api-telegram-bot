@@ -45,6 +45,7 @@ TelegramBotClient
     * [.ReplyKeyboardMarkup](#TelegramBotClient+ReplyKeyboardMarkup) : <code>[ReplyKeyboardMarkup](#ReplyKeyboardMarkup)</code>
     * [.ReplyKeyboardRemove](#TelegramBotClient+ReplyKeyboardRemove) : <code>[ReplyKeyboardRemove](#ReplyKeyboardRemove)</code>
     * [.ForceReply](#TelegramBotClient+ForceReply) : <code>force_reply</code>
+    * [.getWebhook()](#TelegramBotClient+getWebhook) ⇒ <code>function</code>
     * [.createWebhook(config, [expressApp])](#TelegramBotClient+createWebhook)
     * [.onRegex(regex, callback)](#TelegramBotClient+onRegex)
     * [.getMe()](#TelegramBotClient+getMe) ⇒ <code>Promise</code>
@@ -128,6 +129,21 @@ Constructs bot client
 
 ### telegramBotClient.ForceReply : <code>force_reply</code>
 **Kind**: instance property of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+<a name="TelegramBotClient+getWebhook"></a>
+
+### telegramBotClient.getWebhook() ⇒ <code>function</code>
+Use this method to create a route manipulator function for webhook.
+Attention: the webhook url must contains the bot token.
+
+**Kind**: instance method of <code>[TelegramBotClient](#TelegramBotClient)</code>  
+**Example**  
+```js
+// using node http
+http.createServer(bot.getWebhook())
+	.listen(3000);
+// using express
+app.post(webhookUrl, bot.getWebhook())
+```
 <a name="TelegramBotClient+createWebhook"></a>
 
 ### telegramBotClient.createWebhook(config, [expressApp])

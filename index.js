@@ -68,6 +68,58 @@ class TelegramBotClient extends EventEmitter {
 		this.on('message', this._processMessageType);
 		this.on('message', this._checkRegexCallbacks);
 	}
+
+	/**
+	 * Use this method to create a route manipulator function for webhook.
+	 * Attention: the webhook url must contains the bot token.
+	 * 
+	 * @returns {function}
+	 * @example
+	 * // using node http
+	 * http.createServer(bot.getWebhook())
+	 * 	.listen(3000);
+	 * // using express
+	 * app.post(webhookUrl, bot.getWebhook())
+	 */
+	getWebhook () {
+		const wh = (req, res)=>{
+			if (req.method === 'POST' && req.url.includes(this.bot_token)) {
+				let body = [];
+
+				req.on('error', err=>{
+					res.statusCode = 500;
+					res.end();
+				})
+				.on('data', chunk=>{
+					body.push(chunk);
+				})
+				.on('end', ()=>{
+					try {
+						body = Buffer.concat(body).toString();
+						body = JSON.parse(body);
+						res.statusCode = 200;
+						res.end();
+					}
+					catch (err) {
+						res.statusCode = 400;
+						res.end();
+					}
+
+					debug('POST received on Webhook:');
+					debug(body);
+
+					this._processUpdateType(body);
+				})
+
+			}
+			else {
+				res.statusCode = 404;
+				res.end();
+			}
+		}
+
+		return wh;
+	}
 	
 	/**
 	 * Create Webhook
@@ -78,6 +130,7 @@ class TelegramBotClient extends EventEmitter {
 	 * @param {Express} [expressApp] Optional. Personal express app. You must set bodyparser middleware by yourself for webhook works.
 	 */
 	createWebhook (config) {
+		console.warn('createWebhook was deprecated since 4.0.0 and will be removed on next major package release. Please see getWebook method');
 		config = config || {};
 		const path = config.path || `/${this.bot_token}`;
 		const port = config.port || 80;
