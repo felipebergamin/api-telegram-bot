@@ -5,6 +5,7 @@ import { debug } from "./debug";
 import { IMessage as Message } from "./interfaces/IMessage";
 import { IMessageActions as MessageActions } from "./interfaces/IMessageActions";
 import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
+import { ITelegramResponse as TelegramResponse } from "./interfaces/ITelegramResponse";
 import { IUpdate as Update } from "./interfaces/IUpdate";
 import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage";
 import { TelegramBotClient } from "./TelegramBotClient";
@@ -125,19 +126,19 @@ export class Webhook extends EventEmitter {
 
   private getActionsFor(message: Message): MessageActions {
 
-    const banChatMember = (until: number = 0) => {
+    const banChatMember = (until: number = 0): Promise<TelegramResponse<boolean>> => {
       debug("ban member");
 
       return this.bot.kickChatMember(message.chat.id, message.from.id, until);
     };
 
-    const deleteMessage = () => {
+    const deleteMessage = (): Promise<TelegramResponse<boolean>> => {
       debug("deleting message");
 
       return this.bot.deleteMessage(message.chat.id, message.message_id);
     };
 
-    const reply = (text: string, optionals?: ISendMessageOptionals) => {
+    const reply = (text: string, optionals?: ISendMessageOptionals): Promise<TelegramResponse<Message>> => {
       debug("replying message");
 
       optionals = optionals || {} as ISendMessageOptionals;

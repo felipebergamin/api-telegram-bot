@@ -38,6 +38,7 @@ export { IShippingQuery as ShippingQuery } from "./interfaces/IShippingQuery";
 export { ISticker as Sticker } from "./interfaces/ISticker";
 export { IStickerSet as StickerSet } from "./interfaces/IStickerSet";
 export { ISuccessfulPayment as SuccessfulPayment } from "./interfaces/ISuccessfulPayment";
+export { ITelegramResponse as TelegramResponse } from "./interfaces/ITelegramResponse";
 export { IUpdate as Update } from "./interfaces/IUpdate";
 export { IUser as User } from "./interfaces/IUser";
 export { IUserProfilePhotos as UserProfilePhotos } from "./interfaces/IUserProfilePhotos";

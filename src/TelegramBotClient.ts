@@ -38,6 +38,7 @@ import { IMaskPosition as MaskPosition } from "./interfaces/IMaskPosition";
 import { IMessage as Message } from "./interfaces/IMessage";
 // import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
 import { IStickerSet as StickerSet } from "./interfaces/IStickerSet";
+import { ITelegramResponse as TelegramResponse } from "./interfaces/ITelegramResponse";
 import { IUpdate as Update } from "./interfaces/IUpdate";
 import { IUser as User } from "./interfaces/IUser";
 import { IUserProfilePhotos as UserProfilePhotos } from "./interfaces/IUserProfilePhotos";
@@ -82,7 +83,7 @@ export class TelegramBotClient {
    * @see {@link https://core.telegram.org/bots/api#getme}
    * @returns	{Promise}
    */
-  public getMe(): Promise<User> {
+  public getMe(): Promise<TelegramResponse<User>> {
     return this.makeRequest<User>("getMe");
   }
 
@@ -99,7 +100,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public sendMessage(chat_id: number|string, text: string, optionals?: ISendMessageOptionals): Promise<Message> {
+  public sendMessage(chat_id: number|string, text: string, optionals?: ISendMessageOptionals): Promise<TelegramResponse<Message>> {
     // telegram message text can not be greater than 4096 characters
     if (text.length > TelegramBotClient.MAX_MESSAGE_LENGTH) {
 
@@ -111,11 +112,11 @@ export class TelegramBotClient {
       const splited_text = this.split_text(text);
 
       // send chunks sequentially
-      return splited_text.reduce((previous: Promise<Message>, chunk: string) => {
+      return splited_text.reduce((previous: Promise<TelegramResponse<Message>>, chunk: string) => {
         // sendMessage call itself with a acceptable text length
         return previous
           .then(() => this.sendMessage(chat_id, chunk, optionals));
-      }, Promise.resolve({} as Message));
+      }, Promise.resolve({} as TelegramResponse<Message>));
     }
 
     // from here on executes only if text <= 4096
@@ -125,7 +126,7 @@ export class TelegramBotClient {
       ...optionals,
     };
 
-    const _sendmsg = (): Promise<Message> => {
+    const _sendmsg = (): Promise<TelegramResponse<Message>> => {
       return this.makeRequest<Message>("sendMessage", {json});
     };
 
@@ -142,7 +143,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#forwardmessage}
    */
-  public forwardMessage(chat_id: number|string, from_chat_id: number|string, message_id: number, disable_notification: boolean = false): Promise<Message> {
+  public forwardMessage(chat_id: number|string, from_chat_id: number|string, message_id: number, disable_notification: boolean = false): Promise<TelegramResponse<Message>> {
     const params = {chat_id, from_chat_id, message_id, disable_notification};
 
     return this.makeRequest<Message>("forwardMessage", {json: params});
@@ -160,14 +161,14 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
-  public sendPhoto(chat_id: number|string, photo: ReadStream|string, optionals?: ISendPhotoOptionals): Promise<Message> {
+  public sendPhoto(chat_id: number|string, photo: ReadStream|string, optionals?: ISendPhotoOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       photo,
       ...optionals,
     };
 
-    const _sendphoto = (): Promise<Message> => {
+    const _sendphoto = (): Promise<TelegramResponse<Message>> => {
       return this.makeRequest<Message>("sendPhoto", {formData});
     };
 
@@ -190,14 +191,14 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
-  public sendAudio(chat_id: number|string, audio: ReadStream|string, optionals?: ISendAudioOptionals): Promise<Message> {
+  public sendAudio(chat_id: number|string, audio: ReadStream|string, optionals?: ISendAudioOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       audio,
       chat_id,
       ...optionals,
     };
 
-    const _sendaudio = (): Promise<Message> => {
+    const _sendaudio = (): Promise<TelegramResponse<Message>> => {
       return this.makeRequest<Message>("sendAudio", {formData});
     };
 
@@ -217,14 +218,14 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
-  public sendDocument(chat_id: number|string, doc: ReadStream|string, optionals?: ISendDocumentOptionals): Promise<Message> {
+  public sendDocument(chat_id: number|string, doc: ReadStream|string, optionals?: ISendDocumentOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       document: doc,
       ...optionals,
     };
 
-    const _senddocument = (): Promise<Message> => {
+    const _senddocument = (): Promise<TelegramResponse<Message>> => {
       return this.makeRequest<Message>("sendDocument", {formData});
     };
 
@@ -243,7 +244,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendsticker}
    */
-  public sendSticker(chat_id: number|string, sticker: ReadStream|string, optionals?: ISendStickerOptionals): Promise<Message> {
+  public sendSticker(chat_id: number|string, sticker: ReadStream|string, optionals?: ISendStickerOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       sticker,
@@ -268,14 +269,14 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvideo}
    */
-  public sendVideo(chat_id: number|string, video: ReadStream|string, optionals?: ISendVideoOptionals): Promise<Message> {
+  public sendVideo(chat_id: number|string, video: ReadStream|string, optionals?: ISendVideoOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       video,
       ...optionals,
     };
 
-    const _sendvideo = (): Promise<Message> => {
+    const _sendvideo = (): Promise<TelegramResponse<Message>> => {
       return this.makeRequest<Message>("sendVideo", {formData});
     };
 
@@ -296,7 +297,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvoice}
    */
-  public sendVoice(chat_id: number|string, voice: ReadStream|string, optionals?: ISendVoiceOptionals): Promise<Message> {
+  public sendVoice(chat_id: number|string, voice: ReadStream|string, optionals?: ISendVoiceOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       voice,
@@ -318,7 +319,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendlocation}
    */
-  public sendLocation(chat_id: number|string, latitude: number, longitude: number, optionals?: ISendLocationOptionals): Promise<Message> {
+  public sendLocation(chat_id: number|string, latitude: number, longitude: number, optionals?: ISendLocationOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       chat_id,
       latitude,
@@ -344,7 +345,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvenue}
    */
-  public sendVenue(chat_id: number|string, latitude: number, longitude: number, title: string, address: string, optionals?: ISendVenueOptionals): Promise<Message> {
+  public sendVenue(chat_id: number|string, latitude: number, longitude: number, title: string, address: string, optionals?: ISendVenueOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       address,
       chat_id,
@@ -370,7 +371,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendcontact}
    */
-  public sendContact(chat_id: number|string, phone_number: string, first_name: string, optionals?: ISendContactOptionals): Promise<Message> {
+  public sendContact(chat_id: number|string, phone_number: string, first_name: string, optionals?: ISendContactOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       chat_id,
       first_name,
@@ -389,7 +390,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendchataction}
    */
-  public sendChatAction(chat_id: number|string, action: string): Promise<boolean> {
+  public sendChatAction(chat_id: number|string, action: string): Promise<TelegramResponse<boolean>> {
     const json = { chat_id, action };
 
     return this.makeRequest<boolean>("sendChatAction", {json});
@@ -404,7 +405,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getuserprofilephotos}
    */
-  public getUserProfilePhotos(user_id: number|string, optionals?: IGetUserProfilePhotosOptionals): Promise<UserProfilePhotos> {
+  public getUserProfilePhotos(user_id: number|string, optionals?: IGetUserProfilePhotosOptionals): Promise<TelegramResponse<UserProfilePhotos>> {
     const json = {
       user_id,
       ...optionals,
@@ -424,7 +425,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getfile}
    */
-  public getFile(file_id: number): Promise<File> {
+  public getFile(file_id: number): Promise<TelegramResponse<File>> {
     const json = { file_id };
 
     return this.makeRequest<File>("getFile", { json });
@@ -440,7 +441,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#kickchatmember}
    */
-  public kickChatMember(chat_id: number, user_id: number, until_date?: number): Promise<boolean> {
+  public kickChatMember(chat_id: number, user_id: number, until_date?: number): Promise<TelegramResponse<boolean>> {
     const json = { chat_id, user_id, until_date };
 
     return this.makeRequest<boolean>("kickChatMember", { json });
@@ -452,7 +453,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#leavechat}
    */
-  public leaveChat(chat_id: number|string): Promise<boolean> {
+  public leaveChat(chat_id: number|string): Promise<TelegramResponse<boolean>> {
     const json = { chat_id };
 
     return this.makeRequest<boolean>("leaveChat", { json });
@@ -465,7 +466,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#unbanchatmember}
    */
-  public unbanChatMember(chat_id: number|string, user_id: number): Promise<boolean> {
+  public unbanChatMember(chat_id: number|string, user_id: number): Promise<TelegramResponse<boolean>> {
     const json = { chat_id, user_id };
 
     return this.makeRequest<boolean>("unbanChatMember", { json });
@@ -477,7 +478,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#unbanchatmember}
    */
-  public getChat(chat_id: number|string): Promise<Chat> {
+  public getChat(chat_id: number|string): Promise<TelegramResponse<Chat>> {
     const json = { chat_id };
 
     return this.makeRequest<Chat>("getChat", { json });
@@ -489,7 +490,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getchatadministrators}
    */
-  public getChatAdministrators(chat_id: number|string): Promise<ChatMember[]> {
+  public getChatAdministrators(chat_id: number|string): Promise<TelegramResponse<ChatMember[]>> {
     const json = { chat_id };
 
     return this.makeRequest<ChatMember[]>("getChatAdministrators", { json });
@@ -500,7 +501,7 @@ export class TelegramBotClient {
     * @returns {Promise}
     * @see {@link https://core.telegram.org/bots/api#getchatmemberscount}
     */
-  public getChatMembersCount(chat_id: number|string): Promise<number> {
+  public getChatMembersCount(chat_id: number|string): Promise<TelegramResponse<number>> {
     const json = { chat_id };
 
     return this.makeRequest<number>("getChatMembersCount", { json });
@@ -513,7 +514,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getchatmember}
    */
-  public getChatMember(chat_id: number|string, user_id: number): Promise<ChatMember> {
+  public getChatMember(chat_id: number|string, user_id: number): Promise<TelegramResponse<ChatMember>> {
     const json = { chat_id, user_id };
 
     return this.makeRequest<ChatMember>("getChatMember", { json });
@@ -530,7 +531,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#answercallbackquery}
    */
-  public answerCallbackQuery(callback_query_id: string, optionals?: IAnswerCallbackQueryOptionals): Promise<boolean> {
+  public answerCallbackQuery(callback_query_id: string, optionals?: IAnswerCallbackQueryOptionals): Promise<TelegramResponse<boolean>> {
     const json = {
       callback_query_id,
       ...optionals,
@@ -552,7 +553,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#editmessagetext}
    */
-  public editMessageText(text: string, optionals?: IEditMessageTextOptionals): Promise<Message|boolean> {
+  public editMessageText(text: string, optionals?: IEditMessageTextOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = {
       text,
       ...optionals,
@@ -572,7 +573,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#editmessagecaption}
    */
-  public editMessageCaption(optionals?: IEditMessageCaptionOptionals): Promise<Message|boolean> {
+  public editMessageCaption(optionals?: IEditMessageCaptionOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = optionals;
 
     return this.makeRequest<Message|boolean>("editMessageCaption", { json });
@@ -588,7 +589,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#editmessagereplymarkup}
    */
-  public editMessageReplyMarkup(optionals?: IEditMessageReplyMarkupOptionals): Promise<Message|boolean> {
+  public editMessageReplyMarkup(optionals?: IEditMessageReplyMarkupOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = optionals;
 
     return this.makeRequest<Message|boolean>("editMessageReplyMarkup", { json });
@@ -608,7 +609,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#answerinlinequery}
    */
-  public answerInlineQuery(inline_query_id: string, results: any[], optionals?: IAnswerInlineQueryOptionals): Promise<boolean> {
+  public answerInlineQuery(inline_query_id: string, results: any[], optionals?: IAnswerInlineQueryOptionals): Promise<TelegramResponse<boolean>> {
     const json = {
       inline_query_id,
       results,
@@ -629,7 +630,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendgame}
    */
-  public sendGame(chat_id: number, game_short_name: string, optionals?: ISendGameOptionals): Promise<Message> {
+  public sendGame(chat_id: number, game_short_name: string, optionals?: ISendGameOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       chat_id,
       game_short_name,
@@ -652,7 +653,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setgamescore}
    */
-  public setGameScore(user_id: number, score: number, optionals?: ISetGameScoreOptionals): Promise<Message|boolean> {
+  public setGameScore(user_id: number, score: number, optionals?: ISetGameScoreOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = {
       user_id,
       ...optionals,
@@ -672,7 +673,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getgamehighscores}
    */
-  public getGameHighScores(user_id: number, optionals?: IGetGameHighScoresOptionals): Promise<GameHighScore[]> {
+  public getGameHighScores(user_id: number, optionals?: IGetGameHighScoresOptionals): Promise<TelegramResponse<GameHighScore[]>> {
     const json = {
       user_id,
       ...optionals,
@@ -691,7 +692,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getupdates}
    */
-  public getUpdates(optionals?: IGetUpdatesOptionals): Promise<Update[]> {
+  public getUpdates(optionals?: IGetUpdatesOptionals): Promise<TelegramResponse<Update[]>> {
     const json = optionals || {};
 
     return this.makeRequest<Update[]>("getUpdates", { json });
@@ -707,7 +708,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setwebhook}
    */
-  public setWebhook(url: string, optionals?: ISetWebhookOptionals): Promise<boolean> {
+  public setWebhook(url: string, optionals?: ISetWebhookOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       url,
       ...optionals,
@@ -721,7 +722,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#deletewebhook}
    */
-  public deleteWebhook(): Promise<boolean> {
+  public deleteWebhook(): Promise<TelegramResponse<boolean>> {
     return this.makeRequest<boolean>("deleteWebhook");
   }
 
@@ -730,7 +731,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#deletewebhook}
    */
-  public getWebhookInfo(): Promise<WebhookInfo> {
+  public getWebhookInfo(): Promise<TelegramResponse<WebhookInfo>> {
     return this.makeRequest<WebhookInfo>("getWebhookInfo");
   }
 
@@ -741,7 +742,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#deletemessage}
    */
-  public deleteMessage(chat_id: number|string, message_id: number|string): Promise<boolean> {
+  public deleteMessage(chat_id: number|string, message_id: number|string): Promise<TelegramResponse<boolean>> {
     return this.makeRequest<boolean>("deleteMessage", {formData: {chat_id, message_id}});
   }
 
@@ -758,7 +759,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#restrictchatmember}
    */
-  public restrictChatMember(chat_id: number|string, user_id: number|string, options: IRestrictChatMemberOptionals): Promise<boolean> {
+  public restrictChatMember(chat_id: number|string, user_id: number|string, options: IRestrictChatMemberOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       chat_id,
       user_id,
@@ -784,7 +785,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#promotechatmember}
    */
-  public promoteChatMember(chat_id: number|string, user_id: number|string, options: IPromoteChatMemberOptionals): Promise<boolean> {
+  public promoteChatMember(chat_id: number|string, user_id: number|string, options: IPromoteChatMemberOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       chat_id,
       user_id,
@@ -800,7 +801,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#exportchatinvitelink}
    */
-  public exportChatInviteLink(chat_id: number|string): Promise<string> {
+  public exportChatInviteLink(chat_id: number|string): Promise<TelegramResponse<string>> {
     const formData = {chat_id};
 
     return this.makeRequest<string>("exportChatInviteLink", {formData});
@@ -813,7 +814,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setchatphoto}
    */
-  public setChatPhoto(chat_id: number|string, photo: ReadStream): Promise<boolean> {
+  public setChatPhoto(chat_id: number|string, photo: ReadStream): Promise<TelegramResponse<boolean>> {
     const formData = {chat_id, photo};
 
     return this.makeRequest<boolean>("setChatPhoto", {formData});
@@ -825,7 +826,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#deletechatphoto}
    */
-  public deleteChatPhoto(chat_id: number|string): Promise<boolean> {
+  public deleteChatPhoto(chat_id: number|string): Promise<TelegramResponse<boolean>> {
     const formData = {chat_id};
 
     return this.makeRequest<boolean>("deleteChatPhoto", { formData });
@@ -838,7 +839,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setchattitle}
    */
-  public setChatTitle(chat_id: number|string, title: string): Promise<boolean> {
+  public setChatTitle(chat_id: number|string, title: string): Promise<TelegramResponse<boolean>> {
     const formData = {chat_id, title};
 
     return this.makeRequest<boolean>("setChatTitle", {formData});
@@ -851,7 +852,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setchatdescription}
    */
-  public setChatDescription(chat_id: number|string, description: string): Promise<boolean> {
+  public setChatDescription(chat_id: number|string, description: string): Promise<TelegramResponse<boolean>> {
     const formData = {chat_id, description};
 
     return this.makeRequest<boolean>("setChatDescription", {formData});
@@ -865,7 +866,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#pinchatmessage}
    */
-  public pinChatMessage(chat_id: number|string, message_id: number|string, disable_notification = false): Promise<boolean> {
+  public pinChatMessage(chat_id: number|string, message_id: number|string, disable_notification = false): Promise<TelegramResponse<boolean>> {
     const formData = {chat_id, message_id, disable_notification};
 
     return this.makeRequest<boolean>("pinChatMessage", {formData});
@@ -877,7 +878,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#unpinchatmessage}
    */
-  public unpinChatMessage(chat_id: number|string): Promise<boolean> {
+  public unpinChatMessage(chat_id: number|string): Promise<TelegramResponse<boolean>> {
     const formData = { chat_id };
 
     return this.makeRequest<boolean>("unpinChatMessage", {formData});
@@ -889,7 +890,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getstickerset}
    */
-  public getStickerSet(name: string): Promise<StickerSet> {
+  public getStickerSet(name: string): Promise<TelegramResponse<StickerSet>> {
     const formData = { name };
 
     return this.makeRequest<StickerSet>("getStickerSet", { formData });
@@ -902,7 +903,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#uploadstickerfile}
    */
-  public uploadStickerFile(user_id: number, png_sticker: ReadStream): Promise<File> {
+  public uploadStickerFile(user_id: number, png_sticker: ReadStream): Promise<TelegramResponse<File>> {
     const formData = {user_id, png_sticker};
 
     return this.makeRequest<File>("uploadStickerFile", {formData});
@@ -921,7 +922,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#createnewstickerset}
    */
-  public createNewStickerSet(user_id: number|string, name: string, title: string, png_sticker: ReadStream|string, emojis: string, options: ICreateNewStickerSetOptionals): Promise<boolean> {
+  public createNewStickerSet(user_id: number|string, name: string, title: string, png_sticker: ReadStream|string, emojis: string, options: ICreateNewStickerSetOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       emojis,
       name,
@@ -944,7 +945,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#addstickertoset}
    */
-  public addStickerToSet(user_id: number|string, name: string, png_sticker: ReadStream|string, emojis: string, mask_position?: MaskPosition): Promise<boolean> {
+  public addStickerToSet(user_id: number|string, name: string, png_sticker: ReadStream|string, emojis: string, mask_position?: MaskPosition): Promise<TelegramResponse<boolean>> {
     const formData = {
       emojis,
       mask_position,
@@ -963,7 +964,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setstickerpositioninset}
    */
-  public setStickerPositionInSet(sticker: string, position: number): Promise<boolean> {
+  public setStickerPositionInSet(sticker: string, position: number): Promise<TelegramResponse<boolean>> {
     const formData = {sticker, position};
 
     return this.makeRequest<boolean>("setStickerPositionInSet", {formData});
@@ -975,13 +976,13 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#deletestickerfromset}
    */
-  public deleteStickerFromSet(sticker: string): Promise<boolean> {
+  public deleteStickerFromSet(sticker: string): Promise<TelegramResponse<boolean>> {
     const formData = {sticker};
 
     return this.makeRequest<boolean>("deleteStickerFromSet", {formData});
   }
 
-  private makeRequest<T>(api_method: string, params?: any): Promise<T> {
+  private makeRequest<T>(api_method: string, params?: any): Promise<TelegramResponse<T>> {
     if (!this.bot_token) {
       throw new Error("Telegram Bot Token undefined");
     }
