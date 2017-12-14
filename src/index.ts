@@ -1,0 +1,35 @@
+export { TelegramBotClient } from "./TelegramBotClient";
+
+export { InlineKeyboardBuilder } from "./builders/InlineKeyboardBuilder";
+export { ReplyKeyboardBuilder } from "./builders/ReplyKeyboardBuilder";
+
+export { ICallbackQuery as CallbackQuery } from "./interfaces/ICallbackQuery";
+export { IChat as Chat } from "./interfaces/IChat";
+export { IChatMember as ChatMember } from "./interfaces/IChatMember";
+export { IChatPhoto as ChatPhoto } from "./interfaces/IChatPhoto";
+export { IChosenInlineResult as ChosenInlineResult } from "./interfaces/IChosenInlineResult";
+export { IConfig as Config } from "./interfaces/IConfig";
+export { IFile as File } from "./interfaces/IFile";
+export { IForceReply as ForceReply } from "./interfaces/IForceReply";
+export { IGameHighScore as GameHighScore } from "./interfaces/IGameHighScore";
+export { IInlineKeyboardButton as InlineKeyboardButton } from "./interfaces/IInlineKeyboardButton";
+export { IInlineKeyboardMarkup as InlineKeyboardMarkup } from "./interfaces/IInlineKeyboardMarkup";
+export { IInlineQuery as InlineQuery } from "./interfaces/IInlineQuery";
+export { IKeyboardButton as KeyboardButton } from "./interfaces/IKeyboardButton";
+export { ILocation as Location } from "./interfaces/ILocation";
+export { IMaskPosition as MaskPosition } from "./interfaces/IMaskPosition";
+export { IMessage as Message } from "./interfaces/IMessage";
+export { IOrderInfo as OrderInfo } from "./interfaces/IOrderInfo";
+export { IPhotoSize as PhotoSize } from "./interfaces/IPhotoSize";
+export { IPreCheckoutQuery as PreCheckoutQuery } from "./interfaces/IPreCheckoutQuery";
+export { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
+export { IReplyKeyboardMarkup as ReplyKeyboardMarkup } from "./interfaces/IReplyKeyboardMarkup";
+export { IReplyKeyboardRemove as ReplyKeyboardRemove } from "./interfaces/IReplyKeyboardRemove";
+export { IShippingAddress as ShippingAddress } from "./interfaces/IShippingAddress";
+export { IShippingQuery as ShippingQuery } from "./interfaces/IShippingQuery";
+export { ISticker as Sticker } from "./interfaces/ISticker";
+export { IStickerSet as StickerSet } from "./interfaces/IStickerSet";
+export { IUpdate as Update } from "./interfaces/IUpdate";
+export { IUser as User } from "./interfaces/IUser";
+export { IUserProfilePhotos as UserProfilePhotos } from "./interfaces/IUserProfilePhotos";
+export { IWebhookInfo as WebhookInfo } from "./interfaces/IWebhookInfo";
