@@ -1,4 +1,5 @@
 export { TelegramBotClient } from "./TelegramBotClient";
+export { Webhook } from "./Webhook";
 
 export { InlineKeyboardBuilder } from "./builders/InlineKeyboardBuilder";
 export { ReplyKeyboardBuilder } from "./builders/ReplyKeyboardBuilder";
