@@ -3,6 +3,7 @@ import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
 import { debug } from "./debug";
 import { IMessage as Message } from "./interfaces/IMessage";
+import { IMessageActions as MessageActions } from "./interfaces/IMessageActions";
 import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
 import { IUpdate as Update } from "./interfaces/IUpdate";
 import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage";
@@ -47,7 +48,7 @@ export class Webhook extends EventEmitter {
    * @param {RegExp} regex RegExp for test message text
    * @param {function} callback Callback to call if regex.test() return true
    */
-  public onRegex(regex: RegExp, callback: (message: any, reply: (text: string, options: any) => void) => void): void {
+  public onRegex(regex: RegExp, callback: (message: any, actions: MessageActions) => void): void {
     if (regex && callback) {
       this.regexCallbacks.push({regex, callback});
     } else {
@@ -122,37 +123,59 @@ export class Webhook extends EventEmitter {
     });
   }
 
-  private processMessageType(message: Message) {
-    const reply_cbk = (text: string, optionals?: ISendMessageOptionals) => {
+  private getActionsFor(message: Message): MessageActions {
+
+    const banChatMember = (until: number = 0) => {
+      debug("ban member");
+
+      return this.bot.kickChatMember(message.chat.id, message.from.id, until);
+    };
+
+    const deleteMessage = () => {
+      debug("deleting message");
+
+      return this.bot.deleteMessage(message.chat.id, message.message_id);
+    };
+
+    const reply = (text: string, optionals?: ISendMessageOptionals) => {
       debug("replying message");
+
       optionals = optionals || {} as ISendMessageOptionals;
       optionals.reply_to_message_id = message.message_id;
-      const replyTo = message.chat.id;
 
-      return this.bot.sendMessage(replyTo, text, optionals);
+      return this.bot.sendMessage(message.chat.id, text);
     };
+
+    if (message.chat.type.includes("private")) {
+      return {
+        reply,
+      } as MessageActions;
+    }
+
+    return {
+      banChatMember,
+      deleteMessage,
+      reply,
+    } as MessageActions;
+  }
+
+  private processMessageType(message: Message) {
+    const actions = this.getActionsFor(message);
 
     _messageTypes.forEach((msgType) => {
       if (msgType in message) {
         debug(`emitting ${msgType} event`);
-        this.emit(msgType, message, reply_cbk);
+        this.emit(msgType, message, actions);
       }
     });
   }
 
   private checkRegexCallbacks(message: Message) {
-    const reply_cbk = (text: string, optionals?: ISendMessageOptionals) => {
-      debug("replying message");
-      optionals = optionals || {} as ISendMessageOptionals;
-      optionals.reply_to_message_id = message.message_id;
-      const to = message.chat.id;
-
-      return this.bot.sendMessage(to, text, optionals);
-    };
+    const actions = this.getActionsFor(message);
 
     this.regexCallbacks.some((v: RegexCallback): boolean => {
       if (v.regex.test(message.text)) {
-        v.callback(message, reply_cbk);
+        v.callback(message, actions);
         return this.onlyFirstRegexMatch;
       }
       return false;
