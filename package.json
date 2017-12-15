@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && tslint --project . && tsc",
-    "gendoc": "jsdoc2md --files index.js keyboards/*.js keyboards/buttons/*.js --template docs/api.hbs > docs/api.md",
+    "gendoc": "rm -rf docs && typedoc --out docs ./src",
     "prepublishOnly": "rm -rf dist && tslint --project . && tsc"
   },
   "repository": {

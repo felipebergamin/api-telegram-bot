@@ -1,0 +1,525 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>api-telegram-bot</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">api-telegram-bot</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> api-telegram-bot</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="telegram-bot-api-for-node-js">Telegram Bot API for Node.js</h1>
+				<p>Node.js module for <a href="https://core.telegram.org/bots/api">Telegram Bot API</a>.</p>
+				<p>Talk with <a href="https://telegram.me/BotFather">@botfather</a> on Telegram to create your bot.</p>
+				<p>This module is updated with Telegram API version <strong>3.3</strong>.</p>
+				<h1 id="api-reference">API reference</h1>
+				<p><a href="https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/api.md">Click here</a></p>
+				<h2 id="news-on-v4">News on v4</h2>
+				<p>Module codebase has migrated to TypeScript and all declaration files are distributed with package.</p>
+				<h3 id="install">Install</h3>
+				<pre><code class="lang-sh">npm install api-telegram-bot
+</code></pre>
+				<h3 id="start-coding-with-typescript">Start coding with TypeScript</h3>
+				<pre><code class="lang-ts"><span class="hljs-keyword">import</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">"http"</span>);
+<span class="hljs-keyword">import</span> { Message, MessageActions, TelegramBotClient, Webhook } <span class="hljs-keyword">from</span> <span class="hljs-string">"api-telegram-bot"</span>;
+
+<span class="hljs-keyword">const</span> TOKEN = <span class="hljs-string">"BOT_TOKEN"</span>;
+<span class="hljs-keyword">const</span> bot = <span class="hljs-keyword">new</span> TelegramBotClient(TOKEN);
+<span class="hljs-keyword">const</span> webhook = <span class="hljs-keyword">new</span> Webhook(bot);
+
+<span class="hljs-comment">/*
+ * actions is an object with some shortcuts to manipulate received message:
+ *    banChatMember?: (until: number) =&gt; Promise&lt;TelegramResponse&lt;boolean&gt;&gt;
+ *    deleteMessage?: () =&gt; Promise&lt;TelegramResponse&lt;boolean&gt;&gt;;
+ *    reply: (text: string, optionals?) =&gt; Promise&lt;TelegramResponse&lt;Message&gt;&gt;;
+ * 
+ * deleteMessage and banChatMember are not provided if message was received on private chats
+ */</span>
+webhook.on(<span class="hljs-string">"text"</span>, <span class="hljs-function">(<span class="hljs-params">message: Message, actions: MessageActions</span>) =&gt;</span> {
+  actions.reply(<span class="hljs-string">`You send: <span class="hljs-subst">${message.text}</span>`</span>);
+});
+
+<span class="hljs-comment">// <span class="hljs-doctag">NOTE:</span> message actions are provided only for regex callbacks and subtypes of message events</span>
+webhook.on(<span class="hljs-string">"edited_message"</span>, <span class="hljs-function">(<span class="hljs-params">message: Message</span>) =&gt;</span> {
+  <span class="hljs-comment">// message actions not provided here</span>
+});
+
+http.createServer(webhook.getWebhook())
+  .listen(<span class="hljs-number">3000</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"listening"</span>));
+</code></pre>
+				<p>Sending files:</p>
+				<pre><code class="lang-js"><span class="hljs-keyword">import</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">"fs"</span>);
+<span class="hljs-keyword">import</span> { TelegramBotClient } <span class="hljs-keyword">from</span> <span class="hljs-string">"api-telegram-bot"</span>;
+
+<span class="hljs-keyword">const</span> TOKEN = <span class="hljs-string">"BOT_TOKEN"</span>;
+<span class="hljs-keyword">const</span> bot = <span class="hljs-keyword">new</span> TelegramBotClient(TOKEN);
+
+<span class="hljs-keyword">const</span> file = fs.createReadStream(<span class="hljs-string">"/PATH/TO/AWESOME/PHOTO"</span>);
+bot.sendPhoto(send_to, file);
+</code></pre>
+				<h3 id="events">Events</h3>
+				<p>Webhook emits events according to received <a href="https://core.telegram.org/bots/api#update">update</a>.</p>
+				<p>For every <code>message</code> event, webhook also emits another event according to message type received.</p>
+				<p>Webhook actually supports follow update types:</p>
+				<ul>
+					<li>message<ul>
+							<li>text</li>
+							<li>audio</li>
+							<li>document</li>
+							<li>game</li>
+							<li>photo</li>
+							<li>sticker</li>
+							<li>video</li>
+							<li>voice</li>
+							<li>video_note</li>
+							<li>contact</li>
+							<li>location</li>
+							<li>venue</li>
+							<li>new_chat_members</li>
+							<li>left_chat_member</li>
+							<li>new_chat_title</li>
+							<li>new_chat_photo</li>
+							<li>delete_chat_photo</li>
+							<li>group_chat_created</li>
+							<li>supergroup_chat_created</li>
+							<li>channel_chat_created</li>
+							<li>pinned_message</li>
+							<li>invoice</li>
+							<li>successful_payment</li>
+						</ul>
+					</li>
+					<li>edited_message</li>
+					<li>channel_post</li>
+					<li>edited_channel_post,</li>
+					<li>inline_query</li>
+					<li>chosen_inline_result</li>
+					<li>callback_query</li>
+					<li>shipping_query</li>
+					<li>pre_checkout_query</li>
+				</ul>
+				<h3 id="enable-debug-log">Enable debug log</h3>
+				<p>Start your application with DEBUG env variable containing &#39;api-telegram-bot&#39; value.
+				<a href="https://www.npmjs.com/package/debug">Reference to debug package</a></p>
+				<pre><code>$ <span class="hljs-built_in">DEBUG</span>=api-telegram-<span class="hljs-keyword">bot </span>npm start
+</code></pre><h3 id="contributing">Contributing</h3>
+				<p>Thank you! Feel free to send pull requests and suggestions. I&#39;ll really appreciate it.</p>
+				<p><a href="https://t.me/felipebergamin">Call me on Telegram.</a></p>
+				<h1 id="bugs">Bugs</h1>
+				<p>If you found a bug, open an issue on GitHub. If you know the solution, please, submit a pull request.</p>
+				<h1 id="reply-markup-builders">Reply Markup Builders</h1>
+				<h2 id="-reply-keyboard-markup-https-core-telegram-org-bots-api-replykeyboardmarkup-"><a href="https://core.telegram.org/bots/api#replykeyboardmarkup">Reply Keyboard Markup</a></h2>
+				<pre><code class="lang-js"><span class="hljs-keyword">import</span> { ReplyKeyboardBuilder, TelegramBotClient } <span class="hljs-keyword">from</span> <span class="hljs-string">"api-telegram-bot"</span>;
+
+<span class="hljs-keyword">const</span> TOKEN = <span class="hljs-string">"BOT_TOKEN"</span>;
+
+<span class="hljs-keyword">const</span> bot = <span class="hljs-keyword">new</span> TelegramBotClient(TOKEN);
+<span class="hljs-keyword">const</span> kbBuilder = <span class="hljs-keyword">new</span> ReplyKeyboardBuilder();
+
+<span class="hljs-keyword">const</span> reply_markup = kbBuilder
+  .appendRow()
+    .addButton({ <span class="hljs-attr">text</span>: <span class="hljs-string">"Yes"</span> })
+    .addButton({ <span class="hljs-attr">text</span>: <span class="hljs-string">"No"</span> })
+  .appendRow()
+    .addButton({ <span class="hljs-attr">text</span>: <span class="hljs-string">"Cancel"</span> });
+
+bot.sendMessage(tid, <span class="hljs-string">"Confirm?"</span>, { reply_markup });
+</code></pre>
+				<p><img src="https://image.ibb.co/h2g9N6/Screenshot_20171215_102656.png" alt="Reply Keyboard Builder Result"></p>
+				<h2 id="-inline-keyboard-https-core-telegram-org-bots-api-inlinekeyboardmarkup-"><a href="https://core.telegram.org/bots/api#inlinekeyboardmarkup">Inline Keyboard</a></h2>
+				<pre><code class="lang-ts"><span class="hljs-keyword">import</span> { InlineKeyboardBuilder, TelegramBotClient } <span class="hljs-keyword">from</span> <span class="hljs-string">"api-telegram-bot"</span>;
+
+<span class="hljs-keyword">const</span> TOKEN = <span class="hljs-string">"BOT_TOKEN"</span>;
+
+<span class="hljs-keyword">const</span> bot = <span class="hljs-keyword">new</span> TelegramBotClient(TOKEN);
+<span class="hljs-keyword">const</span> kbBuilder = <span class="hljs-keyword">new</span> InlineKeyboardBuilder();
+
+<span class="hljs-keyword">const</span> reply_markup = kbBuilder
+  .appendRow()
+    .addButton({ text: <span class="hljs-string">"Yes"</span>, callback_data: <span class="hljs-string">"YES"</span> })
+    .addButton({ text: <span class="hljs-string">"No"</span>, callback_data: <span class="hljs-string">"NO"</span> })
+  .appendRow()
+    .addButton({ text: <span class="hljs-string">"Cancel"</span>, callback_data: <span class="hljs-string">"CANCEL"</span> });
+
+bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Confirm?"</span>, { reply_markup });
+</code></pre>
+				<p>See the message sent by code above:</p>
+				<p><img src="https://image.ibb.co/kQOH9m/Screenshot_20171215_095919.png" alt="Inline Keyboard Builder Result"></p>
+				<h3 id="distributebuttonsinrows">distributeButtonsInRows</h3>
+				<pre><code class="lang-js"><span class="hljs-keyword">import</span> { InlineKeyboardBuilder, InlineKeyboardButton, TelegramBotClient } <span class="hljs-keyword">from</span> <span class="hljs-string">"api-telegram-bot"</span>;
+
+<span class="hljs-keyword">const</span> TOKEN = <span class="hljs-string">"BOT_TOKEN"</span>;
+
+<span class="hljs-keyword">const</span> bot = <span class="hljs-keyword">new</span> TelegramBotClient(TOKEN);
+<span class="hljs-keyword">const</span> kbBuilder = <span class="hljs-keyword">new</span> InlineKeyboardBuilder();
+<span class="hljs-keyword">const</span> buttons: InlineKeyboardButton[] = [
+  { <span class="hljs-attr">text</span>: <span class="hljs-string">"1"</span>, <span class="hljs-attr">callback_data</span>: <span class="hljs-string">"BTN_1"</span> },
+  { <span class="hljs-attr">text</span>: <span class="hljs-string">"2"</span>, <span class="hljs-attr">callback_data</span>: <span class="hljs-string">"BTN_2"</span> },
+  { <span class="hljs-attr">text</span>: <span class="hljs-string">"3"</span>, <span class="hljs-attr">callback_data</span>: <span class="hljs-string">"BTN_3"</span> },
+  { <span class="hljs-attr">text</span>: <span class="hljs-string">"4"</span>, <span class="hljs-attr">callback_data</span>: <span class="hljs-string">"BTN_4"</span> },
+];
+
+<span class="hljs-comment">// distribute 2 buttons for each row</span>
+<span class="hljs-keyword">const</span> reply_markup = kbBuilder.distributeButtonsInRows(buttons, <span class="hljs-number">2</span>);
+
+bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Choose number"</span>, { reply_markup });
+</code></pre>
+				<p><img src="https://image.ibb.co/mXPFUm/Screenshot_20171215_103502.png" alt="distribute buttons result"></p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_telegrambotclient_.html">"<wbr>Telegram<wbr>Bot<wbr>Client"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_webhook_.html">"<wbr>Webhook"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_builders_inlinekeyboardbuilder_.html">"builders/<wbr>Inline<wbr>Keyboard<wbr>Builder"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_builders_replykeyboardbuilder_.html">"builders/<wbr>Reply<wbr>Keyboard<wbr>Builder"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_debug_.html">"debug"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_index_.html">"index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ianimation_.html">"interfaces/IAnimation"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iaudio_.html">"interfaces/IAudio"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_icallbackquery_.html">"interfaces/ICallback<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ichat_.html">"interfaces/IChat"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ichatmember_.html">"interfaces/IChat<wbr>Member"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ichatphoto_.html">"interfaces/IChat<wbr>Photo"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ichoseninlineresult_.html">"interfaces/IChosen<wbr>Inline<wbr>Result"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iconfig_.html">"interfaces/IConfig"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_icontact_.html">"interfaces/IContact"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ifile_.html">"interfaces/IFile"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iforcereply_.html">"interfaces/IForce<wbr>Reply"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_igame_.html">"interfaces/IGame"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_igamehighscore_.html">"interfaces/IGame<wbr>High<wbr>Score"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinlinekeyboardbutton_.html">"interfaces/IInline<wbr>Keyboard<wbr>Button"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinlinekeyboardmarkup_.html">"interfaces/IInline<wbr>Keyboard<wbr>Markup"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinlinequery_.html">"interfaces/IInline<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinvoice_.html">"interfaces/IInvoice"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ikeyboardbutton_.html">"interfaces/IKeyboard<wbr>Button"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ilocation_.html">"interfaces/ILocation"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_imaskposition_.html">"interfaces/IMask<wbr>Position"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_imessage_.html">"interfaces/IMessage"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_imessageactions_.html">"interfaces/IMessage<wbr>Actions"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_imessageentity_.html">"interfaces/IMessage<wbr>Entity"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iorderinfo_.html">"interfaces/IOrder<wbr>Info"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iphotosize_.html">"interfaces/IPhoto<wbr>Size"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iprecheckoutquery_.html">"interfaces/IPre<wbr>Checkout<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iregexcallback_.html">"interfaces/IRegex<wbr>Callback"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ireplykeyboardmarkup_.html">"interfaces/IReply<wbr>Keyboard<wbr>Markup"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ireplykeyboardremove_.html">"interfaces/IReply<wbr>Keyboard<wbr>Remove"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ishippingaddress_.html">"interfaces/IShipping<wbr>Address"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ishippingquery_.html">"interfaces/IShipping<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_isticker_.html">"interfaces/ISticker"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_istickerset_.html">"interfaces/ISticker<wbr>Set"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_isuccessfulpayment_.html">"interfaces/ISuccessful<wbr>Payment"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_itelegramresponse_.html">"interfaces/ITelegram<wbr>Response"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iupdate_.html">"interfaces/IUpdate"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iuser_.html">"interfaces/IUser"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iuserprofilephotos_.html">"interfaces/IUser<wbr>Profile<wbr>Photos"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ivenue_.html">"interfaces/IVenue"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ivideo_.html">"interfaces/IVideo"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ivideonote_.html">"interfaces/IVideo<wbr>Note"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ivoice_.html">"interfaces/IVoice"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iwebhookinfo_.html">"interfaces/IWebhook<wbr>Info"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ianswercallbackquery_.html">"interfaces/<wbr>Optional<wbr>Params/IAnswer<wbr>Callback<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ianswerinlinequery_.html">"interfaces/<wbr>Optional<wbr>Params/IAnswer<wbr>Inline<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_icreatenewstickerset_.html">"interfaces/<wbr>Optional<wbr>Params/ICreate<wbr>New<wbr>Sticker<wbr>Set"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ieditmessagecaption_.html">"interfaces/<wbr>Optional<wbr>Params/IEdit<wbr>Message<wbr>Caption"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ieditmessagereplymarkup_.html">"interfaces/<wbr>Optional<wbr>Params/IEdit<wbr>Message<wbr>Reply<wbr>Markup"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ieditmessagetext_.html">"interfaces/<wbr>Optional<wbr>Params/IEdit<wbr>Message<wbr>Text"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_igetgamehighscores_.html">"interfaces/<wbr>Optional<wbr>Params/IGet<wbr>Game<wbr>High<wbr>Scores"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_igetupdates_.html">"interfaces/<wbr>Optional<wbr>Params/IGet<wbr>Updates"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_igetuserprofilephotos_.html">"interfaces/<wbr>Optional<wbr>Params/IGet<wbr>User<wbr>Profile<wbr>Photos"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ipromotechatmember_.html">"interfaces/<wbr>Optional<wbr>Params/IPromote<wbr>Chat<wbr>Member"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_irestrictchatmember_.html">"interfaces/<wbr>Optional<wbr>Params/IRestrict<wbr>Chat<wbr>Member"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendaudio_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Audio"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendcontact_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Contact"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isenddocument_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Document"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendgame_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Game"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendlocation_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Location"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendmessage_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Message"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendphoto_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Photo"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendsticker_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Sticker"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendvenue_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Venue"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendvideo_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Video"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendvoice_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Voice"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isetgamescore_.html">"interfaces/<wbr>Optional<wbr>Params/ISet<wbr>Game<wbr>Score"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isetwebhook_.html">"interfaces/<wbr>Optional<wbr>Params/ISet<wbr>Webhook"</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

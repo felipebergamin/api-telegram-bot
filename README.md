@@ -2,102 +2,190 @@
 
 Node.js module for [Telegram Bot API](https://core.telegram.org/bots/api).
 
-Talk with [@botfather](https://telegram.me/BotFather) on Telegram to create a bot for you.
+Talk with [@botfather](https://telegram.me/BotFather) on Telegram to create your bot.
 
-This module implements all methods described in bot API **2.3.1**.
-
-
-Install:
-```sh
-npm install api-telegram-bot
-```
-Start coding:
-```js
-const TelegramBotClient = require('api-telegram-bot');
-const token = 'your toke here';
-const port = process.env.PORT;
-const path = '/';
-
-const bot = new TelegramBotClient (token);
-
-bot.createWebhook({path, port});
-
-bot.on('text', (message, reply)=>{
-    reply(message.text);
-});
-
-bot.on('photo', (photo, reply)=>{
-    reply('wonderful');
-});
-```
-
-If you need to set your routes on Express:
-```js
-const TelegramBotClient = require('api-telegram-bot');
-const bodyparser = require('body-parser');
-const express = require('express');
-
-const expressApp = express();
-// when you create your own express app, you must to set bodyparser middleware, otherwise webhook will not work
-expressApp.use(bodyparser.json());
-
-expressApp.get('/myroute', (req, res)=>{
-    res.end('hi :)');
-});
-
-const token = 'your token here';
-const port = process.env.PORT;
-const path = '/';
-        
-const bot = new TelegramBotClient (token);
-
-bot.createWebhook({ expressApp, path, port });
-
-// callback will be called for every text message that matches with regex
-bot.onRegex(/\/start/, (message, reply)=>{
-    reply('hello');
-});
-```
-
-Sending files:
-```js
-const TelegramBotClient = require('api-telegram-bot');
-const fs = require('fs');
-const token = 'your token here';
-
-const bot = new TelegramBotClient (token);
-const file = fs.createReadStream(__dirname + '/file.txt');
-bot.sendDocument(to_chat_id, file);
-```
-
-### Events
-For every message received, an event will be emitted according to [message type](https://core.telegram.org/bots/api#message) received: `text`, `audio`, `document`, `photo`, `sticker`, `video`, `voice`, `contact`, `location`, `new_chat_participant`, `left_chat_participant`, `new_chat_title`, `new_chat_photo`, `delete_chat_photo`, `group_chat_created`.
-Also emits a `message` event for all messages of any kind.
-
-More events:
-- `callback_query` [see details](https://core.telegram.org/bots/api#callbackquery).
-- `inline_query` [see details](https://core.telegram.org/bots/api#inlinequery)
-- `chosen_inline_result` [see details](https://core.telegram.org/bots/api#choseninlineresult)
-- `channel_post` [see details](https://core.telegram.org/bots/api#message).
-- `edited_message` [see details](https://core.telegram.org/bots/api#message)
-- `edited_channel_post` [see details](https://core.telegram.org/bots/api#message)
-
-### Contributing
-
-Thank you! Feel free to collaborate as best you can. I'll really appreciate it.
-
-[Call me on Telegram.](https://t.me/felipe_tracker)
-
-### Donations
-
-If you like my work and want to buy me a cup of coffee, it helps me keep my projects on the road. Thank you! :D
-
-![bitcoin qrcode](http://i.imgur.com/a565f0H.png)
+This module is updated with Telegram API version **3.3**.
 
 # API reference
 
 [Click here](https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/api.md)
 
-# Reply Markup Classes
+## News on v4
 
-[See here](https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/reply_markup_examples.md)
+Module codebase has migrated to TypeScript and all declaration files are distributed with package.
+
+### Install
+```sh
+npm install api-telegram-bot
+```
+### Start coding with TypeScript
+```ts
+import http = require("http");
+import { Message, MessageActions, TelegramBotClient, Webhook } from "api-telegram-bot";
+
+const TOKEN = "BOT_TOKEN";
+const bot = new TelegramBotClient(TOKEN);
+const webhook = new Webhook(bot);
+
+/*
+ * actions is an object with some shortcuts to manipulate received message:
+ *    banChatMember?: (until: number) => Promise<TelegramResponse<boolean>>
+ *    deleteMessage?: () => Promise<TelegramResponse<boolean>>;
+ *    reply: (text: string, optionals?) => Promise<TelegramResponse<Message>>;
+ * 
+ * deleteMessage and banChatMember are not provided if message was received on private chats
+ */
+webhook.on("text", (message: Message, actions: MessageActions) => {
+  actions.reply(`You send: ${message.text}`);
+});
+
+// NOTE: message actions are provided only for regex callbacks and subtypes of message events
+webhook.on("edited_message", (message: Message) => {
+  // message actions not provided here
+});
+
+http.createServer(webhook.getWebhook())
+  .listen(3000, () => console.log("listening"));
+
+```
+
+Sending files:
+```js
+import fs = require("fs");
+import { TelegramBotClient } from "api-telegram-bot";
+
+const TOKEN = "BOT_TOKEN";
+const bot = new TelegramBotClient(TOKEN);
+
+const file = fs.createReadStream("/PATH/TO/AWESOME/PHOTO");
+bot.sendPhoto(send_to, file);
+```
+
+### Events
+Webhook emits events according to received [update](https://core.telegram.org/bots/api#update).
+
+For every `message` event, webhook also emits another event according to message type received.
+
+Webhook actually supports follow update types:
+* message
+  * text
+  * audio
+  * document
+  * game
+  * photo
+  * sticker
+  * video
+  * voice
+  * video_note
+  * contact
+  * location
+  * venue
+  * new_chat_members
+  * left_chat_member
+  * new_chat_title
+  * new_chat_photo
+  * delete_chat_photo
+  * group_chat_created
+  * supergroup_chat_created
+  * channel_chat_created
+  * pinned_message
+  * invoice
+  * successful_payment
+* edited_message
+* channel_post
+* edited_channel_post,
+* inline_query
+* chosen_inline_result
+* callback_query
+* shipping_query
+* pre_checkout_query
+
+### Enable debug log
+Start your application with DEBUG env variable containing 'api-telegram-bot' value.
+[Reference to debug package](https://www.npmjs.com/package/debug)
+
+```
+$ DEBUG=api-telegram-bot npm start
+```
+
+### Contributing
+
+Thank you! Feel free to send pull requests and suggestions. I'll really appreciate it.
+
+[Call me on Telegram.](https://t.me/felipebergamin)
+
+# Bugs
+
+If you found a bug, open an issue on GitHub. If you know the solution, please, submit a pull request.
+
+# Reply Markup Builders
+
+## [Reply Keyboard Markup](https://core.telegram.org/bots/api#replykeyboardmarkup)
+
+```js
+import { ReplyKeyboardBuilder, TelegramBotClient } from "api-telegram-bot";
+
+const TOKEN = "BOT_TOKEN";
+
+const bot = new TelegramBotClient(TOKEN);
+const kbBuilder = new ReplyKeyboardBuilder();
+
+const reply_markup = kbBuilder
+  .appendRow()
+    .addButton({ text: "Yes" })
+    .addButton({ text: "No" })
+  .appendRow()
+    .addButton({ text: "Cancel" });
+
+bot.sendMessage(tid, "Confirm?", { reply_markup });
+```
+
+![Reply Keyboard Builder Result](https://image.ibb.co/h2g9N6/Screenshot_20171215_102656.png)
+
+## [Inline Keyboard](https://core.telegram.org/bots/api#inlinekeyboardmarkup)
+
+```ts
+import { InlineKeyboardBuilder, TelegramBotClient } from "api-telegram-bot";
+
+const TOKEN = "BOT_TOKEN";
+
+const bot = new TelegramBotClient(TOKEN);
+const kbBuilder = new InlineKeyboardBuilder();
+
+const reply_markup = kbBuilder
+  .appendRow()
+    .addButton({ text: "Yes", callback_data: "YES" })
+    .addButton({ text: "No", callback_data: "NO" })
+  .appendRow()
+    .addButton({ text: "Cancel", callback_data: "CANCEL" });
+
+bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup });
+```
+
+See the message sent by code above:
+
+![Inline Keyboard Builder Result](https://image.ibb.co/kQOH9m/Screenshot_20171215_095919.png)
+
+### distributeButtonsInRows
+
+```js
+import { InlineKeyboardBuilder, InlineKeyboardButton, TelegramBotClient } from "api-telegram-bot";
+
+const TOKEN = "BOT_TOKEN";
+
+const bot = new TelegramBotClient(TOKEN);
+const kbBuilder = new InlineKeyboardBuilder();
+const buttons: InlineKeyboardButton[] = [
+  { text: "1", callback_data: "BTN_1" },
+  { text: "2", callback_data: "BTN_2" },
+  { text: "3", callback_data: "BTN_3" },
+  { text: "4", callback_data: "BTN_4" },
+];
+
+// distribute 2 buttons for each row
+const reply_markup = kbBuilder.distributeButtonsInRows(buttons, 2);
+
+bot.sendMessage(CONTACT_ID, "Choose number", { reply_markup });
+```
+
+![distribute buttons result](https://image.ibb.co/mXPFUm/Screenshot_20171215_103502.png)
