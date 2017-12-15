@@ -1112,6 +1112,23 @@ export class TelegramBotClient {
   }
 
   /**
+   * Use this method to respond to such pre-checkout queries.
+   * @param {string} pre_checkout_query_id Unique identifier for the query to be answered
+   * @param {boolean} ok Specify True if everything is alright (goods are available, etc.) and the bot is ready to proceed with the order.
+   * @param {string} [error_message] Required if ok is False. Error message in human readable form that explains the reason for failure to proceed with the checkout
+   * @return {Promise}
+   */
+  public answerPreCheckoutQuery(pre_checkout_query_id: string, ok: boolean, error_message?: string): Promise<TelegramResponse<boolean>> {
+    const json = {
+      error_message,
+      ok,
+      pre_checkout_query_id,
+    };
+
+    return this.makeRequest<boolean>("answerPreCheckoutQuery", { json });
+  }
+
+  /**
    * Use this method to delete a sticker from a set created by the bot.
    * @param {String} sticker File identifier of the sticker
    * @returns {Promise}
