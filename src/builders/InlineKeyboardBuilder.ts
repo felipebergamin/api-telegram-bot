@@ -1,7 +1,8 @@
 import { IInlineKeyboardButton as InlineKeyboardButton } from "../interfaces/IInlineKeyboardButton";
+import { IInlineKeyboardMarkup as InlineKeyboardMarkup } from "../interfaces/IInlineKeyboardMarkup";
 
-export class InlineKeyboardBuilder {
-  public inline_keyboard: any[];
+export class InlineKeyboardBuilder implements InlineKeyboardMarkup {
+  public inline_keyboard: [InlineKeyboardButton[]];
 
   /**
    * @class {InlineKeyboardBuilder}
@@ -9,7 +10,7 @@ export class InlineKeyboardBuilder {
    * @see {@link https://core.telegram.org/bots/api#inlinekeyboardmarkup}
    */
   constructor() {
-      this.inline_keyboard = [];
+      this.inline_keyboard = [[]];
   }
 
   /**
@@ -17,8 +18,10 @@ export class InlineKeyboardBuilder {
    * @chainable
    */
   public appendRow() {
+    if (this.getLastRow().length > 0) {
       this.inline_keyboard.push([]);
-      return this;
+    }
+    return this;
   }
 
   /**

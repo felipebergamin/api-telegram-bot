@@ -1,10 +1,11 @@
 import { IKeyboardButton as KeyboardButton } from "../interfaces/IKeyboardButton";
+import { IReplyKeyboardMarkup as ReplyKeyboardMarkup } from "../interfaces/IReplyKeyboardMarkup";
 
-export class ReplyKeyboardBuilder {
-  public keyboard: any[];
-  public resize_keyboard: boolean;
-  public one_time_keyboard: boolean;
-  public selective: boolean;
+export class ReplyKeyboardBuilder implements ReplyKeyboardMarkup {
+  public keyboard: [KeyboardButton[]];
+  public resize_keyboard?: boolean;
+  public one_time_keyboard?: boolean;
+  public selective?: boolean;
 
     /**
      * @class ReplyKeyboardBuilder
@@ -12,7 +13,7 @@ export class ReplyKeyboardBuilder {
      * @see {@link https://core.telegram.org/bots/api#replykeyboardmarkup}
      */
     constructor() {
-        this.keyboard = [];
+        this.keyboard = [[]];
         this.resize_keyboard = true;
         this.one_time_keyboard = true;
         this.selective = true;
@@ -53,7 +54,9 @@ export class ReplyKeyboardBuilder {
      * @chainable
      */
     public appendRow(): ReplyKeyboardBuilder {
-        this.keyboard.push([]);
+        if (this._getLastRow().length > 0) {
+          this.keyboard.push([]);
+        }
         return this;
     }
 
