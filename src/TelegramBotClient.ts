@@ -4,6 +4,7 @@ import * as nodeEmoji from "node-emoji";
 import request = require("request-promise-native");
 import { debug } from "./debug";
 
+import { IEditMessageLiveLocation as EditMessageLiveLocation } from "./interfaces/IEditMessageLiveLocation";
 import { IAnswerCallbackQueryOptionals } from "./interfaces/OptionalParams/IAnswerCallbackQuery";
 import { IAnswerInlineQueryOptionals } from "./interfaces/OptionalParams/IAnswerInlineQuery";
 import { ICreateNewStickerSetOptionals } from "./interfaces/OptionalParams/ICreateNewStickerSet";
@@ -328,6 +329,27 @@ export class TelegramBotClient {
     };
 
     return this.makeRequest<Message>("sendLocation", {json});
+  }
+
+  /**
+   * Use this method to edit live location messages sent by the bot or via the bot
+   * @param {Integer} latitude Latitude of new location
+   * @param {Integer} longitude Longitude of new location
+   * @param {object} [optionals]
+   * @param {Integer|String} [optionals.chat_id] Required if inline_message_id is not specified. Unique identifier for the target chat
+   * @param {Integer} [optionals.message_id] Required if inline_message_id is not specified. Identifier of the sent message
+   * @param {String} [optionals.inline_message_id] Required if chat_id and message_id are not specified. Identifier of the inline message
+   * @param {object} [optionals.reply_markup] A JSON-serialized object for a new inline keyboard.
+   * @return {Promise}
+   */
+  public editMessageLiveLocation(latitude: number, longitude: number, optionals: EditMessageLiveLocation): Promise<TelegramResponse<Message|boolean>> {
+    const json = {
+      latitude,
+      longitude,
+      ...optionals,
+    };
+
+    return this.makeRequest<Message|boolean>("editMessageLiveLocation", { json });
   }
 
   /**
