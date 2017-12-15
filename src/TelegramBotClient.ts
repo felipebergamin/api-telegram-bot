@@ -973,6 +973,21 @@ export class TelegramBotClient {
   }
 
   /**
+   * Use this method to set a new group sticker set for a supergroup.
+   * @param chat_id Unique identifier for the target chat
+   * @param sticker_set_name Name of the sticker set to be set as the group sticker set
+   * @return {Promise}
+   */
+  public setChatStickerSet(chat_id: number|string, sticker_set_name: string): Promise<TelegramResponse<boolean>> {
+    const json = {
+      chat_id,
+      sticker_set_name,
+    };
+
+    return this.makeRequest<boolean>("setChatStickerSet", { json });
+  }
+
+  /**
    * Use this method to add a new sticker to a set created by the bot.
    * @param {Integer|String} user_id User identifier of sticker set owner
    * @param {String} name Sticker set name
