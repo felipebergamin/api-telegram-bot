@@ -11,9 +11,10 @@ import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage"
 import { TelegramBotClient } from "./TelegramBotClient";
 
 const _messageTypes = [
-  "text", "audio", "document", "photo", "sticker", "video", "voice", "contact",
-  "location", "new_chat_participant", "left_chat_participant", "new_chat_title",
-  "new_chat_photo", "delete_chat_photo", "group_chat_created",
+  "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
+  "contact", "location", "venue", "new_chat_members", "left_chat_member", "new_chat_title",
+  "new_chat_photo", "delete_chat_photo", "group_chat_created", "supergroup_chat_created",
+  "channel_chat_created", "pinned_message", "invoice", "successful_payment",
 ];
 const _updateTypes = [
   "message", "edited_message", "channel_post", "edited_channel_post",
