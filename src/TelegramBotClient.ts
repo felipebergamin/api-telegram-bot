@@ -4,11 +4,11 @@ import * as nodeEmoji from "node-emoji";
 import request = require("request-promise-native");
 import { debug } from "./debug";
 
-import { IEditMessageLiveLocation as EditMessageLiveLocation } from "./interfaces/IEditMessageLiveLocation";
 import { IAnswerCallbackQueryOptionals } from "./interfaces/OptionalParams/IAnswerCallbackQuery";
 import { IAnswerInlineQueryOptionals } from "./interfaces/OptionalParams/IAnswerInlineQuery";
 import { ICreateNewStickerSetOptionals } from "./interfaces/OptionalParams/ICreateNewStickerSet";
 import { IEditMessageCaptionOptionals } from "./interfaces/OptionalParams/IEditMessageCaption";
+import { IEditMessageLiveLocationOptionals as EditMessageLiveLocationOptionals } from "./interfaces/OptionalParams/IEditMessageLiveLocation";
 import { IEditMessageReplyMarkupOptionals } from "./interfaces/OptionalParams/IEditMessageReplyMarkup";
 import { IEditMessageTextOptionals } from "./interfaces/OptionalParams/IEditMessageText";
 import { IGetGameHighScoresOptionals } from "./interfaces/OptionalParams/IGetGameHighScores";
@@ -29,6 +29,7 @@ import { ISendVideoOptionals } from "./interfaces/OptionalParams/ISendVideo";
 import { ISendVoiceOptionals } from "./interfaces/OptionalParams/ISendVoice";
 import { ISetGameScoreOptionals } from "./interfaces/OptionalParams/ISetGameScore";
 import { ISetWebhookOptionals } from "./interfaces/OptionalParams/ISetWebhook";
+import { IStopMessageLiveLocationOptionals as StopMessageLiveLocationOptionals } from "./interfaces/OptionalParams/IStopMessageLiveLocation";
 
 import { IChat as Chat } from "./interfaces/IChat";
 import { IChatMember as ChatMember } from "./interfaces/IChatMember";
@@ -342,7 +343,7 @@ export class TelegramBotClient {
    * @param {object} [optionals.reply_markup] A JSON-serialized object for a new inline keyboard.
    * @return {Promise}
    */
-  public editMessageLiveLocation(latitude: number, longitude: number, optionals: EditMessageLiveLocation): Promise<TelegramResponse<Message|boolean>> {
+  public editMessageLiveLocation(latitude: number, longitude: number, optionals: EditMessageLiveLocationOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = {
       latitude,
       longitude,
@@ -350,6 +351,20 @@ export class TelegramBotClient {
     };
 
     return this.makeRequest<Message|boolean>("editMessageLiveLocation", { json });
+  }
+
+  /**
+   * Use this method to stop updating a live location message sent by the bot or via the bot (for inline bots) before live_period expires
+   * @param {Integer|String} optionals.chat_id Required if inline_message_id is not specified. Unique identifier for the target chat
+   * @param {Integer} optionals.message_id Required if inline_message_id is not specified. Identifier of the sent message
+   * @param {Integer} optionals.inline_message_id Required if chat_id and message_id are not specified. Identifier of the inline message
+   * @param {object} optionals.reply_markup A JSON-serialized object for a new inline keyboard
+   * @return {Promise}
+   */
+  public stopMessageLiveLocation(optionals: StopMessageLiveLocationOptionals): Promise<TelegramResponse<Message|boolean>> {
+    const json = optionals || {};
+
+    return this.makeRequest<Message|boolean>("stopMessageLiveLocation", { json });
   }
 
   /**
