@@ -557,12 +557,13 @@ export class TelegramBotClient {
 
     return this.makeRequest<ChatMember[]>("getChatAdministrators", { json });
   }
-   /**
-    * Use this method to get the number of members in a chat.
-    * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target supergroup or channel
-    * @returns {Promise}
-    * @see {@link https://core.telegram.org/bots/api#getchatmemberscount}
-    */
+
+  /**
+   * Use this method to get the number of members in a chat.
+   * @param {Integer|String} chat_id Unique identifier for the target chat or username of the target supergroup or channel
+   * @returns {Promise}
+   * @see {@link https://core.telegram.org/bots/api#getchatmemberscount}
+   */
   public getChatMembersCount(chat_id: number|string): Promise<TelegramResponse<number>> {
     const json = { chat_id };
 

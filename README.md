@@ -12,7 +12,7 @@ This module is updated with Telegram API version **3.5**.
 
 ## News on v4
 
-Module codebase has migrated to TypeScript and all declaration files are distributed with package.
+Module codebase was migrated to TypeScript and all declaration files are distributed with package.
 
 ### Install
 ```sh
