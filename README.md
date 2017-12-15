@@ -8,7 +8,7 @@ This module is updated with Telegram API version **3.3**.
 
 # API reference
 
-[Click here](https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/api.md)
+[Click here](https://felipebergamin.github.io/api-telegram-bot)
 
 ## News on v4
 
