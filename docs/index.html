@@ -67,9 +67,9 @@
 				<h1 id="telegram-bot-api-for-node-js">Telegram Bot API for Node.js</h1>
 				<p>Node.js module for <a href="https://core.telegram.org/bots/api">Telegram Bot API</a>.</p>
 				<p>Talk with <a href="https://telegram.me/BotFather">@botfather</a> on Telegram to create your bot.</p>
-				<p>This module is updated with Telegram API version <strong>3.3</strong>.</p>
+				<p>This module is updated with Telegram API version <strong>3.5</strong>.</p>
 				<h1 id="api-reference">API reference</h1>
-				<p><a href="https://github.com/felipebergamin/api-telegram-bot/blob/master/docs/api.md">Click here</a></p>
+				<p><a href="https://felipebergamin.github.io/api-telegram-bot">Click here</a></p>
 				<h2 id="news-on-v4">News on v4</h2>
 				<p>Module codebase has migrated to TypeScript and all declaration files are distributed with package.</p>
 				<h3 id="install">Install</h3>
@@ -295,10 +295,22 @@ bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Choose number"</span>, { 
 						<a href="modules/_interfaces_iinlinequery_.html">"interfaces/IInline<wbr>Query"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinputmedia_.html">"interfaces/IInput<wbr>Media"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinputmediaphoto_.html">"interfaces/IInput<wbr>Media<wbr>Photo"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_iinputmediavideo_.html">"interfaces/IInput<wbr>Media<wbr>Video"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_iinvoice_.html">"interfaces/IInvoice"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_ikeyboardbutton_.html">"interfaces/IKeyboard<wbr>Button"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ilabeledprice_.html">"interfaces/ILabeled<wbr>Price"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_ilocation_.html">"interfaces/ILocation"</a>
@@ -335,6 +347,9 @@ bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Choose number"</span>, { 
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_ishippingaddress_.html">"interfaces/IShipping<wbr>Address"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_ishippingoption_.html">"interfaces/IShipping<wbr>Option"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_ishippingquery_.html">"interfaces/IShipping<wbr>Query"</a>
@@ -382,10 +397,16 @@ bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Choose number"</span>, { 
 						<a href="modules/_interfaces_optionalparams_ianswerinlinequery_.html">"interfaces/<wbr>Optional<wbr>Params/IAnswer<wbr>Inline<wbr>Query"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ianswershippingquery_.html">"interfaces/<wbr>Optional<wbr>Params/IAnswer<wbr>Shipping<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_optionalparams_icreatenewstickerset_.html">"interfaces/<wbr>Optional<wbr>Params/ICreate<wbr>New<wbr>Sticker<wbr>Set"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_optionalparams_ieditmessagecaption_.html">"interfaces/<wbr>Optional<wbr>Params/IEdit<wbr>Message<wbr>Caption"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_ieditmessagelivelocation_.html">"interfaces/<wbr>Optional<wbr>Params/IEdit<wbr>Message<wbr>Live<wbr>Location"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_optionalparams_ieditmessagereplymarkup_.html">"interfaces/<wbr>Optional<wbr>Params/IEdit<wbr>Message<wbr>Reply<wbr>Markup"</a>
@@ -421,7 +442,13 @@ bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Choose number"</span>, { 
 						<a href="modules/_interfaces_optionalparams_isendgame_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Game"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendinvoice_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Invoice"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_optionalparams_isendlocation_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Location"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_isendmediagroup_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Media<wbr>Group"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_optionalparams_isendmessage_.html">"interfaces/<wbr>Optional<wbr>Params/ISend<wbr>Message"</a>
@@ -446,6 +473,9 @@ bot.sendMessage(CONTACT_ID, <span class="hljs-string">"Choose number"</span>, { 
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_interfaces_optionalparams_isetwebhook_.html">"interfaces/<wbr>Optional<wbr>Params/ISet<wbr>Webhook"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_interfaces_optionalparams_istopmessagelivelocation_.html">"interfaces/<wbr>Optional<wbr>Params/IStop<wbr>Message<wbr>Live<wbr>Location"</a>
 					</li>
 				</ul>
 			</nav>
