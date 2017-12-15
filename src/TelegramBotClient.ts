@@ -20,6 +20,7 @@ import { ISendAudioOptionals } from "./interfaces/OptionalParams/ISendAudio";
 import { ISendContactOptionals } from "./interfaces/OptionalParams/ISendContact";
 import { ISendDocumentOptionals } from "./interfaces/OptionalParams/ISendDocument";
 import { ISendGameOptionals } from "./interfaces/OptionalParams/ISendGame";
+import { ISendInvoiceOptionals as SendInvoiceOptionals } from "./interfaces/OptionalParams/ISendInvoice";
 import { ISendLocationOptionals } from "./interfaces/OptionalParams/ISendLocation";
 import { ISendMediaGroupOptionals as SendMediaGroupOptionals } from "./interfaces/OptionalParams/ISendMediaGroup";
 import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage";
@@ -38,6 +39,7 @@ import { IConfig as Config } from "./interfaces/IConfig";
 import { IFile as File } from "./interfaces/IFile";
 import { IGameHighScore as GameHighScore } from "./interfaces/IGameHighScore";
 import { IInputMedia as InputMedia } from "./interfaces/IInputMedia";
+import { ILabeledPrice as LabeledPrice } from "./interfaces/ILabeledPrice";
 import { IMaskPosition as MaskPosition } from "./interfaces/IMaskPosition";
 import { IMessage as Message } from "./interfaces/IMessage";
 // import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
@@ -1045,6 +1047,48 @@ export class TelegramBotClient {
     const formData = {sticker, position};
 
     return this.makeRequest<boolean>("setStickerPositionInSet", {formData});
+  }
+
+  /**
+   * Use this method to send invoices.
+   * @param {number} chat_id Unique identifier for the target private chat
+   * @param {string} title Product name, 1-32 characters
+   * @param {string} description Product description, 1-255 characters
+   * @param {string} payload Bot-defined invoice payload, 1-128 bytes.
+   * @param {string} provider_token Payments provider token, obtained via Botfather
+   * @param {string} start_parameter Unique deep-linking parameter that can be used to generate this invoice when used as a start parameter
+   * @param {string} currency Three-letter ISO 4217 currency code
+   * @param {object} prices Price breakdown, a list of components
+   * @param {object} [optionals]
+   * @param {string} [optionals.provider_data] JSON-encoded data about the invoice, which will be shared with the payment provider
+   * @param {string} [optionals.photo_url] URL of the product photo for the invoice
+   * @param {number} [optionals.photo_size] Photo size
+   * @param {number} [optionals.photo_width] Photo width
+   * @param {number} [optionals.photo_height] Photo height
+   * @param {boolean} [optionals.need_name] Pass True, if you require the user's full name to complete the order
+   * @param {boolean} [optionals.need_phone_number] Pass True, if you require the user's phone number to complete the order
+   * @param {boolean} [optionals.need_email] Pass True, if you require the user's email to complete the order
+   * @param {boolean} [optionals.need_shipping_address] Pass True, if you require the user's shipping address to complete the order
+   * @param {boolean} [optionals.is_flexible] Pass True, if the final price depends on the shipping method
+   * @param {boolean} [optionals.disable_notification] Sends the message silently.
+   * @param {number} [optionals.reply_to_message_id] If the message is a reply, ID of the original message
+   * @param {object} [optionals.reply_markup] A JSON-serialized object for an inline keyboard.
+   * @return {Promise}
+   */
+  public sendInvoice(chat_id: number, title: string, description: string, payload: string, provider_token: string, start_parameter: string, currency: string, prices: LabeledPrice[], optionals: SendInvoiceOptionals): Promise<TelegramResponse<Message>> {
+    const json = {
+      chat_id,
+      currency,
+      description,
+      payload,
+      prices,
+      provider_token,
+      start_parameter,
+      title,
+      ...optionals,
+    };
+
+    return this.makeRequest<Message>("sendInvoice", { json });
   }
 
   /**
