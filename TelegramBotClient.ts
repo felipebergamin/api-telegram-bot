@@ -141,6 +141,15 @@ export class TelegramBotClient {
       .then(_sendmsg);
   }
 
+  /**
+   * Use this method to send a group of photos or videos as an album
+   * @param {integer|string} chat_id Unique identifier for the target chat or username of the target channel
+   * @param {InputMedia[]} media A JSON-serialized array describing photos and videos to be sent, must include 2–10 items
+   * @param {object} optionals
+   * @param {boolean} optionals.disable_notification Sends the messages silently. Users will receive a notification with no sound
+   * @param {integer} optionals.reply_to_message_id If the messages are a reply, ID of the original message
+   * @return {Promise}
+   */
   public sendMediaGroup(chat_id: number|string, media: InputMedia[], optionals: SendMediaGroupOptionals): Promise<TelegramResponse<Message[]>> {
     const formData = {
       chat_id,
@@ -330,6 +339,7 @@ export class TelegramBotClient {
    * @param {Float} latitude Latitude of location
    * @param {FLoat} longitude Longitude of location
    * @param {Object} [optionals] An object with optional params that you want to send in request.
+   * @param {Integer} [optionals.live_period] Period in seconds for which the location will be updated (should be between 60 and 86400)
    * @param {Boolean} [optionals.disable_notification] Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
    * @param {Integer} [optionals.reply_to_message_id] If the message is a reply, ID of the original message
    * @param {Object} [optionals.reply_markup] Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
@@ -473,11 +483,11 @@ export class TelegramBotClient {
    * where `<file_path>` is taken from the response.
    * It is guaranteed that the link will be valid for at least 1 hour.
    * When the link expires, a new one can be requested by calling getFile again.
-   * @param {Integer} file_id File identifier to get info about
+   * @param {String} file_id File identifier to get info about
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getfile}
    */
-  public getFile(file_id: number): Promise<TelegramResponse<File>> {
+  public getFile(file_id: string): Promise<TelegramResponse<File>> {
     const json = { file_id };
 
     return this.makeRequest<File>("getFile", { json });
@@ -487,13 +497,13 @@ export class TelegramBotClient {
    * Use this method to kick a user from a group or a supergroup.
    * In the case of supergroups, the user will not be able to return to the
    * group on their own using invite links, etc., unless unbanned first.
-   * @param {Integer} chat_id Unique identifier for the target group or username of the target supergroup
+   * @param {Integer|String} chat_id Unique identifier for the target group or username of the target supergroup
    * @param {Integer} user_id Unique identifier of the target user
    * @param {Integer} [until_date] Date when the user will be unbanned, unix time.
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#kickchatmember}
    */
-  public kickChatMember(chat_id: number, user_id: number, until_date?: number): Promise<TelegramResponse<boolean>> {
+  public kickChatMember(chat_id: number|string, user_id: number, until_date?: number): Promise<TelegramResponse<boolean>> {
     const json = { chat_id, user_id, until_date };
 
     return this.makeRequest<boolean>("kickChatMember", { json });
