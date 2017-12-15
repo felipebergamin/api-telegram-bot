@@ -988,6 +988,19 @@ export class TelegramBotClient {
   }
 
   /**
+   * Use this method to delete a group sticker set from a supergroup.
+   * @param chat_id Unique identifier for the target chat or username of the target supergroup
+   * @return {Promise}
+   */
+  public deleteChatStickerSet(chat_id: number|string): Promise<TelegramResponse<boolean>> {
+    const json = {
+      chat_id,
+    };
+
+    return this.makeRequest<boolean>("deleteChatStickerSet", { json });
+  }
+
+  /**
    * Use this method to add a new sticker to a set created by the bot.
    * @param {Integer|String} user_id User identifier of sticker set owner
    * @param {String} name Sticker set name
