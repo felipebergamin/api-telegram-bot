@@ -21,6 +21,7 @@ import { ISendContactOptionals } from "./interfaces/OptionalParams/ISendContact"
 import { ISendDocumentOptionals } from "./interfaces/OptionalParams/ISendDocument";
 import { ISendGameOptionals } from "./interfaces/OptionalParams/ISendGame";
 import { ISendLocationOptionals } from "./interfaces/OptionalParams/ISendLocation";
+import { ISendMediaGroupOptionals as SendMediaGroupOptionals } from "./interfaces/OptionalParams/ISendMediaGroup";
 import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage";
 import { ISendPhotoOptionals } from "./interfaces/OptionalParams/ISendPhoto";
 import { ISendStickerOptionals } from "./interfaces/OptionalParams/ISendSticker";
@@ -36,6 +37,7 @@ import { IChatMember as ChatMember } from "./interfaces/IChatMember";
 import { IConfig as Config } from "./interfaces/IConfig";
 import { IFile as File } from "./interfaces/IFile";
 import { IGameHighScore as GameHighScore } from "./interfaces/IGameHighScore";
+import { IInputMedia as InputMedia } from "./interfaces/IInputMedia";
 import { IMaskPosition as MaskPosition } from "./interfaces/IMaskPosition";
 import { IMessage as Message } from "./interfaces/IMessage";
 // import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
@@ -134,6 +136,16 @@ export class TelegramBotClient {
 
     return this.sendChatAction(chat_id, "typing")
       .then(_sendmsg);
+  }
+
+  public sendMediaGroup(chat_id: number|string, media: InputMedia[], optionals: SendMediaGroupOptionals): Promise<TelegramResponse<Message[]>> {
+    const formData = {
+      chat_id,
+      media,
+      ...optionals,
+    };
+
+    return this.makeRequest<Message[]>("sendMediaGroup", { formData });
   }
 
   /**
