@@ -6,6 +6,7 @@ import { debug } from "./debug";
 
 import { IAnswerCallbackQueryOptionals } from "./interfaces/OptionalParams/IAnswerCallbackQuery";
 import { IAnswerInlineQueryOptionals } from "./interfaces/OptionalParams/IAnswerInlineQuery";
+import { IAnswerShippingQueryOptionals as AnswerShippingQueryOptionals } from "./interfaces/OptionalParams/IAnswerShippingQuery";
 import { ICreateNewStickerSetOptionals } from "./interfaces/OptionalParams/ICreateNewStickerSet";
 import { IEditMessageCaptionOptionals } from "./interfaces/OptionalParams/IEditMessageCaption";
 import { IEditMessageLiveLocationOptionals as EditMessageLiveLocationOptionals } from "./interfaces/OptionalParams/IEditMessageLiveLocation";
@@ -1089,6 +1090,25 @@ export class TelegramBotClient {
     };
 
     return this.makeRequest<Message>("sendInvoice", { json });
+  }
+
+  /**
+   * Use this method to reply to shipping queries received in updates
+   * @param {string} shipping_query_id Unique identifier for the query to be answered
+   * @param {boolean} ok Specify True if delivery to the specified address is possible and False if there are any problems
+   * @param {object} optionals Object with optional parameters
+   * @param {object} optionals.shipping_options Required if ok is True. A JSON-serialized array of available shipping options
+   * @param {string} optionals.error_message Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order
+   * @return {Promise}
+   */
+  public answerShippingQuery(shipping_query_id: string, ok: boolean, optionals: AnswerShippingQueryOptionals): Promise<TelegramResponse<boolean>> {
+    const json = {
+      ok,
+      shipping_query_id,
+      ...optionals,
+    };
+
+    return this.makeRequest<boolean>("answerShippingQuery", { json });
   }
 
   /**
