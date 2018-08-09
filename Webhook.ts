@@ -145,7 +145,7 @@ export class Webhook extends EventEmitter {
       optionals = optionals || {} as ISendMessageOptionals;
       optionals.reply_to_message_id = message.message_id;
 
-      return this.bot.sendMessage(message.chat.id, text);
+      return this.bot.sendMessage(message.chat.id, text, optionals);
     };
 
     if (message.chat.type.includes("private")) {
