@@ -1,7 +1,8 @@
 /* tslint:disable:max-line-length */
+import * as formdata from "form-data";
 import { ReadStream } from "fs";
 import * as nodeEmoji from "node-emoji";
-import request = require("request-promise-native");
+import fetch from "node-fetch";
 import { debug } from "./debug";
 
 import { IAnswerCallbackQueryOptionals } from "./interfaces/OptionalParams/IAnswerCallbackQuery";
@@ -1151,41 +1152,37 @@ export class TelegramBotClient {
     return this.makeRequest<boolean>("deleteStickerFromSet", {formData});
   }
 
-  private makeRequest<T>(api_method: string, params?: any): Promise<TelegramResponse<T>> {
+  private makeRequest<T>(api_method: string, params: any = {}): Promise<TelegramResponse<T>> {
+    debug("makeRequest");
     if (!this.bot_token) {
+      debug("Error: bot token isn't defined");
       throw new Error("Telegram Bot Token undefined");
     }
 
-    params = params || {};
-    for (const property in params.formData) {
-      if (params.formData.hasOwnProperty(property)) {
-        if (typeof params.formData[property] !== "object") {
-          if (params.formData[property].toString) {
-            params.formData[property] = params.formData[property].toString();
-          }
-        }
-      }
-    }
+    params = params.json || params.formData || {};
     const url = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
-    const json = true;
 
     if (params.json && params.json.text) {
+      debug("Emojify text");
       params.json.text = this.emojify(params.json.text);
     }
 
     if (params.formData && params.formData.caption) {
+      debug("Emojify caption");
       params.formData.caption = this.emojify(params.formData.caption);
     }
 
-    const requestOptions = {
-      json,
-      url,
-      ...params,
-    };
+    debug("Converting obj to form data");
+    const fd = new formdata();
+    for (const paramName in params) {
+      if (params.hasOwnProperty(paramName)) {
+        fd.append(paramName, params[paramName]);
+      }
+    }
 
-    debug(`Sending ${JSON.stringify(requestOptions)}`);
-
-    return request.post(requestOptions);
+    debug("fetching telegram api");
+    return fetch(url, { method: "POST", body: fd })
+      .then((res) => res.json());
   }
 
   private split_text(text: string): string[] {
