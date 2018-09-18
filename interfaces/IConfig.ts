@@ -1,4 +1,5 @@
 export interface IConfig {
-  splitLongMessages: boolean;
-  emojifyTexts: boolean;
+  splitLongMessages?: boolean;
+  emojifyTexts?: boolean;
+  sendChatActionBeforeMsg?: boolean;
 }

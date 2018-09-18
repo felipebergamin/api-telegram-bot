@@ -55,7 +55,6 @@ import { IWebhookInfo as WebhookInfo } from "./interfaces/IWebhookInfo";
 export class TelegramBotClient {
   private static MAX_MESSAGE_LENGTH = 4096;
   private config: Config;
-  private bot_token: string;
   private emojify: (text: string) => string;
 
   /**
@@ -69,15 +68,15 @@ export class TelegramBotClient {
    * @param {boolean} [config.emojify_texts=false] `true` if you want the bot automatically call [emoji.emojify](https://www.npmjs.com/package/node-emoji) in texts
    * @see {@link https://www.npmjs.com/package/node-emoji}
    */
-  constructor(token: string, config?: Config) {
+  constructor(private bot_token: string, {emojifyTexts = true, splitLongMessages = true, sendChatActionBeforeMsg = true}: Config = {}) {
     debug("constructing TelegramBotClient");
+    debug("Config: ", JSON.stringify({emojifyTexts, splitLongMessages, sendChatActionBeforeMsg}));
 
-    if (!token) {
+    if (!bot_token) {
       throw new Error("bot token undefined");
     }
 
-    this.bot_token = token;
-    this.config = config || {} as Config;
+    this.config = {emojifyTexts, splitLongMessages, sendChatActionBeforeMsg};
 
     if (!this.config.emojifyTexts) {
       this.emojify = (text: string) => text;
@@ -138,8 +137,10 @@ export class TelegramBotClient {
       return this.makeRequest<Message>("sendMessage", {json});
     };
 
-    return this.sendChatAction(chat_id, "typing")
-      .then(_sendmsg);
+    return this.config.sendChatActionBeforeMsg ?
+      this.sendChatAction(chat_id, "typing")
+        .then(_sendmsg) :
+      _sendmsg();
   }
 
   /**
@@ -199,8 +200,9 @@ export class TelegramBotClient {
       return this.makeRequest<Message>("sendPhoto", {formData});
     };
 
-    return this.sendChatAction(chat_id, "upload_photo")
-      .then(_sendphoto);
+    return this.config.sendChatActionBeforeMsg ?
+      this.sendChatAction(chat_id, "upload_photo").then(_sendphoto) :
+      _sendphoto();
   }
 
   /**
@@ -229,8 +231,10 @@ export class TelegramBotClient {
       return this.makeRequest<Message>("sendAudio", {formData});
     };
 
-    return this.sendChatAction(chat_id, "upload_audio")
-      .then(_sendaudio);
+    return this.config.sendChatActionBeforeMsg ?
+      this.sendChatAction(chat_id, "upload_audio")
+        .then(_sendaudio) :
+      _sendaudio();
   }
 
   /**
@@ -256,8 +260,10 @@ export class TelegramBotClient {
       return this.makeRequest<Message>("sendDocument", {formData});
     };
 
-    return this.sendChatAction(chat_id, "upload_document")
-      .then(_senddocument);
+    return this.config.sendChatActionBeforeMsg ?
+      this.sendChatAction(chat_id, "upload_document")
+        .then(_senddocument) :
+      _senddocument();
   }
 
   /**
@@ -307,8 +313,10 @@ export class TelegramBotClient {
       return this.makeRequest<Message>("sendVideo", {formData});
     };
 
-    return this.sendChatAction(chat_id, "upload_video")
-      .then(_sendvideo);
+    return this.config.sendChatActionBeforeMsg ?
+      this.sendChatAction(chat_id, "upload_video")
+        .then(_sendvideo) :
+      _sendvideo();
   }
 
   /**
