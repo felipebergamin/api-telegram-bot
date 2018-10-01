@@ -5,52 +5,52 @@ import * as nodeEmoji from "node-emoji";
 import fetch from "node-fetch";
 import { debug } from "./debug";
 
-import { IAnswerCallbackQueryOptionals } from "./interfaces/OptionalParams/IAnswerCallbackQuery";
-import { IAnswerInlineQueryOptionals } from "./interfaces/OptionalParams/IAnswerInlineQuery";
-import { IAnswerShippingQueryOptionals as AnswerShippingQueryOptionals } from "./interfaces/OptionalParams/IAnswerShippingQuery";
-import { ICreateNewStickerSetOptionals } from "./interfaces/OptionalParams/ICreateNewStickerSet";
-import { IEditMessageCaptionOptionals } from "./interfaces/OptionalParams/IEditMessageCaption";
-import { IEditMessageLiveLocationOptionals as EditMessageLiveLocationOptionals } from "./interfaces/OptionalParams/IEditMessageLiveLocation";
-import { IEditMessageReplyMarkupOptionals } from "./interfaces/OptionalParams/IEditMessageReplyMarkup";
-import { IEditMessageTextOptionals } from "./interfaces/OptionalParams/IEditMessageText";
-import { IGetGameHighScoresOptionals } from "./interfaces/OptionalParams/IGetGameHighScores";
-import { IGetUpdatesOptionals } from "./interfaces/OptionalParams/IGetUpdates";
-import { IGetUserProfilePhotosOptionals } from "./interfaces/OptionalParams/IGetUserProfilePhotos";
-import { IPromoteChatMemberOptionals } from "./interfaces/OptionalParams/IPromoteChatMember";
-import { IRestrictChatMemberOptionals } from "./interfaces/OptionalParams/IRestrictChatMember";
-import { ISendAudioOptionals } from "./interfaces/OptionalParams/ISendAudio";
-import { ISendContactOptionals } from "./interfaces/OptionalParams/ISendContact";
-import { ISendDocumentOptionals } from "./interfaces/OptionalParams/ISendDocument";
-import { ISendGameOptionals } from "./interfaces/OptionalParams/ISendGame";
-import { ISendInvoiceOptionals as SendInvoiceOptionals } from "./interfaces/OptionalParams/ISendInvoice";
-import { ISendLocationOptionals } from "./interfaces/OptionalParams/ISendLocation";
-import { ISendMediaGroupOptionals as SendMediaGroupOptionals } from "./interfaces/OptionalParams/ISendMediaGroup";
-import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage";
-import { ISendPhotoOptionals } from "./interfaces/OptionalParams/ISendPhoto";
-import { ISendStickerOptionals } from "./interfaces/OptionalParams/ISendSticker";
-import { ISendVenueOptionals } from "./interfaces/OptionalParams/ISendVenue";
-import { ISendVideoOptionals } from "./interfaces/OptionalParams/ISendVideo";
-import { ISendVoiceOptionals } from "./interfaces/OptionalParams/ISendVoice";
-import { ISetGameScoreOptionals } from "./interfaces/OptionalParams/ISetGameScore";
-import { ISetWebhookOptionals } from "./interfaces/OptionalParams/ISetWebhook";
-import { IStopMessageLiveLocationOptionals as StopMessageLiveLocationOptionals } from "./interfaces/OptionalParams/IStopMessageLiveLocation";
+import { AnswerCallbackQueryOptionals } from "./interfaces/OptionalParams/AnswerCallbackQuery";
+import { AnswerInlineQueryOptionals } from "./interfaces/OptionalParams/AnswerInlineQuery";
+import { AnswerShippingQueryOptionals } from "./interfaces/OptionalParams/AnswerShippingQuery";
+import { CreateNewStickerSetOptionals } from "./interfaces/OptionalParams/CreateNewStickerSet";
+import { EditMessageCaptionOptionals } from "./interfaces/OptionalParams/EditMessageCaption";
+import { EditMessageLiveLocationOptionals } from "./interfaces/OptionalParams/EditMessageLiveLocation";
+import { EditMessageReplyMarkupOptionals } from "./interfaces/OptionalParams/EditMessageReplyMarkup";
+import { EditMessageTextOptionals } from "./interfaces/OptionalParams/EditMessageText";
+import { GetGameHighScoresOptionals } from "./interfaces/OptionalParams/GetGameHighScores";
+import { GetUpdatesOptionals } from "./interfaces/OptionalParams/GetUpdates";
+import { GetUserProfilePhotosOptionals } from "./interfaces/OptionalParams/GetUserProfilePhotos";
+import { PromoteChatMemberOptionals } from "./interfaces/OptionalParams/PromoteChatMember";
+import { RestrictChatMemberOptionals } from "./interfaces/OptionalParams/RestrictChatMember";
+import { SendAudioOptionals } from "./interfaces/OptionalParams/SendAudio";
+import { SendContactOptionals } from "./interfaces/OptionalParams/SendContact";
+import { SendDocumentOptionals } from "./interfaces/OptionalParams/SendDocument";
+import { SendGameOptionals } from "./interfaces/OptionalParams/SendGame";
+import { SendInvoiceOptionals } from "./interfaces/OptionalParams/SendInvoice";
+import { SendLocationOptionals } from "./interfaces/OptionalParams/SendLocation";
+import { SendMediaGroupOptionals } from "./interfaces/OptionalParams/SendMediaGroup";
+import { SendMessageOptionals } from "./interfaces/OptionalParams/SendMessage";
+import { SendPhotoOptionals } from "./interfaces/OptionalParams/SendPhoto";
+import { SendStickerOptionals } from "./interfaces/OptionalParams/SendSticker";
+import { SendVenueOptionals } from "./interfaces/OptionalParams/SendVenue";
+import { SendVideoOptionals } from "./interfaces/OptionalParams/SendVideo";
+import { SendVoiceOptionals } from "./interfaces/OptionalParams/SendVoiceOptionals";
+import { SetGameScoreOptionals } from "./interfaces/OptionalParams/SetGameScore";
+import { SetWebhookOptionals } from "./interfaces/OptionalParams/SetWebhook";
+import { StopMessageLiveLocationOptionals } from "./interfaces/OptionalParams/StopMessageLiveLocation";
 
-import { IChat as Chat } from "./interfaces/IChat";
-import { IChatMember as ChatMember } from "./interfaces/IChatMember";
-import { IConfig as Config } from "./interfaces/IConfig";
-import { IFile as File } from "./interfaces/IFile";
-import { IGameHighScore as GameHighScore } from "./interfaces/IGameHighScore";
-import { IInputMedia as InputMedia } from "./interfaces/IInputMedia";
-import { ILabeledPrice as LabeledPrice } from "./interfaces/ILabeledPrice";
-import { IMaskPosition as MaskPosition } from "./interfaces/IMaskPosition";
-import { IMessage as Message } from "./interfaces/IMessage";
+import { Chat } from "./interfaces/Chat";
+import { ChatMember } from "./interfaces/ChatMember";
+import { Config } from "./interfaces/Config";
+import { File } from "./interfaces/File";
+import { GameHighScore } from "./interfaces/GameHighScore";
+import { InputMedia } from "./interfaces/InputMedia";
+import { LabeledPrice } from "./interfaces/LabeledPrice";
+import { MaskPosition } from "./interfaces/MaskPosition";
+import { Message } from "./interfaces/Message";
 // import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
-import { IStickerSet as StickerSet } from "./interfaces/IStickerSet";
-import { ITelegramResponse as TelegramResponse } from "./interfaces/ITelegramResponse";
-import { IUpdate as Update } from "./interfaces/IUpdate";
-import { IUser as User } from "./interfaces/IUser";
-import { IUserProfilePhotos as UserProfilePhotos } from "./interfaces/IUserProfilePhotos";
-import { IWebhookInfo as WebhookInfo } from "./interfaces/IWebhookInfo";
+import { StickerSet } from "./interfaces/StickerSet";
+import { TelegramResponse } from "./interfaces/TelegramResponse";
+import { Update } from "./interfaces/Update";
+import { User } from "./interfaces/User";
+import { UserProfilePhotos } from "./interfaces/UserProfilePhotos";
+import { WebhookInfo } from "./interfaces/WebhookInfo";
 
 export class TelegramBotClient {
   private static MAX_MESSAGE_LENGTH = 4096;
@@ -107,7 +107,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public sendMessage(chat_id: number|string, text: string, optionals?: ISendMessageOptionals): Promise<TelegramResponse<Message>> {
+  public sendMessage(chat_id: number|string, text: string, optionals?: SendMessageOptionals): Promise<TelegramResponse<Message>> {
     // telegram message text can not be greater than 4096 characters
     if (text.length > TelegramBotClient.MAX_MESSAGE_LENGTH) {
 
@@ -189,7 +189,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
-  public sendPhoto(chat_id: number|string, photo: ReadStream|string, optionals?: ISendPhotoOptionals): Promise<TelegramResponse<Message>> {
+  public sendPhoto(chat_id: number|string, photo: ReadStream|string, optionals?: SendPhotoOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       photo,
@@ -220,7 +220,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
-  public sendAudio(chat_id: number|string, audio: ReadStream|string, optionals?: ISendAudioOptionals): Promise<TelegramResponse<Message>> {
+  public sendAudio(chat_id: number|string, audio: ReadStream|string, optionals?: SendAudioOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       audio,
       chat_id,
@@ -249,7 +249,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
-  public sendDocument(chat_id: number|string, doc: ReadStream|string, optionals?: ISendDocumentOptionals): Promise<TelegramResponse<Message>> {
+  public sendDocument(chat_id: number|string, doc: ReadStream|string, optionals?: SendDocumentOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       document: doc,
@@ -277,7 +277,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendsticker}
    */
-  public sendSticker(chat_id: number|string, sticker: ReadStream|string, optionals?: ISendStickerOptionals): Promise<TelegramResponse<Message>> {
+  public sendSticker(chat_id: number|string, sticker: ReadStream|string, optionals?: SendStickerOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       sticker,
@@ -302,7 +302,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvideo}
    */
-  public sendVideo(chat_id: number|string, video: ReadStream|string, optionals?: ISendVideoOptionals): Promise<TelegramResponse<Message>> {
+  public sendVideo(chat_id: number|string, video: ReadStream|string, optionals?: SendVideoOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       video,
@@ -332,7 +332,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvoice}
    */
-  public sendVoice(chat_id: number|string, voice: ReadStream|string, optionals?: ISendVoiceOptionals): Promise<TelegramResponse<Message>> {
+  public sendVoice(chat_id: number|string, voice: ReadStream|string, optionals?: SendVoiceOptionals): Promise<TelegramResponse<Message>> {
     const formData = {
       chat_id,
       voice,
@@ -355,7 +355,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendlocation}
    */
-  public sendLocation(chat_id: number|string, latitude: number, longitude: number, optionals?: ISendLocationOptionals): Promise<TelegramResponse<Message>> {
+  public sendLocation(chat_id: number|string, latitude: number, longitude: number, optionals?: SendLocationOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       chat_id,
       latitude,
@@ -416,7 +416,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvenue}
    */
-  public sendVenue(chat_id: number|string, latitude: number, longitude: number, title: string, address: string, optionals?: ISendVenueOptionals): Promise<TelegramResponse<Message>> {
+  public sendVenue(chat_id: number|string, latitude: number, longitude: number, title: string, address: string, optionals?: SendVenueOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       address,
       chat_id,
@@ -442,7 +442,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendcontact}
    */
-  public sendContact(chat_id: number|string, phone_number: string, first_name: string, optionals?: ISendContactOptionals): Promise<TelegramResponse<Message>> {
+  public sendContact(chat_id: number|string, phone_number: string, first_name: string, optionals?: SendContactOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       chat_id,
       first_name,
@@ -476,7 +476,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getuserprofilephotos}
    */
-  public getUserProfilePhotos(user_id: number|string, optionals?: IGetUserProfilePhotosOptionals): Promise<TelegramResponse<UserProfilePhotos>> {
+  public getUserProfilePhotos(user_id: number|string, optionals?: GetUserProfilePhotosOptionals): Promise<TelegramResponse<UserProfilePhotos>> {
     const json = {
       user_id,
       ...optionals,
@@ -603,7 +603,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#answercallbackquery}
    */
-  public answerCallbackQuery(callback_query_id: string, optionals?: IAnswerCallbackQueryOptionals): Promise<TelegramResponse<boolean>> {
+  public answerCallbackQuery(callback_query_id: string, optionals?: AnswerCallbackQueryOptionals): Promise<TelegramResponse<boolean>> {
     const json = {
       callback_query_id,
       ...optionals,
@@ -625,7 +625,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#editmessagetext}
    */
-  public editMessageText(text: string, optionals?: IEditMessageTextOptionals): Promise<TelegramResponse<Message|boolean>> {
+  public editMessageText(text: string, optionals?: EditMessageTextOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = {
       text,
       ...optionals,
@@ -645,7 +645,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#editmessagecaption}
    */
-  public editMessageCaption(optionals?: IEditMessageCaptionOptionals): Promise<TelegramResponse<Message|boolean>> {
+  public editMessageCaption(optionals?: EditMessageCaptionOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = optionals;
 
     return this.makeRequest<Message|boolean>("editMessageCaption", { json });
@@ -661,7 +661,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#editmessagereplymarkup}
    */
-  public editMessageReplyMarkup(optionals?: IEditMessageReplyMarkupOptionals): Promise<TelegramResponse<Message|boolean>> {
+  public editMessageReplyMarkup(optionals?: EditMessageReplyMarkupOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = optionals;
 
     return this.makeRequest<Message|boolean>("editMessageReplyMarkup", { json });
@@ -681,7 +681,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#answerinlinequery}
    */
-  public answerInlineQuery(inline_query_id: string, results: any[], optionals?: IAnswerInlineQueryOptionals): Promise<TelegramResponse<boolean>> {
+  public answerInlineQuery(inline_query_id: string, results: any[], optionals?: AnswerInlineQueryOptionals): Promise<TelegramResponse<boolean>> {
     const json = {
       inline_query_id,
       results,
@@ -702,7 +702,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendgame}
    */
-  public sendGame(chat_id: number, game_short_name: string, optionals?: ISendGameOptionals): Promise<TelegramResponse<Message>> {
+  public sendGame(chat_id: number, game_short_name: string, optionals?: SendGameOptionals): Promise<TelegramResponse<Message>> {
     const json = {
       chat_id,
       game_short_name,
@@ -725,7 +725,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setgamescore}
    */
-  public setGameScore(user_id: number, score: number, optionals?: ISetGameScoreOptionals): Promise<TelegramResponse<Message|boolean>> {
+  public setGameScore(user_id: number, score: number, optionals?: SetGameScoreOptionals): Promise<TelegramResponse<Message|boolean>> {
     const json = {
       user_id,
       ...optionals,
@@ -745,7 +745,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getgamehighscores}
    */
-  public getGameHighScores(user_id: number, optionals?: IGetGameHighScoresOptionals): Promise<TelegramResponse<GameHighScore[]>> {
+  public getGameHighScores(user_id: number, optionals?: GetGameHighScoresOptionals): Promise<TelegramResponse<GameHighScore[]>> {
     const json = {
       user_id,
       ...optionals,
@@ -764,7 +764,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#getupdates}
    */
-  public getUpdates(optionals?: IGetUpdatesOptionals): Promise<TelegramResponse<Update[]>> {
+  public getUpdates(optionals?: GetUpdatesOptionals): Promise<TelegramResponse<Update[]>> {
     const json = optionals || {};
 
     return this.makeRequest<Update[]>("getUpdates", { json });
@@ -780,7 +780,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#setwebhook}
    */
-  public setWebhook(url: string, optionals?: ISetWebhookOptionals): Promise<TelegramResponse<boolean>> {
+  public setWebhook(url: string, optionals?: SetWebhookOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       url,
       ...optionals,
@@ -831,7 +831,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#restrictchatmember}
    */
-  public restrictChatMember(chat_id: number|string, user_id: number|string, options: IRestrictChatMemberOptionals): Promise<TelegramResponse<boolean>> {
+  public restrictChatMember(chat_id: number|string, user_id: number|string, options: RestrictChatMemberOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       chat_id,
       user_id,
@@ -857,7 +857,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#promotechatmember}
    */
-  public promoteChatMember(chat_id: number|string, user_id: number|string, options: IPromoteChatMemberOptionals): Promise<TelegramResponse<boolean>> {
+  public promoteChatMember(chat_id: number|string, user_id: number|string, options: PromoteChatMemberOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       chat_id,
       user_id,
@@ -994,7 +994,7 @@ export class TelegramBotClient {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#createnewstickerset}
    */
-  public createNewStickerSet(user_id: number|string, name: string, title: string, png_sticker: ReadStream|string, emojis: string, options: ICreateNewStickerSetOptionals): Promise<TelegramResponse<boolean>> {
+  public createNewStickerSet(user_id: number|string, name: string, title: string, png_sticker: ReadStream|string, emojis: string, options: CreateNewStickerSetOptionals): Promise<TelegramResponse<boolean>> {
     const formData = {
       emojis,
       name,

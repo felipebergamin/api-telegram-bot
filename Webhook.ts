@@ -2,12 +2,12 @@
 import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
 import { debug } from "./debug";
-import { IMessage as Message } from "./interfaces/IMessage";
-import { IMessageActions as MessageActions } from "./interfaces/IMessageActions";
-import { IRegexCallback as RegexCallback } from "./interfaces/IRegexCallback";
-import { ITelegramResponse as TelegramResponse } from "./interfaces/ITelegramResponse";
-import { IUpdate as Update } from "./interfaces/IUpdate";
-import { ISendMessageOptionals } from "./interfaces/OptionalParams/ISendMessage";
+import { Message } from "./interfaces/Message";
+import { MessageActions } from "./interfaces/MessageActions";
+import { SendMessageOptionals } from "./interfaces/OptionalParams/SendMessage";
+import { RegexCallback } from "./interfaces/RegexCallback";
+import { TelegramResponse } from "./interfaces/TelegramResponse";
+import { Update } from "./interfaces/Update";
 import { TelegramBotClient } from "./TelegramBotClient";
 
 const _messageTypes = [
@@ -139,10 +139,10 @@ export class Webhook extends EventEmitter {
       return this.bot.deleteMessage(message.chat.id, message.message_id);
     };
 
-    const reply = (text: string, optionals?: ISendMessageOptionals): Promise<TelegramResponse<Message>> => {
+    const reply = (text: string, optionals?: SendMessageOptionals): Promise<TelegramResponse<Message>> => {
       debug("replying message");
 
-      optionals = optionals || {} as ISendMessageOptionals;
+      optionals = optionals || {} as SendMessageOptionals;
       optionals.reply_to_message_id = message.message_id;
 
       return this.bot.sendMessage(message.chat.id, text, optionals);

@@ -1,5 +1,5 @@
-import { IInlineKeyboardButton as InlineKeyboardButton } from "../interfaces/IInlineKeyboardButton";
-import { IInlineKeyboardMarkup as InlineKeyboardMarkup } from "../interfaces/IInlineKeyboardMarkup";
+import { InlineKeyboardButton } from "../interfaces/InlineKeyboardButton";
+import { InlineKeyboardMarkup } from "../interfaces/InlineKeyboardMarkup";
 
 export class InlineKeyboardBuilder implements InlineKeyboardMarkup {
   public inline_keyboard: [InlineKeyboardButton[]];

@@ -1,5 +1,5 @@
-import { IKeyboardButton as KeyboardButton } from "../interfaces/IKeyboardButton";
-import { IReplyKeyboardMarkup as ReplyKeyboardMarkup } from "../interfaces/IReplyKeyboardMarkup";
+import { KeyboardButton } from "../interfaces/KeyboardButton";
+import { ReplyKeyboardMarkup } from "../interfaces/ReplyKeyboardMarkup";
 
 export class ReplyKeyboardBuilder implements ReplyKeyboardMarkup {
   public keyboard: [KeyboardButton[]];
