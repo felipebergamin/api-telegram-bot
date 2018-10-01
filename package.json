@@ -6,9 +6,9 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && tslint --project . && tsc",
+    "build": "tslint --project . && rm -rf dist && tsc",
     "gendoc": "rm -rf docs && typedoc --out docs .",
-    "prepublishOnly": "rm -rf dist && tslint --project . && tsc"
+    "prepublishOnly": "tslint --project . && rm -rf dist && tsc"
   },
   "repository": {
     "type": "git",

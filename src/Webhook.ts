@@ -1,6 +1,7 @@
 /* tslint:disable:max-line-length */
 import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
+import { Bot } from "./Bot";
 import { debug } from "./debug";
 import { Message } from "./interfaces/Message";
 import { MessageActions } from "./interfaces/MessageActions";
@@ -8,7 +9,6 @@ import { SendMessageOptionals } from "./interfaces/OptionalParams/SendMessage";
 import { RegexCallback } from "./interfaces/RegexCallback";
 import { TelegramResponse } from "./interfaces/TelegramResponse";
 import { Update } from "./interfaces/Update";
-import { TelegramBotClient } from "./TelegramBotClient";
 
 const _messageTypes = [
   "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
@@ -23,9 +23,9 @@ const _updateTypes = [
 ];
 
 export class Webhook extends EventEmitter {
+  private bot: Bot;
   private onlyFirstRegexMatch: boolean;
   private regexCallbacks: RegexCallback[];
-  private bot: TelegramBotClient;
 
   /**
    * class constructor
@@ -34,7 +34,7 @@ export class Webhook extends EventEmitter {
    * @param bot TelegramBotClient instance
    * @param onlyFirstRegexMatch `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex())
    */
-  constructor(bot: TelegramBotClient, onlyFirstRegexMatch: boolean = true) {
+  constructor(bot: Bot, onlyFirstRegexMatch: boolean = true) {
     super();
 
     this.bot = bot;

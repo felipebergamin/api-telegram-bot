@@ -7,7 +7,7 @@ import { debug } from "./debug";
 
 import * as I from "./interfaces";
 
-export class TelegramBotClient {
+export class Bot {
   private static MAX_MESSAGE_LENGTH = 4096;
   private config: I.Config;
   private emojify: (text: string) => string;
@@ -64,11 +64,11 @@ export class TelegramBotClient {
    */
   public sendMessage(chat_id: number|string, text: string, optionals?: I.SendMessageOptionals): Promise<I.TelegramResponse<I.Message>> {
     // telegram message text can not be greater than 4096 characters
-    if (text.length > TelegramBotClient.MAX_MESSAGE_LENGTH) {
+    if (text.length > Bot.MAX_MESSAGE_LENGTH) {
 
       // if configuration does not allow message split, throw an error
       if (!this.config.splitLongMessages) {
-        return Promise.reject(new Error(`text can't be longer than ${TelegramBotClient.MAX_MESSAGE_LENGTH} chars`));
+        return Promise.reject(new Error(`text can't be longer than ${Bot.MAX_MESSAGE_LENGTH} chars`));
       }
       // Wraps text in chunks of 4096 characters
       const splited_text = this.split_text(text);
@@ -1150,12 +1150,12 @@ export class TelegramBotClient {
 
   private split_text(text: string): string[] {
     const text_length = text.length;
-    const times_greater = Math.ceil((text_length / TelegramBotClient.MAX_MESSAGE_LENGTH));
+    const times_greater = Math.ceil((text_length / Bot.MAX_MESSAGE_LENGTH));
     const splited_text = [];
 
     for (let i = 0; i < times_greater; i++) {
-        const start = TelegramBotClient.MAX_MESSAGE_LENGTH * i;
-        const end = TelegramBotClient.MAX_MESSAGE_LENGTH * (i + 1);
+        const start = Bot.MAX_MESSAGE_LENGTH * i;
+        const end = Bot.MAX_MESSAGE_LENGTH * (i + 1);
 
         const piece = text.substring(start, end);
 

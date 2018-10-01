@@ -1,4 +1,4 @@
-export { TelegramBotClient } from "./TelegramBotClient";
+export { Bot } from "./Bot";
 export { Webhook } from "./Webhook";
 
 export * from "./builders";
