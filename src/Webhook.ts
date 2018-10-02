@@ -1,6 +1,7 @@
 /* tslint:disable:max-line-length */
 import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
+
 import { Bot } from "./Bot";
 import { debug } from "./debug";
 import { Message } from "./interfaces/Message";
