@@ -70,7 +70,7 @@ export class Bot {
         return Promise.reject(new Error(`text can't be longer than ${Bot.MAX_MESSAGE_LENGTH} chars`));
       }
       // Wraps text in chunks of 4096 characters
-      const splited_text = this.split_text(text);
+      const splited_text = this.splitText(text, Bot.MAX_MESSAGE_LENGTH);
 
       // send chunks sequentially
       return splited_text.reduce((previous: Promise<I.TelegramResponse<I.Message>>, chunk: string) => {
@@ -1140,19 +1140,19 @@ export class Bot {
     }).promise();
   }
 
-  private split_text(text: string): string[] {
-    const text_length = text.length;
-    const times_greater = Math.ceil((text_length / Bot.MAX_MESSAGE_LENGTH));
-    const splited_text = [];
+  private splitText(text: string, chunkLength: number): string[] {
+    const textLength = text.length;
+    const timesGreater = Math.ceil((textLength / chunkLength));
+    const splitedText = [];
 
-    for (let i = 0; i < times_greater; i++) {
+    for (let i = 0; i < timesGreater; i++) {
       const start = Bot.MAX_MESSAGE_LENGTH * i;
       const end = Bot.MAX_MESSAGE_LENGTH * (i + 1);
 
       const piece = text.substring(start, end);
 
-      splited_text.push(piece);
+      splitedText.push(piece);
     }
-    return splited_text;
+    return splitedText;
   }
 }
