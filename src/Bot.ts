@@ -6,6 +6,7 @@ import { isFunction, isObject } from "util";
 
 import { debug } from "./debug";
 import * as I from "./interfaces";
+import { createMessageActions } from "./utils";
 import { Webhook } from "./Webhook";
 
 export class Bot {
@@ -1185,7 +1186,7 @@ export class Bot {
     });
 
     if (cbk) {
-      cbk.f(message);
+      cbk.f(message, createMessageActions(message, this));
       return this.repliesCallbacks.splice(i, 1);
     }
     debug(`Reply handler not found for message ${message.reply_to_message.message_id} from ${message.from.id}`);
