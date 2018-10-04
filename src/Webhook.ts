@@ -10,6 +10,7 @@ import { SendMessageOptionals } from "./interfaces/OptionalParams/SendMessage";
 import { RegexCallback } from "./interfaces/RegexCallback";
 import { TelegramResponse } from "./interfaces/TelegramResponse";
 import { Update } from "./interfaces/Update";
+import { createMessageActions } from "./utils";
 
 const _messageTypes = [
   "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
@@ -124,44 +125,8 @@ export class Webhook extends EventEmitter {
     });
   }
 
-  private getActionsFor(message: Message): MessageActions {
-
-    const banChatMember = (until: number = 0): Promise<TelegramResponse<boolean>> => {
-      debug("ban member");
-
-      return this.bot.kickChatMember(message.chat.id, message.from.id, until);
-    };
-
-    const deleteMessage = (): Promise<TelegramResponse<boolean>> => {
-      debug("deleting message");
-
-      return this.bot.deleteMessage(message.chat.id, message.message_id);
-    };
-
-    const reply = (text: string, optionals?: SendMessageOptionals): Promise<TelegramResponse<Message>> => {
-      debug("replying message");
-
-      optionals = optionals || {} as SendMessageOptionals;
-      optionals.reply_to_message_id = message.message_id;
-
-      return this.bot.sendMessage(message.chat.id, text, optionals);
-    };
-
-    if (message.chat.type.includes("private")) {
-      return {
-        reply,
-      } as MessageActions;
-    }
-
-    return {
-      banChatMember,
-      deleteMessage,
-      reply,
-    } as MessageActions;
-  }
-
   private processMessageType(message: Message) {
-    const actions = this.getActionsFor(message);
+    const actions = createMessageActions(message, this.bot);
 
     _messageTypes.forEach((msgType) => {
       if (msgType in message) {
@@ -172,7 +137,7 @@ export class Webhook extends EventEmitter {
   }
 
   private checkRegexCallbacks(message: Message) {
-    const actions = this.getActionsFor(message);
+    const actions = createMessageActions(message, this.bot);
 
     this.regexCallbacks.some((v: RegexCallback): boolean => {
       if (v.regex.test(message.text)) {
