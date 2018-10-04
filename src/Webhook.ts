@@ -62,7 +62,6 @@ export class Webhook extends EventEmitter {
 
   /**
    * Use this method to create a route manipulator function for webhook.
-   * Attention: the webhook url must contains the bot token.
    * @returns {function}
    * @example
    * // using node http
@@ -72,7 +71,7 @@ export class Webhook extends EventEmitter {
    * app.post(webhookUrl, bot.getWebhook())
    */
   public getWebhook() {
-    const wh = (req: IncomingMessage, res: ServerResponse) => {
+    return (req: IncomingMessage, res: ServerResponse) => {
       if (req.method === "POST") {
         const chunks: any[] = [];
         let body: string;
@@ -109,8 +108,6 @@ export class Webhook extends EventEmitter {
         res.end();
       }
     };
-
-    return wh;
   }
 
   private processUpdateType(update: Update) {
