@@ -43,5 +43,6 @@ export { Video } from "./Video";
 export { VideoNote } from "./VideoNote";
 export { Voice } from "./Voice";
 export { WebhookInfo } from "./WebhookInfo";
+export { OnReceiveReplyCallback, OnReplyCallbackFunction } from "./OnReceiveReplyCallback";
 
 export * from "./OptionalParams";

@@ -2,14 +2,17 @@
 import { ReadStream } from "fs";
 import * as nodeEmoji from "node-emoji";
 import * as request from "request-promise-native";
+import { isFunction, isObject } from "util";
 
 import { debug } from "./debug";
 import * as I from "./interfaces";
+import { Webhook } from "./Webhook";
 
 export class Bot {
   private static MAX_MESSAGE_LENGTH = 4096;
   private config: I.Config;
   private emojify: (text: string) => string;
+  private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
 
   /**
    * Constructs bot client
@@ -39,6 +42,14 @@ export class Bot {
     }
   }
 
+  public set webhook(webhook: Webhook) {
+    // this._webhook = webhook;
+
+    if (webhook) {
+      webhook.on("message", (e) => this.checkRegisteredCallbacks(e));
+    }
+  }
+
   /**
    * Requires no parameters. Returns basic information about the bot in form of a `User` object.
    * @see {@link https://core.telegram.org/bots/api#getme}
@@ -61,7 +72,21 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public sendMessage(chat_id: number | string, text: string, optionals?: I.SendMessageOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendMessage(chat_id: number | string, text: string, optionalParams: I.SendMessageOptionals | I.OnReplyCallbackFunction = {}): Promise<I.TelegramResponse<I.Message>> {
+    let replyCallback;
+    let optionals = {};
+
+    const isParamsObj = (obj): obj is I.SendMessageOptionals => isObject(optionalParams);
+
+    if (isFunction(optionalParams)) {
+      replyCallback = optionalParams;
+    } else if (isParamsObj(optionalParams)) {
+      const { onReceiveReply, ...opts } = optionalParams;
+
+      replyCallback = onReceiveReply;
+      optionals = opts;
+    }
+
     // telegram message text can not be greater than 4096 characters
     if (text.length > Bot.MAX_MESSAGE_LENGTH) {
 
@@ -88,7 +113,8 @@ export class Bot {
     };
 
     const _sendmsg = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendMessage", { json });
+      return this.makeRequest<I.Message>("sendMessage", { json })
+        .then((msg) => isFunction(replyCallback) ? this.registerReplyHandler(msg, replyCallback) : msg);
     };
 
     return this.config.sendChatActionBeforeMsg ?
@@ -1138,6 +1164,46 @@ export class Bot {
       uri,
       ...params,
     }).promise();
+  }
+
+  private checkRegisteredCallbacks(message: I.Message) {
+    if (!message.reply_to_message) {
+      debug("Message isn't a reply, skipping");
+      return;
+    }
+    debug(`I have ${this.repliesCallbacks.length} reply callbacks`);
+
+    let i;
+    const cbk = this.repliesCallbacks.find((rc, index) => {
+      if (rc.message_id === message.reply_to_message.message_id && rc.chat === message.from.id) {
+        debug(`Reply handler found for message ${rc.message_id} from ${rc.chat}`);
+        i = index;
+        return true;
+      }
+
+      return false;
+    });
+
+    if (cbk) {
+      cbk.f(message);
+      return this.repliesCallbacks.splice(i, 1);
+    }
+    debug(`Reply handler not found for message ${message.reply_to_message.message_id} from ${message.from.id}`);
+  }
+
+  private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: (m: I.Message) => void): I.TelegramResponse<I.Message> {
+    if (!isFunction(cbk)) {
+      throw new Error(`expected a function, received ${typeof cbk}`);
+    }
+    const { message_id, chat } = sentMsg.result;
+    this.repliesCallbacks.push({
+      chat: chat.id,
+      message_id,
+
+      f: cbk,
+    });
+
+    return sentMsg;
   }
 
   private splitText(text: string, chunkLength: number): string[] {

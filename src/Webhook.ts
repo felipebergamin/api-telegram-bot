@@ -38,6 +38,7 @@ export class Webhook extends EventEmitter {
   constructor(bot: Bot, onlyFirstRegexMatch: boolean = true) {
     super();
 
+    bot.webhook = this;
     this.bot = bot;
     this.onlyFirstRegexMatch = onlyFirstRegexMatch;
     this.regexCallbacks = [];

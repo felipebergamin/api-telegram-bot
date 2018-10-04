@@ -10,5 +10,7 @@ export interface SendMessageOptionals {
   reply_to_message_id?: number;
   reply_markup?: InlineKeyboardMarkup|ReplyKeyboardMarkup|ReplyKeyboardRemove|ForceReply;
 
+  onReceiveReply?: (any) => void;
+
   readonly [propName: string]: any;
 }
