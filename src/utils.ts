@@ -1,3 +1,5 @@
+import { isObject } from "util";
+
 import { Bot } from "./Bot";
 import { debug } from "./debug";
 import { Message, MessageActions, SendMessageOptionals, TelegramResponse } from "./interfaces";
@@ -26,3 +28,5 @@ export const createMessageActions = (message: Message, bot: Bot): MessageActions
     },
   };
 };
+
+export const isParamsObj = <T>(obj): obj is T => isObject(obj);

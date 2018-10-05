@@ -6,7 +6,7 @@ import { isFunction, isObject } from "util";
 
 import { debug } from "./debug";
 import * as I from "./interfaces";
-import { createMessageActions } from "./utils";
+import { createMessageActions, isParamsObj } from "./utils";
 import { Webhook } from "./Webhook";
 
 export class Bot {
@@ -77,11 +77,9 @@ export class Bot {
     let replyCallback;
     let optionals = {};
 
-    const isParamsObj = (obj): obj is I.SendMessageOptionals => isObject(optionalParams);
-
     if (isFunction(optionalParams)) {
       replyCallback = optionalParams;
-    } else if (isParamsObj(optionalParams)) {
+    } else if (isParamsObj<I.SendMessageOptionals>(optionalParams)) {
       const { onReceiveReply, ...opts } = optionalParams;
 
       replyCallback = onReceiveReply;
