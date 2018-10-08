@@ -168,15 +168,18 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
-  public sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals?: I.SendPhotoOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals: I.SendPhotoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+    const { onReceiveReply, ...optionalParams } = optionals;
+
     const formData = {
       chat_id,
       photo,
-      ...optionals,
+      ...optionalParams,
     };
 
     const _sendphoto = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendPhoto", { formData });
+      return this.makeRequest<I.Message>("sendPhoto", { formData })
+        .then((msgSent) => isFunction(onReceiveReply) ? this.registerReplyHandler(msgSent, onReceiveReply) : msgSent);
     };
 
     return this.config.sendChatActionBeforeMsg ?
@@ -1190,11 +1193,13 @@ export class Bot {
     debug(`Reply handler not found for message ${message.reply_to_message.message_id} from ${message.from.id}`);
   }
 
-  private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: (m: I.Message) => void): I.TelegramResponse<I.Message> {
+  private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: I.OnReplyCallbackFunction): I.TelegramResponse<I.Message> {
     if (!isFunction(cbk)) {
-      throw new Error(`expected a function, received ${typeof cbk}`);
+      throw new Error(`registerReplyHandler: expected a function, received ${typeof cbk}`);
     }
     const { message_id, chat } = sentMsg.result;
+
+    debug(`Registering reply handler to message ${message_id} on chat ${chat.id}`);
     this.repliesCallbacks.push({
       chat: chat.id,
       message_id,
