@@ -6,7 +6,7 @@ import { isFunction, isObject } from "util";
 
 import { debug } from "./debug";
 import * as I from "./interfaces";
-import { createMessageActions, isParamsObj } from "./utils";
+import { createMessageActions, isParamsObj, stringifyFormData } from "./utils";
 import { Webhook } from "./Webhook";
 
 export class Bot {
@@ -1159,6 +1159,10 @@ export class Bot {
     if (params.formData && params.formData.caption) {
       debug("Emojify caption");
       params.formData.caption = this.emojify(params.formData.caption);
+    }
+
+    if ("formData" in params) {
+      params.formData = stringifyFormData(params.formData);
     }
 
     debug("fetching telegram api");

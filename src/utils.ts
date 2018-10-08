@@ -1,3 +1,4 @@
+import { ReadStream } from "fs";
 import { isObject } from "util";
 
 import { Bot } from "./Bot";
@@ -30,3 +31,19 @@ export const createMessageActions = (message: Message, bot: Bot): MessageActions
 };
 
 export const isParamsObj = <T>(obj): obj is T => isObject(obj);
+
+/**
+ * receive a object and stringify sub-objects to send via form-data
+ * @beta
+ */
+export const stringifyFormData = (formData: any) => {
+  const objKeys = Object.keys(formData);
+
+  for (const key of objKeys) {
+    if (typeof formData[key] === "object" && !(formData[key] instanceof ReadStream)) {
+      formData[key] = JSON.stringify(formData[key]);
+    }
+  }
+
+  return formData;
+};
