@@ -73,7 +73,7 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public sendMessage(chat_id: number | string, text: string, optionalParams: I.SendMessageOptionals | I.OnReplyCallbackFunction = {}): Promise<I.TelegramResponse<I.Message>> {
+  public async sendMessage(chat_id: number | string, text: string, optionalParams: I.SendMessageOptionals | I.OnReplyCallbackFunction = {}): Promise<I.TelegramResponse<I.Message>> {
     let replyCallback;
     let optionals = {};
 
@@ -89,37 +89,37 @@ export class Bot {
     // telegram message text can not be greater than 4096 characters
     if (text.length > Bot.MAX_MESSAGE_LENGTH) {
 
-      // if configuration does not allow message split, throw an error
-      if (!this.config.splitLongMessages) {
-        return Promise.reject(new Error(`text can't be longer than ${Bot.MAX_MESSAGE_LENGTH} chars`));
-      }
-      // Wraps text in chunks of 4096 characters
-      const splited_text = this.splitText(text, Bot.MAX_MESSAGE_LENGTH);
+      // if bot config allow message split, throw an error
+      if (this.config.splitLongMessages) {
+        // Wraps text in chunks of 4096 characters
+        const splited_text = this.splitText(text, Bot.MAX_MESSAGE_LENGTH);
 
-      // send chunks sequentially
-      return splited_text.reduce((previous: Promise<I.TelegramResponse<I.Message>>, chunk: string) => {
-        // sendMessage call itself with a acceptable text length
-        return previous
-          .then(() => this.sendMessage(chat_id, chunk, optionals));
-      }, Promise.resolve({} as I.TelegramResponse<I.Message>));
+        // send chunks sequentially
+        return splited_text.reduce((previous: Promise<I.TelegramResponse<I.Message>>, chunk: string) => {
+          // sendMessage call itself with a acceptable text length
+          return previous
+            .then(() => this.sendMessage(chat_id, chunk, optionals));
+        }, Promise.resolve({} as I.TelegramResponse<I.Message>));
+      }
     }
 
     // from here on executes only if text <= 4096
-    const params = { chat_id, text };
     const json = {
-      ...params,
+      chat_id,
+      text,
       ...optionals,
     };
 
-    const _sendmsg = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendMessage", { json })
-        .then((msg) => isFunction(replyCallback) ? this.registerReplyHandler(msg, replyCallback) : msg);
+    const _sendmsg = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sentmsg = await this.makeRequest<I.Message>("sendMessage", { json });
+      this.registerReplyHandler(sentmsg, replyCallback);
+      return sentmsg;
     };
 
-    return this.config.sendChatActionBeforeMsg ?
-      this.sendChatAction(chat_id, "typing")
-        .then(_sendmsg) :
-      _sendmsg();
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, "typing");
+    }
+    return await _sendmsg();
   }
 
   /**
@@ -168,7 +168,7 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
-  public sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals: I.SendPhotoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+  public async sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals: I.SendPhotoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
     const { onReceiveReply, ...optionalParams } = optionals;
 
     const formData = {
@@ -177,14 +177,16 @@ export class Bot {
       ...optionalParams,
     };
 
-    const _sendphoto = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendPhoto", { formData })
-        .then((msgSent) => isFunction(onReceiveReply) ? this.registerReplyHandler(msgSent, onReceiveReply) : msgSent);
+    const _sendphoto = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>("sendPhoto", { formData });
+      this.registerReplyHandler(sent, onReceiveReply);
+      return sent;
     };
 
-    return this.config.sendChatActionBeforeMsg ?
-      this.sendChatAction(chat_id, "upload_photo").then(_sendphoto) :
-      _sendphoto();
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, "upload_photo");
+    }
+    return await _sendphoto();
   }
 
   /**
@@ -202,7 +204,7 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
-  public sendAudio(chat_id: number | string, audio: ReadStream | string, optionals: I.SendAudioOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+  public async sendAudio(chat_id: number | string, audio: ReadStream | string, optionals: I.SendAudioOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
     const { onReceiveReply, ...optionalParams } = optionals;
     const formData = {
       audio,
@@ -216,10 +218,10 @@ export class Bot {
       return sent;
     };
 
-    return this.config.sendChatActionBeforeMsg ?
-      this.sendChatAction(chat_id, "upload_audio")
-        .then(_sendaudio) :
-      _sendaudio();
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, "upload_audio");
+    }
+    return await _sendaudio();
   }
 
   /**
@@ -234,7 +236,7 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
-  public sendDocument(chat_id: number | string, doc: ReadStream | string, optionals: I.SendDocumentOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+  public async sendDocument(chat_id: number | string, doc: ReadStream | string, optionals: I.SendDocumentOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
     const { onReceiveReply, ...optionalParams } = optionals;
 
     const formData = {
@@ -249,10 +251,10 @@ export class Bot {
       return sent;
     };
 
-    return this.config.sendChatActionBeforeMsg ?
-      this.sendChatAction(chat_id, "upload_document")
-        .then(_senddocument) :
-      _senddocument();
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, "upload_document");
+    }
+    return await _senddocument();
   }
 
   /**
