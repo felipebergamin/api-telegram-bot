@@ -202,15 +202,18 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
-  public sendAudio(chat_id: number | string, audio: ReadStream | string, optionals?: I.SendAudioOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendAudio(chat_id: number | string, audio: ReadStream | string, optionals: I.SendAudioOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+    const { onReceiveReply, ...optionalParams } = optionals;
     const formData = {
       audio,
       chat_id,
-      ...optionals,
+      ...optionalParams,
     };
 
-    const _sendaudio = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendAudio", { formData });
+    const _sendaudio = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>("sendAudio", { formData });
+      this.registerReplyHandler(sent, onReceiveReply);
+      return sent;
     };
 
     return this.config.sendChatActionBeforeMsg ?
@@ -231,15 +234,19 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
-  public sendDocument(chat_id: number | string, doc: ReadStream | string, optionals?: I.SendDocumentOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendDocument(chat_id: number | string, doc: ReadStream | string, optionals: I.SendDocumentOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+    const { onReceiveReply, ...optionalParams } = optionals;
+
     const formData = {
       chat_id,
       document: doc,
-      ...optionals,
+      ...optionalParams,
     };
 
-    const _senddocument = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendDocument", { formData });
+    const _senddocument = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>("sendDocument", { formData });
+      this.registerReplyHandler(sent, onReceiveReply);
+      return sent;
     };
 
     return this.config.sendChatActionBeforeMsg ?
@@ -259,14 +266,18 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendsticker}
    */
-  public sendSticker(chat_id: number | string, sticker: ReadStream | string, optionals?: I.SendStickerOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public async sendSticker(chat_id: number | string, sticker: ReadStream | string, optionals?: I.SendStickerOptionals): Promise<I.TelegramResponse<I.Message>> {
+    const { onReceiveReply, ...optionalParams } = optionals;
+
     const formData = {
       chat_id,
       sticker,
-      ...optionals,
+      ...optionalParams,
     };
 
-    return this.makeRequest<I.Message>("sendSticker", { formData });
+    const sent = await this.makeRequest<I.Message>("sendSticker", { formData });
+    this.registerReplyHandler(sent, onReceiveReply);
+    return sent;
   }
 
   /**
@@ -284,21 +295,25 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendvideo}
    */
-  public sendVideo(chat_id: number | string, video: ReadStream | string, optionals?: I.SendVideoOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public async sendVideo(chat_id: number | string, video: ReadStream | string, optionals: I.SendVideoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+    const { onReceiveReply, ...optionalParams } = optionals;
+
     const formData = {
       chat_id,
       video,
-      ...optionals,
+      ...optionalParams,
     };
 
-    const _sendvideo = (): Promise<I.TelegramResponse<I.Message>> => {
-      return this.makeRequest<I.Message>("sendVideo", { formData });
+    const _sendvideo = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>("sendVideo", { formData });
+      this.registerReplyHandler(sent, onReceiveReply);
+      return sent;
     };
 
-    return this.config.sendChatActionBeforeMsg ?
-      this.sendChatAction(chat_id, "upload_video")
-        .then(_sendvideo) :
-      _sendvideo();
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, "upload_video");
+    }
+    return await _sendvideo();
   }
 
   /**
@@ -337,15 +352,19 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendlocation}
    */
-  public sendLocation(chat_id: number | string, latitude: number, longitude: number, optionals?: I.SendLocationOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public async sendLocation(chat_id: number | string, latitude: number, longitude: number, optionals: I.SendLocationOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+    const { onReceiveReply, ...optionalParams } = optionals;
+
     const json = {
       chat_id,
       latitude,
       longitude,
-      ...optionals,
+      ...optionalParams,
     };
 
-    return this.makeRequest<I.Message>("sendLocation", { json });
+    const sent = await this.makeRequest<I.Message>("sendLocation", { json });
+    this.registerReplyHandler(sent, onReceiveReply);
+    return sent;
   }
 
   /**
@@ -1166,10 +1185,23 @@ export class Bot {
     }
 
     debug("fetching telegram api");
-    return request.post({
-      uri,
-      ...params,
-    }).promise();
+    return request.post(
+      {
+        uri,
+        ...params,
+        transform: (body, response) => {
+          if (typeof body === "string") {
+            try {
+              return JSON.parse(body);
+            } catch (err) {
+              return body;
+            }
+          }
+
+          return body;
+        },
+      },
+    ).promise();
   }
 
   private checkRegisteredCallbacks(message: I.Message) {
@@ -1198,18 +1230,21 @@ export class Bot {
   }
 
   private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: I.OnReplyCallbackFunction): I.TelegramResponse<I.Message> {
-    if (!isFunction(cbk)) {
-      throw new Error(`registerReplyHandler: expected a function, received ${typeof cbk}`);
+    if (cbk) {
+
+      if (!isFunction(cbk)) {
+        throw new Error(`registerReplyHandler: expected a function, received ${typeof cbk}`);
+      }
+      const { message_id, chat } = sentMsg.result;
+
+      debug(`Registering reply handler to message ${message_id} on chat ${chat.id}`);
+      this.repliesCallbacks.push({
+        chat: chat.id,
+        message_id,
+
+        f: cbk,
+      });
     }
-    const { message_id, chat } = sentMsg.result;
-
-    debug(`Registering reply handler to message ${message_id} on chat ${chat.id}`);
-    this.repliesCallbacks.push({
-      chat: chat.id,
-      message_id,
-
-      f: cbk,
-    });
 
     return sentMsg;
   }
