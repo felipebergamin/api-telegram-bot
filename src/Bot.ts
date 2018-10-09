@@ -73,17 +73,17 @@ export class Bot {
    * @returns {Promise}
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public async sendMessage(chat_id: number | string, text: string, optionalParams: I.SendMessageOptionals | I.OnReplyCallbackFunction = {}): Promise<I.TelegramResponse<I.Message>> {
+  public async sendMessage(chat_id: number | string, text: string, optionals: I.SendMessageOptionals | I.OnReplyCallbackFunction = {}): Promise<I.TelegramResponse<I.Message>> {
     let replyCallback;
-    let optionals = {};
+    let optionalParams = {};
 
-    if (isFunction(optionalParams)) {
-      replyCallback = optionalParams;
-    } else if (isParamsObj<I.SendMessageOptionals>(optionalParams)) {
-      const { onReceiveReply, ...opts } = optionalParams;
+    if (isFunction(optionals)) {
+      replyCallback = optionals;
+    } else if (isParamsObj<I.SendMessageOptionals>(optionals)) {
+      const { onReceiveReply, ...opts } = optionals;
 
       replyCallback = onReceiveReply;
-      optionals = opts;
+      optionalParams = opts;
     }
 
     // telegram message text can not be greater than 4096 characters
@@ -95,10 +95,11 @@ export class Bot {
         const splited_text = this.splitText(text, Bot.MAX_MESSAGE_LENGTH);
 
         // send chunks sequentially
-        return splited_text.reduce((previous: Promise<I.TelegramResponse<I.Message>>, chunk: string) => {
+        return splited_text.reduce((previous: Promise<I.TelegramResponse<I.Message>>, chunk: string, index) => {
           // sendMessage call itself with a acceptable text length
+          // if this chunk is the last, pass optionals with reply handler callback
           return previous
-            .then(() => this.sendMessage(chat_id, chunk, optionals));
+            .then(() => this.sendMessage(chat_id, chunk, (index === splited_text.length - 1 ? optionals : optionalParams)));
         }, Promise.resolve({} as I.TelegramResponse<I.Message>));
       }
     }
