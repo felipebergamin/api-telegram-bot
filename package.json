@@ -28,7 +28,8 @@
     "debug": "^2.6.0",
     "node-emoji": "^1.7.0",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "rxjs": "^6.3.3"
   },
   "devDependencies": {
     "@types/debug": "0.0.30",
