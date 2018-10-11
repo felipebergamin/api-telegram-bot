@@ -1,75 +1,115 @@
 /* tslint:disable:max-line-length */
 import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
+import { fromEvent, Observable } from "rxjs";
+import { map, share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
-import { Message } from "./interfaces/Message";
+import { Message } from "./interfaces";
 import { MessageActions } from "./interfaces/MessageActions";
 import { RegexCallback } from "./interfaces/RegexCallback";
 import { Update } from "./interfaces/Update";
-import { createMessageActions } from "./utils";
+import {
+  checkUpdateType,
+  createFilteredMessageObservable,
+  createFilteredUpdateObservable,
+  ExplicitTypedUpdate,
+} from "./utils";
 
-const _messageTypes = [
-  "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
-  "contact", "location", "venue", "new_chat_members", "left_chat_member", "new_chat_title",
-  "new_chat_photo", "delete_chat_photo", "group_chat_created", "supergroup_chat_created",
-  "channel_chat_created", "pinned_message", "invoice", "successful_payment",
-];
-const _updateTypes = [
-  "message", "edited_message", "channel_post", "edited_channel_post",
-  "inline_query", "chosen_inline_result", "callback_query", "shipping_query",
-  "pre_checkout_query",
-];
+export class Webhook {
+  public messages: Observable<Update>;
+  public editedMessages: Observable<Update>;
+  public channelPost: Observable<Update>;
+  public editedChannelPost: Observable<Update>;
+  public inlineQuery: Observable<Update>;
+  public chosenInlineResult: Observable<Update>;
+  public callbackQuery: Observable<Update>;
+  public shippingQuery: Observable<Update>;
+  public preCheckoutQuery: Observable<Update>;
 
-export class Webhook extends EventEmitter {
-  private bot: Bot;
-  private onlyFirstRegexMatch: boolean;
-  private regexCallbacks: RegexCallback[];
+  public text: Observable<Update>;
+  public audio: Observable<Update>;
+  public document: Observable<Update>;
+  public game: Observable<Update>;
+  public photo: Observable<Update>;
+  public sticker: Observable<Update>;
+  public video: Observable<Update>;
+  public voice: Observable<Update>;
+  public videoNote: Observable<Update>;
+  public contact: Observable<Update>;
+  public location: Observable<Update>;
+  public venue: Observable<Update>;
+  public newChatMembers: Observable<Update>;
+  public leftChatMember: Observable<Update>;
+  public newChatTitle: Observable<Update>;
+  public newChatPhoto: Observable<Update>;
+  public deleteChatPhoto: Observable<Update>;
+  public groupChatCreated: Observable<Update>;
+  public supergroupChatCreated: Observable<Update>;
+  public channelChatCreated: Observable<Update>;
+  public pinnedMessage: Observable<Update>;
+  public invoice: Observable<Update>;
+  public successfulPayment: Observable<Update>;
+
+  private _events = new EventEmitter();
+  private observable: Observable<Update>;
 
   /**
    * class constructor
    * @class Webhook
    * @constructor
    * @param bot TelegramBotClient instance
-   * @param onlyFirstRegexMatch `true` for execute only first callback whose RegExp returns true. `false` will execute all matches. (see .onRegex())
    */
-  constructor(bot: Bot, onlyFirstRegexMatch: boolean = true) {
-    super();
+  constructor(bot: Bot) {
+    this.observable = this._createObservable().pipe(share());
+
+    this.messages = createFilteredUpdateObservable(this.updates, "message");
+    this.editedMessages = createFilteredUpdateObservable(this.updates, "edited_message");
+    this.channelPost = createFilteredUpdateObservable(this.updates, "channel_post");
+    this.editedChannelPost = createFilteredUpdateObservable(this.updates, "edited_channel_post");
+    this.inlineQuery = createFilteredUpdateObservable(this.updates, "inline_query");
+    this.chosenInlineResult = createFilteredUpdateObservable(this.updates, "chosen_inline_result");
+    this.callbackQuery = createFilteredUpdateObservable(this.updates, "callback_query");
+    this.shippingQuery = createFilteredUpdateObservable(this.updates, "shipping_query");
+    this.preCheckoutQuery = createFilteredUpdateObservable(this.updates, "pre_checkout_query");
+
+    this.text = createFilteredMessageObservable(this.messages, "text");
+    this.audio = createFilteredMessageObservable(this.messages, "audio");
+    this.document = createFilteredMessageObservable(this.messages, "document");
+    this.game = createFilteredMessageObservable(this.messages, "game");
+    this.photo = createFilteredMessageObservable(this.messages, "photo");
+    this.sticker = createFilteredMessageObservable(this.messages, "sticker");
+    this.video = createFilteredMessageObservable(this.messages, "video");
+    this.voice = createFilteredMessageObservable(this.messages, "voice");
+    this.videoNote = createFilteredMessageObservable(this.messages, "video_note");
+    this.contact = createFilteredMessageObservable(this.messages, "contact");
+    this.location = createFilteredMessageObservable(this.messages, "location");
+    this.venue = createFilteredMessageObservable(this.messages, "venue");
+    this.newChatMembers = createFilteredMessageObservable(this.messages, "new_chat_members");
+    this.leftChatMember = createFilteredMessageObservable(this.messages, "left_chat_member");
+    this.newChatTitle = createFilteredMessageObservable(this.messages, "new_chat_title");
+    this.newChatPhoto = createFilteredMessageObservable(this.messages, "new_chat_photo");
+    this.deleteChatPhoto = createFilteredMessageObservable(this.messages, "delete_chat_photo");
+    this.groupChatCreated = createFilteredMessageObservable(this.messages, "group_chat_created");
+    this.supergroupChatCreated = createFilteredMessageObservable(this.messages, "supergroup_chat_created");
+    this.channelChatCreated = createFilteredMessageObservable(this.messages, "channel_chat_created");
+    this.pinnedMessage = createFilteredMessageObservable(this.messages, "pinned_message");
+    this.invoice = createFilteredMessageObservable(this.messages, "invoice");
+    this.successfulPayment = createFilteredMessageObservable(this.messages, "successful_payment");
 
     bot.webhook = this;
-    this.bot = bot;
-    this.onlyFirstRegexMatch = onlyFirstRegexMatch;
-    this.regexCallbacks = [];
-
-    this.on("message", this.processMessageType);
-    this.on("message", this.checkRegexCallbacks);
   }
 
-  /**
-   * Set a regex that will test every text message received. If regex.test() returns true, callback is called with two arguments: the message received and reply callback.
-   * @param {RegExp} regex RegExp for test message text
-   * @param {function} callback Callback to call if regex.test() return true
-   */
-  public onRegex(regex: RegExp, callback: (message: any, actions: MessageActions) => void): void {
-    if (regex && callback) {
-      this.regexCallbacks.push({regex, callback});
-    } else {
-      throw new Error("you must pass a regex and callback");
-    }
+  public get updates(): Observable<ExplicitTypedUpdate> {
+    return this.observable
+      .pipe(map((update) => checkUpdateType(update)));
   }
 
   /**
    * Use this method to create a route manipulator function for webhook.
-   * @returns {function}
-   * @example
-   * // using node http
-   * http.createServer(bot.getWebhook())
-   * 	.listen(3000);
-   * // using express
-   * app.post(webhookUrl, bot.getWebhook())
    */
-  public getWebhook() {
+  public getWebhook(): (req: IncomingMessage, res: ServerResponse) => void {
     return (req: IncomingMessage, res: ServerResponse) => {
       if (req.method === "POST") {
         const chunks: any[] = [];
@@ -78,29 +118,29 @@ export class Webhook extends EventEmitter {
 
         req.on("error", (err) => {
           res.statusCode = 500;
-          this.emit("error", err);
+          this._events.emit("error", err);
           res.end();
         })
-        .on("data", (chunk) => {
-          chunks.push(chunk);
-        })
-        .on("end", () => {
-          try {
-            body = Buffer.concat(chunks).toString();
-            receivedData = JSON.parse(body);
-            res.statusCode = 200;
-            res.end();
-          } catch (err) {
-            this.emit("error", err);
-            res.statusCode = 400;
-            res.end();
-          }
+          .on("data", (chunk) => {
+            chunks.push(chunk);
+          })
+          .on("end", () => {
+            try {
+              body = Buffer.concat(chunks).toString();
+              receivedData = JSON.parse(body);
+              res.statusCode = 200;
+              res.end();
+            } catch (err) {
+              this._events.emit("error", err);
+              res.statusCode = 400;
+              res.end();
+            }
 
-          debug("webhook: POST received on Webhook:");
-          debug(body);
+            debug("webhook: POST received on Webhook:");
+            debug(body);
 
-          this.processUpdateType(receivedData);
-        });
+            this._events.emit("update", receivedData);
+          });
       } else {
         debug(`webhook: ${req.method} received, but expecting POST`);
         res.statusCode = 404;
@@ -109,40 +149,7 @@ export class Webhook extends EventEmitter {
     };
   }
 
-  private processUpdateType(update: Update) {
-    debug("trying to process update and emit appropriate event");
-    if (!update) {
-      return debug("update is undefined");
-    }
-
-    _updateTypes.forEach((type: string) => {
-      if (type in update) {
-        debug(`emitting ${type} event`);
-        this.emit(type, update[type]);
-      }
-    });
-  }
-
-  private processMessageType(message: Message) {
-    const actions = createMessageActions(message, this.bot);
-
-    _messageTypes.forEach((msgType) => {
-      if (msgType in message) {
-        debug(`emitting ${msgType} event`);
-        this.emit(msgType, message, actions);
-      }
-    });
-  }
-
-  private checkRegexCallbacks(message: Message) {
-    const actions = createMessageActions(message, this.bot);
-
-    this.regexCallbacks.some((v: RegexCallback): boolean => {
-      if (v.regex.test(message.text)) {
-        v.callback(message, actions);
-        return this.onlyFirstRegexMatch;
-      }
-      return false;
-    });
+  private _createObservable(): Observable<Update> {
+    return fromEvent(this._events, "update");
   }
 }
