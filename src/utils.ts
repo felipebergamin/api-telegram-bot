@@ -1,9 +1,22 @@
 import { ReadStream } from "fs";
+import { filter, map } from "rxjs/operators";
 import { isObject } from "util";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
-import { Message, MessageActions, SendMessageOptionals, TelegramResponse } from "./interfaces";
+import { Message, MessageActions, SendMessageOptionals, TelegramResponse, Update } from "./interfaces";
+
+const _messageTypes = [
+  "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
+  "contact", "location", "venue", "new_chat_members", "left_chat_member", "new_chat_title",
+  "new_chat_photo", "delete_chat_photo", "group_chat_created", "supergroup_chat_created",
+  "channel_chat_created", "pinned_message", "invoice", "successful_payment",
+];
+const _updateTypes = [
+  "message", "edited_message", "channel_post", "edited_channel_post",
+  "inline_query", "chosen_inline_result", "callback_query", "shipping_query",
+  "pre_checkout_query",
+];
 
 export const createMessageActions = (message: Message, bot: Bot): MessageActions => {
   return {
@@ -46,4 +59,38 @@ export const stringifyFormData = (formData: any) => {
   }
 
   return formData;
+};
+
+export interface ExplicitTypedUpdate {
+  type: string;
+  update: Update;
+}
+
+export const checkUpdateType = (update: Update): ExplicitTypedUpdate => {
+  for (const updateType of _updateTypes) {
+    if (updateType in update) {
+      return {
+        type: updateType,
+        update,
+      };
+    }
+  }
+
+  return {
+    type: null,
+    update,
+  };
+};
+
+export const createFilteredUpdateObservable = (originObservable, updateType: string) => {
+  return originObservable.pipe(
+    filter(({ type }) => type === updateType),
+    map(({ update }) => update),
+  );
+};
+
+export const createFilteredMessageObservable = (originObservable, messageType: string) => {
+  return originObservable.pipe(
+    filter((update: Update) => messageType in update.message),
+  );
 };
