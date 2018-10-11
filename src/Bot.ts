@@ -2,7 +2,7 @@
 import { ReadStream } from "fs";
 import * as nodeEmoji from "node-emoji";
 import * as request from "request-promise-native";
-import { isFunction, isObject } from "util";
+import { isFunction } from "util";
 
 import { debug } from "./debug";
 import * as I from "./interfaces";

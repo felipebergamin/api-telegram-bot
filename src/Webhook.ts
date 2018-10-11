@@ -6,9 +6,7 @@ import { Bot } from "./Bot";
 import { debug } from "./debug";
 import { Message } from "./interfaces/Message";
 import { MessageActions } from "./interfaces/MessageActions";
-import { SendMessageOptionals } from "./interfaces/OptionalParams/SendMessage";
 import { RegexCallback } from "./interfaces/RegexCallback";
-import { TelegramResponse } from "./interfaces/TelegramResponse";
 import { Update } from "./interfaces/Update";
 import { createMessageActions } from "./utils";
 

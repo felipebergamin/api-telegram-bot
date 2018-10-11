@@ -1,5 +1,5 @@
 import { Observable, Observer } from "rxjs";
-import { filter, map, share } from "rxjs/operators";
+import { map, share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
