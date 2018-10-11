@@ -6,19 +6,17 @@ import { map, share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
-import { Message } from "./interfaces";
-import { MessageActions } from "./interfaces/MessageActions";
-import { RegexCallback } from "./interfaces/RegexCallback";
-import { Update } from "./interfaces/Update";
+import { Update, WrappedMessageActions } from "./interfaces";
 import {
   checkUpdateType,
   createFilteredMessageObservable,
   createFilteredUpdateObservable,
+  createMessageActions,
   ExplicitTypedUpdate,
 } from "./utils";
 
 export class Webhook {
-  public message: Observable<Update>;
+  public message: Observable<WrappedMessageActions>;
   public editedMessage: Observable<Update>;
   public channelPost: Observable<Update>;
   public editedChannelPost: Observable<Update>;
@@ -28,29 +26,29 @@ export class Webhook {
   public shippingQuery: Observable<Update>;
   public preCheckoutQuery: Observable<Update>;
 
-  public text: Observable<Update>;
-  public audio: Observable<Update>;
-  public document: Observable<Update>;
-  public game: Observable<Update>;
-  public photo: Observable<Update>;
-  public sticker: Observable<Update>;
-  public video: Observable<Update>;
-  public voice: Observable<Update>;
-  public videoNote: Observable<Update>;
-  public contact: Observable<Update>;
-  public location: Observable<Update>;
-  public venue: Observable<Update>;
-  public newChatMembers: Observable<Update>;
-  public leftChatMember: Observable<Update>;
-  public newChatTitle: Observable<Update>;
-  public newChatPhoto: Observable<Update>;
-  public deleteChatPhoto: Observable<Update>;
-  public groupChatCreated: Observable<Update>;
-  public supergroupChatCreated: Observable<Update>;
-  public channelChatCreated: Observable<Update>;
-  public pinnedMessage: Observable<Update>;
-  public invoice: Observable<Update>;
-  public successfulPayment: Observable<Update>;
+  public text: Observable<WrappedMessageActions>;
+  public audio: Observable<WrappedMessageActions>;
+  public document: Observable<WrappedMessageActions>;
+  public game: Observable<WrappedMessageActions>;
+  public photo: Observable<WrappedMessageActions>;
+  public sticker: Observable<WrappedMessageActions>;
+  public video: Observable<WrappedMessageActions>;
+  public voice: Observable<WrappedMessageActions>;
+  public videoNote: Observable<WrappedMessageActions>;
+  public contact: Observable<WrappedMessageActions>;
+  public location: Observable<WrappedMessageActions>;
+  public venue: Observable<WrappedMessageActions>;
+  public newChatMembers: Observable<WrappedMessageActions>;
+  public leftChatMember: Observable<WrappedMessageActions>;
+  public newChatTitle: Observable<WrappedMessageActions>;
+  public newChatPhoto: Observable<WrappedMessageActions>;
+  public deleteChatPhoto: Observable<WrappedMessageActions>;
+  public groupChatCreated: Observable<WrappedMessageActions>;
+  public supergroupChatCreated: Observable<WrappedMessageActions>;
+  public channelChatCreated: Observable<WrappedMessageActions>;
+  public pinnedMessage: Observable<WrappedMessageActions>;
+  public invoice: Observable<WrappedMessageActions>;
+  public successfulPayment: Observable<WrappedMessageActions>;
 
   private _events = new EventEmitter();
   private observable: Observable<Update>;
@@ -61,10 +59,11 @@ export class Webhook {
    * @constructor
    * @param bot TelegramBotClient instance
    */
-  constructor(bot: Bot) {
+  constructor(private bot: Bot) {
     this.observable = this._createObservable().pipe(share());
 
-    this.message = createFilteredUpdateObservable(this.updates, "message");
+    this.message = createFilteredUpdateObservable(this.updates, "message")
+      .pipe(map((update) => ({ update, actions: createMessageActions(update.message, this.bot) })));
     this.editedMessage = createFilteredUpdateObservable(this.updates, "edited_message");
     this.channelPost = createFilteredUpdateObservable(this.updates, "channel_post");
     this.editedChannelPost = createFilteredUpdateObservable(this.updates, "edited_channel_post");

@@ -1,10 +1,18 @@
 import { ReadStream } from "fs";
+import { Observable } from "rxjs";
 import { filter, map } from "rxjs/operators";
 import { isObject } from "util";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
-import { Message, MessageActions, SendMessageOptionals, TelegramResponse, Update } from "./interfaces";
+import {
+  Message,
+  MessageActions,
+  SendMessageOptionals,
+  TelegramResponse,
+  Update,
+  WrappedMessageActions,
+} from "./interfaces";
 
 const _messageTypes = [
   "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
@@ -82,15 +90,13 @@ export const checkUpdateType = (update: Update): ExplicitTypedUpdate => {
   };
 };
 
-export const createFilteredUpdateObservable = (originObservable, updateType: string) => {
-  return originObservable.pipe(
-    filter(({ type }) => type === updateType),
-    map(({ update }) => update),
-  );
-};
+export const createFilteredUpdateObservable =
+  (originObservable: Observable<ExplicitTypedUpdate>, updateType: string): Observable<Update> =>
+    originObservable.pipe(
+      filter(({ type }) => type === updateType),
+      map(({ update }) => update),
+    );
 
-export const createFilteredMessageObservable = (originObservable, messageType: string) => {
-  return originObservable.pipe(
-    filter((update: Update) => messageType in update.message),
-  );
-};
+export const createFilteredMessageObservable =
+  (originObservable: Observable<WrappedMessageActions>, messageType: string): Observable<WrappedMessageActions> =>
+    originObservable.pipe(filter(({ update }) => messageType in update.message));

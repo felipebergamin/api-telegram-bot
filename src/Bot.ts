@@ -45,7 +45,7 @@ export class Bot {
 
   public set webhook(webhook: Webhook) {
     if (webhook) {
-      webhook.messages.subscribe((update) => this.checkRegisteredCallbacks(update.message));
+      webhook.message.subscribe((update) => this.checkRegisteredCallbacks(update.update.message));
     }
   }
 
