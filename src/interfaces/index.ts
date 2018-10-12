@@ -45,5 +45,6 @@ export { Voice } from "./Voice";
 export { WebhookInfo } from "./WebhookInfo";
 export { OnReceiveReplyCallback, OnReplyCallbackFunction } from "./OnReceiveReplyCallback";
 export { WrappedMessageActions } from "./WrappedMessageActions";
+export { PollingOptions } from "./PollingOptions";
 
 export * from "./OptionalParams";

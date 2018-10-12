@@ -2,18 +2,98 @@
 import { ReadStream } from "fs";
 import * as nodeEmoji from "node-emoji";
 import * as request from "request-promise-native";
+import { Observable } from "rxjs";
+import { filter, map, tap } from "rxjs/operators";
 import { isFunction } from "util";
 
 import { debug } from "./debug";
 import * as I from "./interfaces";
-import { createMessageActions, isParamsObj, stringifyFormData } from "./utils";
+import { Polling } from "./Polling";
 import { Webhook } from "./Webhook";
+
+import {
+  createFilteredMessageObservable,
+  createFilteredUpdateObservable,
+  createMessageActions,
+  ExplicitTypedUpdate,
+  isParamsObj,
+  stringifyFormData,
+} from "./utils";
 
 export class Bot {
   private static MAX_MESSAGE_LENGTH = 4096;
+
+  /** emits all message updates received on webhook or polling */
+  public message$: Observable<I.WrappedMessageActions>;
+  /** emits edited_message updates received on webhook or polling */
+  public editedMessage$: Observable<I.Update>;
+  /** emits channel_post updates from webhook or polling */
+  public channelPost$: Observable<I.Update>;
+  /** emits edited_channel_post updates from webhook or polling */
+  public editedChannelPost$: Observable<I.Update>;
+  /** emits inline_query updates from webhook or polling */
+  public inlineQuery$: Observable<I.Update>;
+  /** emits chosen_inline_result updates from webhook or polling */
+  public chosenInlineResult$: Observable<I.Update>;
+  /** emits callback_query updates from webhook or polling */
+  public callbackQuery$: Observable<I.Update>;
+  /** emits shipping_query updates from webhook or polling */
+  public shippingQuery$: Observable<I.Update>;
+  /** emits pre_checkout_query updates from webhook or polling */
+  public preCheckoutQuery$: Observable<I.Update>;
+
+  /** emits text message types from webhook or polling */
+  public text$: Observable<I.WrappedMessageActions>;
+  /** emits audio message types from webhook or polling */
+  public audio$: Observable<I.WrappedMessageActions>;
+  /** emits document message types from webhook or polling */
+  public document$: Observable<I.WrappedMessageActions>;
+  /** emits game message types from webhook or polling */
+  public game$: Observable<I.WrappedMessageActions>;
+  /** emits photo message types from webhook or polling */
+  public photo$: Observable<I.WrappedMessageActions>;
+  /** emits sticker message types from webhook or polling */
+  public sticker$: Observable<I.WrappedMessageActions>;
+  /** emits video message types from webhook or polling */
+  public video$: Observable<I.WrappedMessageActions>;
+  /** emits voice message types from webhook or polling */
+  public voice$: Observable<I.WrappedMessageActions>;
+  /** emits video_note message types from webhook or polling */
+  public videoNote$: Observable<I.WrappedMessageActions>;
+  /** emits contact message types from webhook or polling */
+  public contact$: Observable<I.WrappedMessageActions>;
+  /** emits location message types from webhook or polling */
+  public location$: Observable<I.WrappedMessageActions>;
+  /** emits venue message types from webhook or polling */
+  public venue$: Observable<I.WrappedMessageActions>;
+  /** emits new_chat_members message types from webhook or polling */
+  public newChatMembers$: Observable<I.WrappedMessageActions>;
+  /** emits left_chat_member message types from webhook or polling */
+  public leftChatMember$: Observable<I.WrappedMessageActions>;
+  /** emits new_chat_title message types from webhook or polling */
+  public newChatTitle$: Observable<I.WrappedMessageActions>;
+  /** emits new_chat_photo message types from webhook or polling */
+  public newChatPhoto$: Observable<I.WrappedMessageActions>;
+  /** emits delete_chat_photo message types from webhook or polling */
+  public deleteChatPhoto$: Observable<I.WrappedMessageActions>;
+  /** emits group_chat_created message types from webhook or polling */
+  public groupChatCreated$: Observable<I.WrappedMessageActions>;
+  /** emits supergroup_chat_created message types from webhook or polling */
+  public supergroupChatCreated$: Observable<I.WrappedMessageActions>;
+  /** emits channel_chat_created message types from webhook or polling */
+  public channelChatCreated$: Observable<I.WrappedMessageActions>;
+  /** emits pinned_message message types from webhook or polling */
+  public pinnedMessage$: Observable<I.WrappedMessageActions>;
+  /** emits invoice message types from webhook or polling */
+  public invoice$: Observable<I.WrappedMessageActions>;
+  /** emits successful_payment message types from webhook or polling */
+  public successfulPayment$: Observable<I.WrappedMessageActions>;
+
   private config: I.Config;
   private emojify: (text: string) => string;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
+  private _webhook: Webhook;
+  private _polling: Polling;
 
   /**
    * Constructs bot client
@@ -21,9 +101,7 @@ export class Bot {
    * @class TelegramBotClient
    * @constructor
    * @param {String} token Bot token
-   * @param {object} [config={}] Optional config object. See default configuration below
-   * @param {boolean} [config.split_long_messages=false] Telegram messages can"t be longer than 4096 chars, if `true`, the sendMessage function will split long messages and send sequentially
-   * @param {boolean} [config.emojify_texts=false] `true` if you want the bot automatically call [emoji.emojify](https://www.npmjs.com/package/node-emoji) in texts
+   * @param {Config} [config={}] Optional config object.
    * @see {@link https://www.npmjs.com/package/node-emoji}
    */
   constructor(private bot_token: string, { emojifyTexts = true, splitLongMessages = true, sendChatActionBeforeMsg = true }: I.Config = {}) {
@@ -44,9 +122,36 @@ export class Bot {
   }
 
   public set webhook(webhook: Webhook) {
-    if (webhook) {
-      webhook.message.subscribe((update) => this.checkRegisteredCallbacks(update.update.message));
+    if (webhook && webhook instanceof Webhook) {
+      this.configObservables(webhook.updates);
+      this._webhook = webhook;
     }
+  }
+
+  public get webhook() {
+    return this._webhook;
+  }
+
+  public set polling(polling: Polling) {
+    if (polling && polling instanceof Polling) {
+      this.configObservables(polling.updates);
+      this._polling = polling;
+    }
+  }
+
+  public get polling() {
+    return this._polling;
+  }
+
+  public startPolling(options: I.PollingOptions = {}) {
+    const polling = new Polling(this, options);
+    this.polling = polling;
+  }
+
+  public getWebhook() {
+    const wh = new Webhook(this);
+    this.webhook = wh;
+    return wh.getWebhook();
   }
 
   /**
@@ -1205,10 +1310,20 @@ export class Bot {
     ).promise();
   }
 
-  private checkRegisteredCallbacks(message: I.Message) {
+  /**
+   * Check if a received message has a callback for handle it.
+   * If it has, call the function.
+   * Return true if a callback handler was found, false otherwise.
+   * @param message received message
+   */
+  private _checkRegisteredCallbacks(message: I.Message): boolean {
     if (!message.reply_to_message) {
       debug("Message isn't a reply, skipping");
-      return;
+      return false;
+    }
+    if (this.repliesCallbacks.length === 0) {
+      debug(`There's no callback queries registered, skipping`);
+      return false;
     }
     debug(`I have ${this.repliesCallbacks.length} reply callbacks`);
 
@@ -1216,18 +1331,26 @@ export class Bot {
     const cbk = this.repliesCallbacks.find((rc, index) => {
       if (rc.message_id === message.reply_to_message.message_id && rc.chat === message.from.id) {
         debug(`Reply handler found for message ${rc.message_id} from ${rc.chat}`);
+        // save index
         i = index;
+        // return true for find() function
         return true;
       }
 
+      // return false for find() fn
       return false;
     });
 
+    // check if a callback was found
     if (cbk) {
       cbk.f(message, createMessageActions(message, this));
-      return this.repliesCallbacks.splice(i, 1);
+      // remove handler from array
+      this.repliesCallbacks.splice(i, 1);
+      // a handler was found, so return true
+      return true;
     }
     debug(`Reply handler not found for message ${message.reply_to_message.message_id} from ${message.from.id}`);
+    return false;
   }
 
   private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: I.OnReplyCallbackFunction): I.TelegramResponse<I.Message> {
@@ -1264,5 +1387,46 @@ export class Bot {
       splitedText.push(piece);
     }
     return splitedText;
+  }
+
+  private configObservables(origin: Observable<ExplicitTypedUpdate>) {
+    this.message$ = createFilteredUpdateObservable(origin, "message")
+      .pipe(
+        filter((update) => !this._checkRegisteredCallbacks(update.message)),
+        map((update) => ({ update, actions: createMessageActions(update.message, this) })),
+      );
+
+    this.editedMessage$ = createFilteredUpdateObservable(origin, "edited_message");
+    this.channelPost$ = createFilteredUpdateObservable(origin, "channel_post");
+    this.editedChannelPost$ = createFilteredUpdateObservable(origin, "edited_channel_post");
+    this.inlineQuery$ = createFilteredUpdateObservable(origin, "inline_query");
+    this.chosenInlineResult$ = createFilteredUpdateObservable(origin, "chosen_inline_result");
+    this.callbackQuery$ = createFilteredUpdateObservable(origin, "callback_query");
+    this.shippingQuery$ = createFilteredUpdateObservable(origin, "shipping_query");
+    this.preCheckoutQuery$ = createFilteredUpdateObservable(origin, "pre_checkout_query");
+
+    this.text$ = createFilteredMessageObservable(this.message$, "text");
+    this.audio$ = createFilteredMessageObservable(this.message$, "audio");
+    this.document$ = createFilteredMessageObservable(this.message$, "document");
+    this.game$ = createFilteredMessageObservable(this.message$, "game");
+    this.photo$ = createFilteredMessageObservable(this.message$, "photo");
+    this.sticker$ = createFilteredMessageObservable(this.message$, "sticker");
+    this.video$ = createFilteredMessageObservable(this.message$, "video");
+    this.voice$ = createFilteredMessageObservable(this.message$, "voice");
+    this.videoNote$ = createFilteredMessageObservable(this.message$, "video_note");
+    this.contact$ = createFilteredMessageObservable(this.message$, "contact");
+    this.location$ = createFilteredMessageObservable(this.message$, "location");
+    this.venue$ = createFilteredMessageObservable(this.message$, "venue");
+    this.newChatMembers$ = createFilteredMessageObservable(this.message$, "new_chat_members");
+    this.leftChatMember$ = createFilteredMessageObservable(this.message$, "left_chat_member");
+    this.newChatTitle$ = createFilteredMessageObservable(this.message$, "new_chat_title");
+    this.newChatPhoto$ = createFilteredMessageObservable(this.message$, "new_chat_photo");
+    this.deleteChatPhoto$ = createFilteredMessageObservable(this.message$, "delete_chat_photo");
+    this.groupChatCreated$ = createFilteredMessageObservable(this.message$, "group_chat_created");
+    this.supergroupChatCreated$ = createFilteredMessageObservable(this.message$, "supergroup_chat_created");
+    this.channelChatCreated$ = createFilteredMessageObservable(this.message$, "channel_chat_created");
+    this.pinnedMessage$ = createFilteredMessageObservable(this.message$, "pinned_message");
+    this.invoice$ = createFilteredMessageObservable(this.message$, "invoice");
+    this.successfulPayment$ = createFilteredMessageObservable(this.message$, "successful_payment");
   }
 }
