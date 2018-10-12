@@ -10,20 +10,25 @@ import { Update } from "./interfaces";
 import { checkUpdateType, ExplicitTypedUpdate } from "./utils";
 
 export class Webhook {
+  /** @ignore */
   private _events = new EventEmitter();
+  /** @ignore */
   private observable: Observable<Update>;
 
   /**
    * class constructor
    * @class Webhook
    * @constructor
-   * @param bot TelegramBotClient instance
+   * @param bot Bot instance
    */
   constructor(private bot: Bot) {
     this.observable = this._createObservable().pipe(share());
     bot.webhook = this;
   }
 
+  /**
+   * @return an observable that emits objects with the update received and a `type` field describing update type
+   */
   public get updates(): Observable<ExplicitTypedUpdate> {
     return this.observable
       .pipe(map((update) => checkUpdateType(update)));
@@ -31,6 +36,7 @@ export class Webhook {
 
   /**
    * Use this method to create a route manipulator function for webhook.
+   * @return http request handler function
    */
   public getWebhook(): (req: IncomingMessage, res: ServerResponse) => void {
     return (req: IncomingMessage, res: ServerResponse) => {
@@ -72,6 +78,9 @@ export class Webhook {
     };
   }
 
+  /**
+   * @ignore
+   */
   private _createObservable(): Observable<Update> {
     return fromEvent(this._events, "update");
   }

@@ -3,7 +3,7 @@ import { ReadStream } from "fs";
 import * as nodeEmoji from "node-emoji";
 import * as request from "request-promise-native";
 import { Observable } from "rxjs";
-import { filter, map, tap } from "rxjs/operators";
+import { filter, map } from "rxjs/operators";
 import { isFunction } from "util";
 
 import { debug } from "./debug";
@@ -21,6 +21,7 @@ import {
 } from "./utils";
 
 export class Bot {
+  /** @ignore */
   private static MAX_MESSAGE_LENGTH = 4096;
 
   /** emits all message updates received on webhook or polling */
@@ -98,11 +99,9 @@ export class Bot {
   /**
    * Constructs bot client
    *
-   * @class TelegramBotClient
    * @constructor
-   * @param {String} token Bot token
-   * @param {Config} [config={}] Optional config object.
-   * @see {@link https://www.npmjs.com/package/node-emoji}
+   * @param token Bot token
+   * @param config Optional config object.
    */
   constructor(private bot_token: string, { emojifyTexts = true, splitLongMessages = true, sendChatActionBeforeMsg = true }: I.Config = {}) {
     debug("constructing TelegramBotClient");
@@ -121,6 +120,7 @@ export class Bot {
     }
   }
 
+  /** @ignore */
   public set webhook(webhook: Webhook) {
     if (webhook && webhook instanceof Webhook) {
       this.configObservables(webhook.updates);
@@ -128,6 +128,9 @@ export class Bot {
     }
   }
 
+  /**
+   * @return Webhook instance reference
+   */
   public get webhook() {
     return this._webhook;
   }

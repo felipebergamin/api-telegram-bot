@@ -7,14 +7,22 @@ import { Update } from "./interfaces";
 import { PollingOptions } from "./interfaces/PollingOptions";
 import { checkUpdateType, ExplicitTypedUpdate } from "./utils";
 
+/** @beta */
 export class Polling {
+  /** @ignore */
   private offset;
+  /** @ignore */
   private limit;
+  /** @ignore */
   private allowed_updates;
+  /** @ignore */
   private timeout;
+  /** @ignore */
   private receivedStopSignal;
+  /** @ignore */
   private observable: Observable<Update>;
 
+  /** @constructor */
   constructor(private bot: Bot, { limit = 100, offset = 0, allowed_updates = [], timeout = 10 }: PollingOptions = {}) {
     this.offset = offset;
     this.limit = limit;
@@ -49,6 +57,7 @@ export class Polling {
     this.receivedStopSignal = true;
   }
 
+  /** @ignore */
   private createObservable(): Observable<Update> {
     return Observable.create((observer: Observer<Update>) => {
       debug("Creating Observable");
