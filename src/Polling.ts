@@ -25,11 +25,26 @@ export class Polling {
     this.observable = this.createObservable().pipe(share());
   }
 
+  /**
+   * return true if is polling, false otherwise.
+   * E.g. return true is `stopPolling()` was called
+   */
+  public get isPolling(): boolean {
+    return !this.receivedStopSignal;
+  }
+
+  /**
+   * emits objects with the update received and a `type` field describing update type
+   */
   public get updates(): Observable<ExplicitTypedUpdate> {
     return this.observable
       .pipe(map((update) => checkUpdateType(update)));
   }
 
+  /**
+   * set a flag to stop polling and close all observables.
+   * due to long polling implementation logic, some updates may be delivered for a short time after call `stopPolling`
+   */
   public stopPolling() {
     this.receivedStopSignal = true;
   }
