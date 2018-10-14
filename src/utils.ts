@@ -1,7 +1,6 @@
 import { ReadStream } from "fs";
 import { Observable } from "rxjs";
 import { filter, map } from "rxjs/operators";
-import { isObject } from "util";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
@@ -14,18 +13,21 @@ import {
   WrappedMessageActions,
 } from "./interfaces";
 
+/** @ignore */
 const _messageTypes = [
   "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
   "contact", "location", "venue", "new_chat_members", "left_chat_member", "new_chat_title",
   "new_chat_photo", "delete_chat_photo", "group_chat_created", "supergroup_chat_created",
   "channel_chat_created", "pinned_message", "invoice", "successful_payment",
 ];
+/** @ignore */
 const _updateTypes = [
   "message", "edited_message", "channel_post", "edited_channel_post",
   "inline_query", "chosen_inline_result", "callback_query", "shipping_query",
   "pre_checkout_query",
 ];
 
+/** @ignore */
 export const createMessageActions = (message: Message, bot: Bot): MessageActions => {
   return {
     banChatMember: (until: number = 0): Promise<TelegramResponse<boolean>> => {
@@ -51,10 +53,9 @@ export const createMessageActions = (message: Message, bot: Bot): MessageActions
   };
 };
 
-export const isParamsObj = <T>(obj): obj is T => isObject(obj);
-
 /**
  * receive a object and stringify sub-objects to send via form-data
+ * @ignore
  * @beta
  */
 export const stringifyFormData = (formData: any) => {
@@ -74,6 +75,7 @@ export interface ExplicitTypedUpdate {
   update: Update;
 }
 
+/** @ignore */
 export const checkUpdateType = (update: Update): ExplicitTypedUpdate => {
   for (const updateType of _updateTypes) {
     if (updateType in update) {
@@ -90,6 +92,7 @@ export const checkUpdateType = (update: Update): ExplicitTypedUpdate => {
   };
 };
 
+/** @ignore */
 export const createFilteredUpdateObservable =
   (originObservable: Observable<ExplicitTypedUpdate>, updateType: string): Observable<Update> =>
     originObservable.pipe(
@@ -97,6 +100,7 @@ export const createFilteredUpdateObservable =
       map(({ update }) => update),
     );
 
+/** @ignore */
 export const createFilteredMessageObservable =
   (originObservable: Observable<WrappedMessageActions>, messageType: string): Observable<WrappedMessageActions> =>
     originObservable.pipe(filter(({ update }) => messageType in update.message));

@@ -42,3 +42,4 @@ test.js
 *.js
 *.d.ts
 dist
+.vscode

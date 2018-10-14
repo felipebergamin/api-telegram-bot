@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tslint --project . && rm -rf dist && tsc",
-    "gendoc": "rm -rf docs && typedoc --out docs .",
+    "gendoc": "rm -rf docs && typedoc --excludePrivate --mode file --out docs src",
     "prepublishOnly": "tslint --project . && rm -rf dist && tsc"
   },
   "repository": {
