@@ -150,10 +150,12 @@ export class Bot {
   /**
    * create a polling object to fetch updates
    * @param options polling configs
+   * @return polling instance
    */
   public startPolling(options: I.PollingOptions = {}) {
     const polling = new Polling(this, options);
     this.polling = polling;
+    return polling;
   }
 
   /**
