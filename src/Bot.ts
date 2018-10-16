@@ -6,6 +6,7 @@ import { Observable } from "rxjs";
 import { filter, map } from "rxjs/operators";
 import { isFunction } from "util";
 
+import { SmartMenu } from "./builders/SmartMenu";
 import { debug } from "./debug";
 import * as I from "./interfaces";
 import { Polling } from "./Polling";
@@ -93,6 +94,7 @@ export class Bot {
   private config: I.Config;
   private emojify: (text: string) => string;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
+  private _smartMenus: SmartMenu[] = [];
   private _webhook: Webhook;
   private _polling: Polling;
 
@@ -167,6 +169,23 @@ export class Bot {
     const wh = new Webhook(this);
     this.webhook = wh;
     return wh.getWebhook();
+  }
+
+  /**
+   * Send a message with a SmartMenu. *This is a experimental feature*
+   * @param chat_id Unique identifier for the target chat
+   * @param smartMenu SmartMenu to send
+   * @beta
+   */
+  public async sendSmartMenu(chat_id: number | string, smartMenu: SmartMenu) {
+    const sentMenu = await this.sendMessage(chat_id, smartMenu.title, { reply_markup: { inline_keyboard: smartMenu.inline_keyboard }});
+
+    if (sentMenu.ok) {
+      smartMenu.chat_id = sentMenu.result.chat.id;
+      smartMenu.message_id = sentMenu.result.message_id;
+      this._smartMenus.unshift(smartMenu);
+    }
+    return sentMenu;
   }
 
   /**
@@ -1227,7 +1246,43 @@ export class Bot {
     this.editedChannelPost$ = createFilteredUpdateObservable(origin, "edited_channel_post");
     this.inlineQuery$ = createFilteredUpdateObservable(origin, "inline_query");
     this.chosenInlineResult$ = createFilteredUpdateObservable(origin, "chosen_inline_result");
-    this.callbackQuery$ = createFilteredUpdateObservable(origin, "callback_query");
+    this.callbackQuery$ = createFilteredUpdateObservable(origin, "callback_query")
+        .pipe(
+          filter((cbkQuery) => {
+            debug(`${this._smartMenus.length} smart menus on array`);
+
+            this._smartMenus.forEach((smartMenu, index) => {
+
+              if (smartMenu.checkCallbackQueryUpdate(cbkQuery.callback_query)) {
+                debug("smart menu found in array, running function");
+
+                const kill = (): void => {
+                  debug("kill was called, removing smart menu");
+                  const i = this._smartMenus.indexOf(smartMenu);
+                  if (i >= 0) {
+                    debug("found on index ", i);
+                    this._smartMenus.splice(i, 1);
+                  }
+                };
+
+                smartMenu.run(cbkQuery.callback_query, this, kill)
+                  .then((result) => {
+                    if (result && result instanceof SmartMenu) {
+                      debug("new SmartMenu instance returned, replacing in array");
+                      this._smartMenus.splice(index, 1, result);
+                    } else if (result === null) {
+                      debug("null was returned, removing smart menu from array");
+                      this._smartMenus.splice(index, 1);
+                    }
+                  });
+
+                return false; // breaks propagation of update
+              }
+            });
+
+            return true;
+          }),
+        );
     this.shippingQuery$ = createFilteredUpdateObservable(origin, "shipping_query");
     this.preCheckoutQuery$ = createFilteredUpdateObservable(origin, "pre_checkout_query");
 
