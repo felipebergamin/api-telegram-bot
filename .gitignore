@@ -39,7 +39,6 @@ jspm_packages
 # personal
 test.ts
 test.js
-*.js
 *.d.ts
 dist
 .vscode
