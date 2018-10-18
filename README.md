@@ -4,7 +4,7 @@ Node.js module for [Telegram Bot API](https://core.telegram.org/bots/api).
 
 Talk with [@botfather](https://telegram.me/BotFather) on Telegram to create your bot.
 
-This module is updated with Telegram API version **3.5**.
+This module is updated with Telegram API version **4.1**. Except with Telegram Passport.
 
 # API reference
 
@@ -200,3 +200,8 @@ rootMenu.addButton('Hi! ;)', (cbkQuery, endMenu) => {
 
 bot.sendSmartMenu(CONTACT_ID, rootMenu);
 ```
+
+# What still need to be done
+
+- Write tests
+- Implement Telegram Passport support
