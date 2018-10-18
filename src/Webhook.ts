@@ -14,6 +14,7 @@ export class Webhook {
   private _events = new EventEmitter();
   /** @ignore */
   private observable: Observable<Update>;
+  private receivedStopSinal: boolean;
 
   /**
    * class constructor

@@ -124,7 +124,12 @@ export class Bot {
 
   /** @ignore */
   public set webhook(webhook: Webhook) {
+    if (this._webhook) {
+      throw new Error("Trying to set a webhook reference, but another webhook was set");
+    }
+
     if (webhook && webhook instanceof Webhook) {
+      debug("setting webhook reference");
       this.configObservables(webhook.updates);
       this._webhook = webhook;
     }
@@ -138,7 +143,12 @@ export class Bot {
   }
 
   public set polling(polling: Polling) {
+    if (this._polling) {
+      this._polling.stopPolling();
+    }
+
     if (polling && polling instanceof Polling) {
+      debug("setting polling reference");
       this.configObservables(polling.updates);
       this._polling = polling;
     }
@@ -156,7 +166,6 @@ export class Bot {
    */
   public startPolling(options: I.PollingOptions = {}) {
     const polling = new Polling(this, options);
-    this.polling = polling;
     return polling;
   }
 
@@ -167,7 +176,6 @@ export class Bot {
    */
   public getWebhook() {
     const wh = new Webhook(this);
-    this.webhook = wh;
     return wh.getWebhook();
   }
 
