@@ -1128,6 +1128,23 @@ export class Bot {
     return this.makeRequest<I.Message>("editMessageMedia", { formData });
   }
 
+  /**
+   * Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound).
+   * @param chat_id Unique identifier for the target chat or username of the target channel
+   * @param animation Animation to send. A file_id, web URL or a ReadStream to upload your own file
+   * @param optionals Optional params
+   * @see {@link https://core.telegram.org/bots/api#sendanimation}
+   */
+  public sendAnimation(chat_id: number | string, animation: ReadStream | string, optionals: I.SendAnimationOptionals): Promise<I.TelegramResponse<I.Message>> {
+    const formData = {
+      animation,
+      chat_id,
+      ...optionals,
+    };
+
+    return this.makeRequest<I.Message>("sendAnimation", { formData });
+  }
+
   private makeRequest<T>(api_method: string, params: any = {}): Promise<I.TelegramResponse<T>> {
     debug("makeRequest ", api_method);
     if (!this.bot_token) {

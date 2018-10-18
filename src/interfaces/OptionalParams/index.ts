@@ -28,3 +28,4 @@ export { SendVoiceOptionals } from "./SendVoiceOptionals";
 export { SetGameScoreOptionals } from "./SetGameScore";
 export { SetWebhookOptionals } from "./SetWebhook";
 export { StopMessageLiveLocationOptionals } from "./StopMessageLiveLocation";
+export { SendAnimationOptionals } from "./SendAnimation";
