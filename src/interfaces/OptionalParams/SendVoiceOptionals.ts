@@ -8,6 +8,8 @@ export interface SendVoiceOptionals {
    * Voice message caption, 0-200 characters
    */
   caption?: string;
+  /** Optional. Send Markdown or HTML */
+  parse_mode?: string;
   /**
    * Duration of the voice message in seconds
    */

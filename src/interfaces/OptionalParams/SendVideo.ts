@@ -1,3 +1,5 @@
+import { ReadStream } from "fs";
+
 import { OnReplyCallbackFunction } from "../../types";
 import { ForceReply} from "../ForceReply";
 import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
@@ -17,10 +19,16 @@ export interface SendVideoOptionals {
    * Video height
    */
   height?: number;
+  /** Optional. Thumbnail of the file sent. */
+  thumb?: ReadStream | string;
   /**
    * Video caption (may also be used when resending videos by file_id), 0-200 characters
    */
   caption?: string;
+  /** Optional. Send Markdown or HTML */
+  parse_mode?: string;
+  /** Pass True, if the uploaded video is suitable for streaming */
+  supports_streaming?: boolean;
   /**
    * Sends the message silently. iOS users will not receive a notification,
    * Android users will receive a notification with no sound.

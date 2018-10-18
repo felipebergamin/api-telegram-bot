@@ -12,6 +12,8 @@ export interface InputMediaVideo {
   thumb?: ReadStream | string;
   /** Optional. Caption of the video to be sent, 0-200 characters */
   caption?: string;
+  /** Optional. Send Markdown or HTML */
+  parse_mode?: string;
   /** Optional. Video width */
   width?: number;
   /** Optional. Video height */

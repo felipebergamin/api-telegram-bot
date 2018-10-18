@@ -108,4 +108,6 @@ export interface Message {
   invoice: Invoice;
   /** Message is a service message about a successful payment, information about the payment */
   successful_payment: SuccessfulPayment;
+  /** Optional. The domain name of the website on which the user has logged in. */
+  connected_website?: string;
 }

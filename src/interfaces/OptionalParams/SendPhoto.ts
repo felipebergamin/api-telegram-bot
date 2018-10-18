@@ -9,6 +9,8 @@ export interface SendPhotoOptionals {
    * Photo caption (may also be used when resending photos by file_id), 0-200 characters
    */
   caption?: string;
+  /** Optional. Send Markdown or HTML */
+  parse_mode?: string;
   /**
    * Sends the message silently.
    * iOS users will not receive a notification, Android users will receive a notification with no sound.

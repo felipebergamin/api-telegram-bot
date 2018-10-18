@@ -1,3 +1,5 @@
+import { ReadStream } from "fs";
+
 import { OnReplyCallbackFunction } from "../../types";
 import { ForceReply} from "../ForceReply";
 import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
@@ -9,6 +11,8 @@ export interface SendAudioOptionals {
    * Audio caption, 0-200 characters
    */
   caption?: string;
+  /** Optional. Send Markdown or HTML */
+  parse_mode?: string;
   /**
    * Duration of the audio in seconds.
    */
@@ -21,6 +25,8 @@ export interface SendAudioOptionals {
    * Track name
    */
   title?: string;
+  /** Optional. Thumbnail of the file sent. */
+  thumb?: ReadStream | string;
   /**
    * Sends the message silently.
    * iOS users will not receive a notification, Android users will receive a notification with no sound.

@@ -21,6 +21,8 @@ export interface EditMessageCaptionOptionals {
    * New caption of the message
    */
   caption?: string;
+  /** Optional. Send Markdown or HTML */
+  parse_mode?: string;
   /**
    * A JSON-serialized object for an inline keyboard.
    */
