@@ -13,9 +13,15 @@ export type InlineKeyboardButtonFunction = (callbackQuery: CallbackQuery, killMe
  * @beta
  */
 export class SmartMenu {
-  /** chat identifier where this menu was sent, used to match callback_queries */
+  /**
+   * chat identifier where this menu was sent, used to match callback_queries
+   * @ignore
+   */
   public chat_id;
-  /** sent message identifier, used to match callback_queries */
+  /**
+   * sent message identifier, used to match callback_queries
+   * @ignore
+   */
   public message_id;
 
   /** reference to parent menu, used to "back button" know where to back */
@@ -33,7 +39,7 @@ export class SmartMenu {
    * @param backButtonText optional, back button text. Default: `Back`
    * @constructor
    */
-  constructor(public title: string, public showBackButton: boolean = false, public backButtonText: string = "Back") {
+  constructor(public title: string, private showBackButton: boolean = false, public backButtonText: string = "Back") {
     this.keyboard = [[]];
   }
 
