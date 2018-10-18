@@ -2,6 +2,7 @@ export { AnswerCallbackQueryOptionals } from "./AnswerCallbackQuery";
 export { AnswerInlineQueryOptionals } from "./AnswerInlineQuery";
 export { AnswerShippingQueryOptionals } from "./AnswerShippingQuery";
 export { CreateNewStickerSetOptionals } from "./CreateNewStickerSet";
+export { EditMessageMediaOptionals } from "./EditMessageMedia";
 export { EditMessageCaptionOptionals } from "./EditMessageCaption";
 export { EditMessageLiveLocationOptionals } from "./EditMessageLiveLocation";
 export { EditMessageReplyMarkupOptionals } from "./EditMessageReplyMarkup";

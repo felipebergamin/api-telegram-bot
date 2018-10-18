@@ -1112,6 +1112,22 @@ export class Bot {
     return this.makeRequest<boolean>("deleteStickerFromSet", { formData });
   }
 
+  /**
+   * Use this method to edit audio, document, photo, or video messages.
+   * See official Telegram docs for a complete reference.
+   * @param media A JSON-serialized object for a new media content of the message
+   * @param optionals Optional params, see Telegram Official API for a complete reference
+   * @see {@link https://core.telegram.org/bots/api#editmessagemedia}
+   */
+  public editMessageMedia(media: I.InputMedia, optionals: I.EditMessageMediaOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+    const formData = {
+      media,
+      ...optionals,
+    };
+
+    return this.makeRequest<I.Message>("editMessageMedia", { formData });
+  }
+
   private makeRequest<T>(api_method: string, params: any = {}): Promise<I.TelegramResponse<T>> {
     debug("makeRequest ", api_method);
     if (!this.bot_token) {
