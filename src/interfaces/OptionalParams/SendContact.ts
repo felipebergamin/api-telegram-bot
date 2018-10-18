@@ -9,6 +9,10 @@ export interface SendContactOptionals {
    */
   last_name?: string;
   /**
+   * Additional data about the contact in the form of a vCard, 0-2048 bytes
+   */
+  vcard?: string;
+  /**
    * Sends the message silently.
    */
   disable_notification?: boolean;

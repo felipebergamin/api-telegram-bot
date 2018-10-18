@@ -57,6 +57,8 @@ export interface Message {
   audio: Audio;
   /** Message is a general file, information about the file */
   document: Document;
+  /** Optional. Message is an animation, information about the animation. */
+  animation: Animation;
   /** Message is a game, information about the game. */
   game: Game;
   /** Message is a photo, available sizes of the photo */

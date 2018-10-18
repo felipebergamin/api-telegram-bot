@@ -9,6 +9,11 @@ export interface SendVenueOptionals {
    */
   foursquare_id?: string;
   /**
+   * Optional. Foursquare type of the venue.
+   * (For example, “arts_entertainment/default”, “arts_entertainment/aquarium” or “food/icecream”.)
+   */
+  foursquare_type: string;
+  /**
    * Sends the message silently.
    */
   disable_notification?: boolean;
