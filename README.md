@@ -32,7 +32,7 @@ Before run any example code, please install deps with `npm i` and run `npm run b
 
 ### Install
 ```sh
-npm install api-telegram-bot
+npm install api-telegram-bot@beta
 ```
 ### Start coding
 
