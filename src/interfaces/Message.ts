@@ -1,9 +1,11 @@
+import { Animation } from "./Animation";
 import { Audio } from "./Audio";
 import { Chat } from "./Chat";
 import { Contact } from "./Contact";
 import { Document } from "./Document";
 import { Game } from "./Game";
 import { Invoice } from "./Invoice";
+import { Location } from "./Location";
 import { MessageEntity } from "./MessageEntity";
 import { PhotoSize } from "./PhotoSize";
 import { Sticker } from "./Sticker";

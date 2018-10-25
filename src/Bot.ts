@@ -564,10 +564,10 @@ export class Bot {
    * @param file_id File identifier to get info about
    * @see {@link https://core.telegram.org/bots/api#getfile}
    */
-  public getFile(file_id: string): Promise<I.TelegramResponse<File>> {
+  public getFile(file_id: string): Promise<I.TelegramResponse<I.File>> {
     const json = { file_id };
 
-    return this.makeRequest<File>("getFile", { json });
+    return this.makeRequest<I.File>("getFile", { json });
   }
 
   /**
@@ -958,10 +958,10 @@ export class Bot {
    * @param png_sticker Png image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px.
    * @see {@link https://core.telegram.org/bots/api#uploadstickerfile}
    */
-  public uploadStickerFile(user_id: number, png_sticker: ReadStream): Promise<I.TelegramResponse<File>> {
+  public uploadStickerFile(user_id: number, png_sticker: ReadStream): Promise<I.TelegramResponse<I.File>> {
     const formData = { user_id, png_sticker };
 
-    return this.makeRequest<File>("uploadStickerFile", { formData });
+    return this.makeRequest<I.File>("uploadStickerFile", { formData });
   }
 
   /**
