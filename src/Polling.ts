@@ -31,6 +31,7 @@ export class Polling {
     this.receivedStopSignal = false;
 
     this.observable = this.createObservable().pipe(share());
+    this.bot.polling = this;
   }
 
   /**
