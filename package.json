@@ -19,7 +19,7 @@
     "telegram"
   ],
   "author": "Felipe Bergamin <felipebergamin6@gmail.com>",
-  "license": "ISC",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/felipebergamin/api-telegram-bot/issues"
   },
