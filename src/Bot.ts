@@ -92,7 +92,6 @@ export class Bot {
   public successfulPayment$ = new Subject<I.WrappedMessageActions>();
 
   private config: I.Config;
-  private emojify: (text: string) => string;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
   private _smartMenus: SmartMenu[] = [];
   private _webhook: Webhook;
@@ -114,12 +113,6 @@ export class Bot {
     }
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
-
-    if (!this.config.emojifyTexts) {
-      this.emojify = (text: string) => text;
-    } else {
-      this.emojify = nodeEmoji.emojify;
-    }
   }
 
   /** @ignore */
@@ -1352,4 +1345,6 @@ export class Bot {
     createFilteredMessageObservable(this.message$, "invoice").subscribe(this.invoice$);
     createFilteredMessageObservable(this.message$, "successful_payment").subscribe(this.successfulPayment$);
   }
+
+  private emojify = (text: string) => this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
 }
