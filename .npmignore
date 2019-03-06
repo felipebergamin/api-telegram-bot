@@ -44,3 +44,5 @@ docs/
 src/
 examples/
 docs/
+tslint.json
+tsconfig.json
