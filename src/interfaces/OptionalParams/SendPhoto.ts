@@ -26,6 +26,14 @@ export interface SendPhotoOptionals {
    * instructions to remove reply keyboard or to force a reply from the user.
    */
   reply_markup?: InlineKeyboardMarkup|ReplyKeyboardMarkup|ReplyKeyboardRemove|ForceReply;
-
+  /**
+   * a function that will be called if user reply the sent message.
+   * Note: the user must explicity reply the message (tap message on telegram app and "Reply")
+   */
   onReceiveReply?: OnReplyCallbackFunction;
+  /**
+   * Any data that onReceiveReply function will receive as 3th parameter.
+   * You can use this to "remind" something from previous user messages.
+   */
+  data?: any;
 }

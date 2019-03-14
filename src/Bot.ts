@@ -207,7 +207,7 @@ export class Bot {
    */
   public async sendMessage(chat_id: number | string, text: string, optionals: I.SendMessageOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
 
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
 
     // telegram message text can not be greater than 4096 characters
     if (text.length > Bot.MAX_MESSAGE_LENGTH) {
@@ -236,7 +236,7 @@ export class Bot {
 
     const _sendmsg = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sentmsg = await this.makeRequest<I.Message>("sendMessage", { json });
-      this.registerReplyHandler(sentmsg, onReceiveReply);
+      this.registerReplyHandler(sentmsg, onReceiveReply, data);
       return sentmsg;
     };
 
@@ -285,7 +285,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
   public async sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals: I.SendPhotoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -295,7 +295,7 @@ export class Bot {
 
     const _sendphoto = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendPhoto", { formData });
-      this.registerReplyHandler(sent, onReceiveReply);
+      this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
@@ -313,7 +313,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
   public async sendAudio(chat_id: number | string, audio: ReadStream | string, optionals: I.SendAudioOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
     const formData = {
       audio,
       chat_id,
@@ -322,7 +322,7 @@ export class Bot {
 
     const _sendaudio = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendAudio", { formData });
-      this.registerReplyHandler(sent, onReceiveReply);
+      this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
@@ -340,7 +340,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
   public async sendDocument(chat_id: number | string, doc: ReadStream | string, optionals: I.SendDocumentOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -350,7 +350,7 @@ export class Bot {
 
     const _senddocument = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendDocument", { formData });
-      this.registerReplyHandler(sent, onReceiveReply);
+      this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
@@ -368,7 +368,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendsticker}
    */
   public async sendSticker(chat_id: number | string, sticker: ReadStream | string, optionals?: I.SendStickerOptionals): Promise<I.TelegramResponse<I.Message>> {
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -377,7 +377,7 @@ export class Bot {
     };
 
     const sent = await this.makeRequest<I.Message>("sendSticker", { formData });
-    this.registerReplyHandler(sent, onReceiveReply);
+    this.registerReplyHandler(sent, onReceiveReply, data);
     return sent;
   }
 
@@ -389,7 +389,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendvideo}
    */
   public async sendVideo(chat_id: number | string, video: ReadStream | string, optionals: I.SendVideoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -399,7 +399,7 @@ export class Bot {
 
     const _sendvideo = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendVideo", { formData });
-      this.registerReplyHandler(sent, onReceiveReply);
+      this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
@@ -435,7 +435,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendlocation}
    */
   public async sendLocation(chat_id: number | string, latitude: number, longitude: number, optionals: I.SendLocationOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, ...optionalParams } = optionals;
 
     const json = {
       chat_id,
@@ -445,7 +445,7 @@ export class Bot {
     };
 
     const sent = await this.makeRequest<I.Message>("sendLocation", { json });
-    this.registerReplyHandler(sent, onReceiveReply);
+    this.registerReplyHandler(sent, onReceiveReply, data);
     return sent;
   }
 
@@ -1222,7 +1222,7 @@ export class Bot {
 
     // check if a callback was found
     if (cbk) {
-      cbk.f(message, createMessageActions(message, this));
+      cbk.f(message, createMessageActions(message, this), cbk.data);
       // remove handler from array
       this.repliesCallbacks.splice(i, 1);
       // a handler was found, so return true
@@ -1232,7 +1232,7 @@ export class Bot {
     return false;
   }
 
-  private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: Types.OnReplyCallbackFunction): I.TelegramResponse<I.Message> {
+  private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: Types.OnReplyCallbackFunction, data: any): I.TelegramResponse<I.Message> {
     if (cbk) {
 
       if (!isFunction(cbk)) {
@@ -1243,6 +1243,7 @@ export class Bot {
       debug(`Registering reply handler to message ${message_id} on chat ${chat.id}`);
       this.repliesCallbacks.push({
         chat: chat.id,
+        data,
         message_id,
 
         f: cbk,

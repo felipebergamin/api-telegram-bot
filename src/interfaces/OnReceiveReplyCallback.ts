@@ -13,4 +13,6 @@ export interface OnReceiveReplyCallback {
    * function to be called when receive reply
    */
   f: OnReplyCallbackFunction;
+
+  data?: any;
 }

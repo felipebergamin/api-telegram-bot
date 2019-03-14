@@ -34,6 +34,11 @@ export interface SendMessageOptionals {
    * Note: the user must explicity reply the message (tap message on telegram app and "Reply")
    */
   onReceiveReply?: OnReplyCallbackFunction;
+  /**
+   * Any data that onReceiveReply function will receive as 3th parameter.
+   * You can use this to "remind" something from previous user messages.
+   */
+  data?: any;
 
   readonly [propName: string]: any;
 }
