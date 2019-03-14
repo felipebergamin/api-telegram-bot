@@ -1,6 +1,7 @@
 import { ReadStream } from "fs";
 
 import { OnReplyCallbackFunction } from "../../types";
+import { CallbackQueryHandlerFunction } from "../CallbackQueryHandler";
 import { ForceReply} from "../ForceReply";
 import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
 import { ReplyKeyboardMarkup} from "../ReplyKeyboardMarkup";
@@ -47,6 +48,10 @@ export interface SendAudioOptionals {
    * Note: the user must explicity reply the message (tap message on telegram app and "Reply")
    */
   onReceiveReply?: OnReplyCallbackFunction;
+  /**
+   * a function that will be called when user tap a inline_keyboard button in sent message
+   */
+  onCallbackQuery?: CallbackQueryHandlerFunction;
   /**
    * Any data that onReceiveReply function will receive as 3th parameter.
    * You can use this to "remind" something from previous user messages.

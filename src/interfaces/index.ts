@@ -1,6 +1,8 @@
 export { Animation } from "./Animation";
 export { Audio } from "./Audio";
 export { CallbackQuery } from "./CallbackQuery";
+export { CallbackQueryActions } from "./CallbackQueryActions";
+export { CallbackQueryHandler, CallbackQueryHandlerFunction } from "./CallbackQueryHandler";
 export { Chat } from "./Chat";
 export { ChatMember } from "./ChatMember";
 export { ChatPhoto } from "./ChatPhoto";

@@ -14,6 +14,7 @@ import * as Types from "./types";
 import { Webhook } from "./Webhook";
 
 import {
+  createCallbackQueryActions,
   createFilteredMessageObservable,
   createFilteredUpdateObservable,
   createMessageActions,
@@ -93,6 +94,7 @@ export class Bot {
 
   private config: I.Config;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
+  private callbackQueriesHandlers: I.CallbackQueryHandler[];
   private _smartMenus: SmartMenu[] = [];
   private _webhook: Webhook;
   private _polling: Polling;
@@ -113,6 +115,7 @@ export class Bot {
     }
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
+    this.callbackQueriesHandlers = [];
   }
 
   /** @ignore */
@@ -207,7 +210,7 @@ export class Bot {
    */
   public async sendMessage(chat_id: number | string, text: string, optionals: I.SendMessageOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
 
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
     // telegram message text can not be greater than 4096 characters
     if (text.length > Bot.MAX_MESSAGE_LENGTH) {
@@ -237,6 +240,15 @@ export class Bot {
     const _sendmsg = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sentmsg = await this.makeRequest<I.Message>("sendMessage", { json });
       this.registerReplyHandler(sentmsg, onReceiveReply, data);
+
+      if (onCallbackQuery) {
+        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+          return;
+        }
+        debug("registering callback_query handler");
+        this.addCallbackQueryHandler(sentmsg.result, onCallbackQuery, data);
+      }
       return sentmsg;
     };
 
@@ -285,7 +297,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
   public async sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals: I.SendPhotoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -295,6 +307,16 @@ export class Bot {
 
     const _sendphoto = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendPhoto", { formData });
+
+      if (onCallbackQuery) {
+        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+          return;
+        }
+        debug("registering callback_query handler");
+        this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
+      }
+
       this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
@@ -313,7 +335,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
   public async sendAudio(chat_id: number | string, audio: ReadStream | string, optionals: I.SendAudioOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
     const formData = {
       audio,
       chat_id,
@@ -322,6 +344,16 @@ export class Bot {
 
     const _sendaudio = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendAudio", { formData });
+
+      if (onCallbackQuery) {
+        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+          return;
+        }
+        debug("registering callback_query handler");
+        this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
+      }
+
       this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
@@ -340,7 +372,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
   public async sendDocument(chat_id: number | string, doc: ReadStream | string, optionals: I.SendDocumentOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -350,6 +382,16 @@ export class Bot {
 
     const _senddocument = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendDocument", { formData });
+
+      if (onCallbackQuery) {
+        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+          return;
+        }
+        debug("registering callback_query handler");
+        this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
+      }
+
       this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
@@ -368,7 +410,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendsticker}
    */
   public async sendSticker(chat_id: number | string, sticker: ReadStream | string, optionals?: I.SendStickerOptionals): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -377,6 +419,16 @@ export class Bot {
     };
 
     const sent = await this.makeRequest<I.Message>("sendSticker", { formData });
+
+    if (onCallbackQuery) {
+      if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+        debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+        return;
+      }
+      debug("registering callback_query handler");
+      this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
+    }
+
     this.registerReplyHandler(sent, onReceiveReply, data);
     return sent;
   }
@@ -389,7 +441,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendvideo}
    */
   public async sendVideo(chat_id: number | string, video: ReadStream | string, optionals: I.SendVideoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
     const formData = {
       chat_id,
@@ -399,6 +451,16 @@ export class Bot {
 
     const _sendvideo = async (): Promise<I.TelegramResponse<I.Message>> => {
       const sent = await this.makeRequest<I.Message>("sendVideo", { formData });
+
+      if (onCallbackQuery) {
+        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+          return;
+        }
+        debug("registering callback_query handler");
+        this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
+      }
+
       this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
@@ -435,7 +497,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendlocation}
    */
   public async sendLocation(chat_id: number | string, latitude: number, longitude: number, optionals: I.SendLocationOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, ...optionalParams } = optionals;
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
     const json = {
       chat_id,
@@ -445,6 +507,16 @@ export class Bot {
     };
 
     const sent = await this.makeRequest<I.Message>("sendLocation", { json });
+
+    if (onCallbackQuery) {
+      if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+        debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+        return;
+      }
+      debug("registering callback_query handler");
+      this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
+    }
+
     this.registerReplyHandler(sent, onReceiveReply, data);
     return sent;
   }
@@ -1232,6 +1304,26 @@ export class Bot {
     return false;
   }
 
+  private checkForCallbackQueryHandlers(update: I.CallbackQuery): boolean {
+    if (!update) {
+      return false;
+    }
+
+    debug(`Searching a callback_query handler for message ${update.message.message_id} on chat ${update.message.chat.id}`);
+    const handlerIndex = this.callbackQueriesHandlers.findIndex((h) => h.message_id === update.message.message_id && h.chat_id === update.message.chat.id);
+
+    if (handlerIndex < 0) {
+      debug("Handler not found");
+      return false;
+    }
+
+    debug(`Handler found on index ${handlerIndex}. Calling function now`);
+    const [handler] = this.callbackQueriesHandlers.splice(handlerIndex, 1);
+    handler.f(update, createCallbackQueryActions(update, this), handler.data);
+    this.callbackQueriesHandlers.splice(handlerIndex, 1);
+    return true;
+  }
+
   private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: Types.OnReplyCallbackFunction, data: any): I.TelegramResponse<I.Message> {
     if (cbk) {
 
@@ -1251,6 +1343,28 @@ export class Bot {
     }
 
     return sentMsg;
+  }
+
+  private addCallbackQueryHandler(sentMsg: I.Message, cbk: I.CallbackQueryHandlerFunction, data?: any) {
+    if (sentMsg && cbk) {
+      debug(`Adding callback_query handler to message ${sentMsg.message_id} on chat ${sentMsg.chat.id}`);
+
+      if (!isFunction(cbk)) {
+        debug(`Ops, callback handler must be a function, received a ${typeof cbk}`);
+        throw new Error(`onCallbackQuery: expected a function, received ${typeof cbk}`);
+      }
+
+      this.callbackQueriesHandlers.unshift({
+        chat_id: sentMsg.chat.id,
+        f: cbk,
+        message_id: sentMsg.message_id,
+
+        data,
+      });
+
+      debug("Handler was added");
+      return sentMsg;
+    }
   }
 
   private splitText(text: string, chunkLength: number): string[] {
@@ -1317,6 +1431,7 @@ export class Bot {
 
             return true;
           }),
+          filter((cbkQuery) => this.checkForCallbackQueryHandlers(cbkQuery.callback_query)),
         ).subscribe(this.callbackQuery$);
     createFilteredUpdateObservable(origin, "shipping_query").subscribe(this.shippingQuery$);
     createFilteredUpdateObservable(origin, "pre_checkout_query").subscribe(this.preCheckoutQuery$);

@@ -5,8 +5,16 @@ import { filter, map } from "rxjs/operators";
 import { Bot } from "./Bot";
 import { debug } from "./debug";
 import {
+  AnswerCallbackQueryOptionals,
+  CallbackQuery,
+  CallbackQueryActions,
+  EditMessageTextOptionals,
+  ForceReply,
+  InlineKeyboardMarkup,
   Message,
   MessageActions,
+  ReplyKeyboardMarkup,
+  ReplyKeyboardRemove,
   SendMessageOptionals,
   TelegramResponse,
   Update,
@@ -49,6 +57,48 @@ export const createMessageActions = (message: Message, bot: Bot): MessageActions
       optionals.reply_to_message_id = message.message_id;
 
       return bot.sendMessage(message.chat.id, text, optionals);
+    },
+  };
+};
+
+export const createCallbackQueryActions = (cbkQuery: CallbackQuery, bot: Bot): CallbackQueryActions => {
+  return {
+    banChatMember: (until: number = 0) => {
+      debug(`CallbackQueryActions: ban chat member ${cbkQuery.message.chat.id} / ${cbkQuery.message.from.id}`);
+
+      return bot.kickChatMember(cbkQuery.message.chat.id, cbkQuery.message.from.id, until);
+    },
+
+    deleteMessage: () => {
+      debug(`CallbackQueryActions: deleting message ${cbkQuery.message.message_id}`);
+
+      return bot.deleteMessage(cbkQuery.message.chat.id, cbkQuery.message.message_id);
+    },
+
+    answerQuery: (opt: AnswerCallbackQueryOptionals = {}) => {
+      debug(`CallbackQueryActions: answering callback_query ${cbkQuery.id}`);
+      return bot.answerCallbackQuery(cbkQuery.id, opt);
+    },
+
+    editMessageText: (text: string, opt: EditMessageTextOptionals = {}) => {
+      debug(`CallbackQueryActions: editing message(${cbkQuery.message.message_id}) text`);
+      return bot.editMessageText(
+        text,
+        {
+          ...opt,
+          chat_id: cbkQuery.message.chat.id,
+          message_id: cbkQuery.message.message_id,
+        },
+      );
+    },
+
+    // tslint:disable-next-line: max-line-length
+    editMessageReplyMarkup: (reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply) => {
+      return bot.editMessageReplyMarkup({
+        chat_id: cbkQuery.message.chat.id,
+        message_id: cbkQuery.message.message_id,
+        reply_markup,
+      });
     },
   };
 };
