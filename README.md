@@ -8,11 +8,12 @@ This module is updated with Telegram API version **4.1**. Except with Telegram P
 
 # API reference
 
-[Click Here (v5.0)](http://apitelegrambot.tech/v5.0.0)
+[Click Here (v5.1)](http://apitelegrambot.tech/v5.1.0)
 
 ### Older Versions
 
-[v4.0.2](http://apitelegrambot.tech/v4.0.2/)
+- [v4.0.2](http://apitelegrambot.tech/v4.0.2/)
+- [v5.0.x](http://apitelegrambot.tech/v5.0.0)
 
 ### Examples
 
@@ -20,11 +21,18 @@ There's a `examples` directory on GitHub. Take a look ;)
 
 Before run any example code, please install deps with `npm i` and run `npm run build` to transpile TS code to JS in dist folder.
 
+## News on v5.1
+
+- Implements `onCallbackQuery` param, like `onReceiveReply` it's a function defined by you when sending an inline_keyboard, this function will be called when user press any button of sent keyboard (see `examples/onCallbackQuery.js` file)
+- Add `data` optional param to send methods. This param can be anything defined by you and will be passed as 3th parameter to `onReceiveReply` and `onCallbackQuery` functions. You can use this to "remember" something between user messages.
+
+**See examples/onReplyCallback.js on GitHub to see how to use `onCallbackQuery` and `onReceiveReply`**
+
 ## News on v5
 
 - *Smart Menus:* An experimental resource was added on v5. It attempt to allow easier interactions with InlineKeyboards, building nested menus and a easy way to handle user's response.
 - Implements `onReceiveReply` optional param to messages send, it's a function that will be called when user reply the message (tapping message on client and selecting 'Reply')
-- Implements polling support for receive updates
+- Implements polling support
 - `onRegex` was temporarily removed from code
 - `TelegramBotClient` class renamed to `Bot`
 - Updates is delivered by rxjs Observables, so you can combine, filter, map, and more
@@ -32,7 +40,7 @@ Before run any example code, please install deps with `npm i` and run `npm run b
 
 ### Install
 ```sh
-npm install api-telegram-bot@beta
+npm install api-telegram-bot
 ```
 ### Start coding
 
