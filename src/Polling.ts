@@ -1,11 +1,13 @@
+import * as Debug from "debug";
 import { Observable, Observer } from "rxjs";
 import { map, share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
-import { debug } from "./debug";
 import { Update } from "./interfaces";
 import { PollingOptions } from "./interfaces/PollingOptions";
 import { checkUpdateType, ExplicitTypedUpdate } from "./utils";
+
+const debug = Debug("api-telegram-bot:polling");
 
 /** @beta */
 export class Polling {

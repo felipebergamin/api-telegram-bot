@@ -1,13 +1,15 @@
 /* tslint:disable:max-line-length */
+import * as Debug from "debug";
 import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
 import { fromEvent, Observable } from "rxjs";
 import { map, share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
-import { debug } from "./debug";
 import { Update } from "./interfaces";
 import { checkUpdateType, ExplicitTypedUpdate } from "./utils";
+
+const debug = Debug("api-telegram-bot:webhook");
 
 export class Webhook {
   /** @ignore */
