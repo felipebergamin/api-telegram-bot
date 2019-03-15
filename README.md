@@ -103,6 +103,15 @@ Start your application with DEBUG env variable containing 'api-telegram-bot' val
 $ DEBUG=api-telegram-bot npm start
 ```
 
+To see debug logs from webhook or polling:
+
+```
+$ DEBUG=api-telegram-bot:polling npm start
+```
+``` 
+$ DEBUG=api-telegram-bot:webhook npm start
+```
+
 # Bugs
 
 If you found a bug, open an issue on GitHub. If you want to help and know the solution, please, submit a pull request.
