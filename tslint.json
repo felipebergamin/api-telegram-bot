@@ -6,7 +6,8 @@
     "jsRules": {},
     "rules": {
       "variable-name": false,
-      "interface-name": false
+      "interface-name": false,
+      "quotemark": false
     },
     "rulesDirectory": []
 }
