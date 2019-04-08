@@ -66,7 +66,7 @@ export class Polling {
    * E.g. return true is `stopPolling()` was called
    */
   public get isPolling(): boolean {
-    return !this.receivedStopSignal;
+    return ['NEW', 'STOPPED'].indexOf(this._status) === -1;
   }
 
   /**
