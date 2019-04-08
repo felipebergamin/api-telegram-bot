@@ -83,7 +83,7 @@ export class Polling {
    * because this, some updates may be delivered once after call `stopPolling`
    * @returns a promise that will be fulfilled when last fetch was done
    */
-  public stopPolling() {
+  public stopPolling(): Promise<void> {
     debug("Stop polling");
     this.receivedStopSignal = true;
     return this.status === "STOPPED"
