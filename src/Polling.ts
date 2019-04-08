@@ -88,11 +88,18 @@ export class Polling {
     this.receivedStopSignal = true;
     return this.status === "STOPPED"
       ? Promise.resolve()
-      : new Promise((resolve) => {
+      : new Promise((resolve, reject) => {
           const onStopCbk = (status) => {
             debug("CBK: " + status);
             if (status === "STOPPED") {
-              resolve();
+              /*
+                call get updates one last time only to set offset on telegram servers
+                if we don't update offset, updates received by last polling fetch
+                will be received again if we call getUpdates()
+              */
+              this.bot.getUpdates({ offset: this.offset, limit: 1 })
+                .then(() => resolve())
+                .catch((err) => reject(err));
               this._events.removeListener("STATUS_CHANGED", onStopCbk);
             }
           };
