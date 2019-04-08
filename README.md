@@ -8,18 +8,23 @@ This module is updated with Telegram API version **4.1**. Except with Telegram P
 
 # API reference
 
-[Click Here (v5.1)](http://apitelegrambot.tech/v5.1.0)
+[Click Here (v5.2)](http://apitelegrambot.tech/v5.2.0)
 
 ### Older Versions
 
 - [v4.0.2](http://apitelegrambot.tech/v4.0.2/)
 - [v5.0.x](http://apitelegrambot.tech/v5.0.0)
+- [v5.1.x](http://apitelegrambot.tech/v5.1.0)
 
 ### Examples
 
 There's a `examples` directory on GitHub. Take a look ;)
 
 Before run any example code, please install deps with `npm i` and run `npm run build` to transpile TS code to JS in dist folder.
+
+## News on v5.2
+
+- stopPolling() returns a Promise fulfilled when last long polling fetch ends
 
 ## News on v5.1
 
@@ -76,6 +81,11 @@ bot.text$.subscribe(
      * note: deleteMessage and banChatMember doesn't works on private chats
      */
     actions.reply(update.message.text);
+
+    setTimeout(() => {
+      bot.polling.stopPolling() // stopPolling() returns a promise fulfilled when polling ends (v5.2 or newer) (see docs for details)
+        .then(() => console.log('polling stopped'));
+    }, 30000)
   }
 );
 
