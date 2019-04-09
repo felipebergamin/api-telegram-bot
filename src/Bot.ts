@@ -1431,7 +1431,7 @@ export class Bot {
 
             return true;
           }),
-          filter((cbkQuery) => this.checkForCallbackQueryHandlers(cbkQuery.callback_query)),
+          filter((cbkQuery) => !this.checkForCallbackQueryHandlers(cbkQuery.callback_query)),
         ).subscribe(this.callbackQuery$);
     createFilteredUpdateObservable(origin, "shipping_query").subscribe(this.shippingQuery$);
     createFilteredUpdateObservable(origin, "pre_checkout_query").subscribe(this.preCheckoutQuery$);
