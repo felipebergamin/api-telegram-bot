@@ -23,15 +23,15 @@ export class Polling {
   /** @ignore */
   private _events: EventEmitter;
   /** @ignore */
-  private offset;
+  private offset: number;
   /** @ignore */
-  private limit;
+  private limit: number;
   /** @ignore */
-  private allowed_updates;
+  private allowed_updates: string[];
   /** @ignore */
-  private timeout;
+  private timeout: number;
   /** @ignore */
-  private receivedStopSignal;
+  private receivedStopSignal: boolean;
   /** @ignore */
   private observable: Observable<Update>;
 
@@ -76,6 +76,9 @@ export class Polling {
       .pipe(map((update) => checkUpdateType(update)));
   }
 
+  /**
+   * Call this function to start polling
+   */
   public startPolling() {
     // bot will subscribe to updates observable and polling will start
     this.bot.polling = this;
