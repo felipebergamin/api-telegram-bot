@@ -126,7 +126,7 @@ export class Polling {
     return Observable.create((observer: Observer<Update>) => {
       debug("Creating Observable");
 
-      const getUpdates = () => {
+      const getUpdates = async () => {
         this.setStatus("FETCHING");
         debug("Getting updates: %j", {
           allowed_updates: this.allowed_updates,
@@ -135,14 +135,15 @@ export class Polling {
           timeout: this.timeout,
         });
 
-        return this.bot.getUpdates({
-          allowed_updates: this.allowed_updates,
-          limit: this.limit,
-          offset: this.offset,
-          timeout: this.timeout,
-        }).then((updates) => {
-          this.setStatus("FETCH_DONE");
+        try {
+          const updates = await this.bot.getUpdates({
+            allowed_updates: this.allowed_updates,
+            limit: this.limit,
+            offset: this.offset,
+            timeout: this.timeout,
+          });
 
+          this.setStatus('FETCH_DONE');
           debug(`received ${updates.result.length} updates`);
           if (updates.ok && updates.result.length > 0) {
             this.offset = updates.result[updates.result.length - 1].update_id + 1;
@@ -150,26 +151,21 @@ export class Polling {
               observer.next(u);
             }
           }
+        } catch (err) {
 
-          if (!this.receivedStopSignal) {
-            return getUpdates();
-          }
-          debug(`Stop flag is ${this.receivedStopSignal}, stopping polling`);
-          this.setStatus("STOPPED");
-          observer.complete();
-          return updates;
-        }).catch((err) => {
           this.lastError = err;
           this.setStatus("ERROR");
 
           debug("error on fetch updates");
           observer.error(err);
-          if (!this.receivedStopSignal) {
-            return getUpdates();
-          }
-          this.setStatus("STOPPED");
-          observer.complete();
-        });
+        }
+
+        if (!this.receivedStopSignal) {
+          return await getUpdates();
+        }
+        debug(`Stop flag is ${this.receivedStopSignal}, stopping polling`);
+        this.setStatus("STOPPED");
+        observer.complete();
       };
 
       getUpdates();
