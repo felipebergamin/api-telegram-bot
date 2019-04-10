@@ -91,6 +91,14 @@ export class Bot {
   /** emits successful_payment message types from webhook or polling */
   public successfulPayment$ = new Subject<I.WrappedMessageActions>();
 
+  /**
+   * each item is an array with message_id, chat_id and a generator function
+   * [
+   *  [message_id, chat_id, fn],
+   *  [message_id, chat_id, fn],
+   * ]
+   */
+  private _menus: any[];
   private config: I.Config;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
   private callbackQueriesHandlers: I.CallbackQueryHandler[];
@@ -114,6 +122,7 @@ export class Bot {
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
     this.callbackQueriesHandlers = [];
+    this._menus = [];
   }
 
   /** @ignore */
@@ -161,6 +170,14 @@ export class Bot {
   public getWebhook() {
     const wh = new Webhook(this);
     return wh.getWebhook();
+  }
+
+  public async sendMenu(fg: AsyncIterableIterator<I.TelegramResponse<I.Message>>) {
+    const { value, done } = await fg.next();
+    const { message_id, chat: { id } } = value.result;
+    if (!done) {
+      this._menus.unshift([message_id, id, fg]);
+    }
   }
 
   /**
@@ -1275,6 +1292,25 @@ export class Bot {
     return false;
   }
 
+  private removeMenuFn(f: any) {
+    debug('Removing menu generator from array');
+    this._menus = this._menus.filter(([mid, cid, fn]) => {
+      return f !== fn;
+    });
+  }
+
+  private async runMenuFunction(fn: any, callbackQuery: I.CallbackQuery) {
+    debug('Running menu function');
+    const { done } = await fn.next([
+      callbackQuery,
+      createCallbackQueryActions(callbackQuery, this),
+    ]);
+
+    if (done) {
+      this.removeMenuFn(fn);
+    }
+  }
+
   private checkForCallbackQueryHandlers(update: I.CallbackQuery): boolean {
     if (!update) {
       return false;
@@ -1368,7 +1404,22 @@ export class Bot {
     createFilteredUpdateObservable(origin, "chosen_inline_result").subscribe(this.chosenInlineResult$);
     createFilteredUpdateObservable(origin, "callback_query")
         .pipe(
-          filter((cbkQuery) => this.checkForCallbackQueryHandlers(cbkQuery.callback_query)),
+          filter((cbkQuery) => !this.checkForCallbackQueryHandlers(cbkQuery.callback_query)),
+          filter((cbkQuery) => {
+            debug(`_menu array length: ${this._menus.length}`);
+            if (this._menus.length === 0) {
+              return true;
+            }
+
+            const { message_id, chat: { id } } = cbkQuery.callback_query.message;
+
+            const menu = this._menus.find(([messageId, chatId]) => message_id === messageId && id === chatId);
+            const fn = menu[2];
+
+            if (!menu) { return true; }
+            this.runMenuFunction(fn, cbkQuery.callback_query);
+            return false;
+          }),
         ).subscribe(this.callbackQuery$);
     createFilteredUpdateObservable(origin, "shipping_query").subscribe(this.shippingQuery$);
     createFilteredUpdateObservable(origin, "pre_checkout_query").subscribe(this.preCheckoutQuery$);
