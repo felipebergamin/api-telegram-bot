@@ -61,9 +61,9 @@ bot.text$.subscribe(
 
     /*
      * actions is an object with some functions to manipulate received message:
-     *    banChatMember?: (until: number) => Promise<TelegramResponse<boolean>>
-     *    deleteMessage?: () => Promise<TelegramResponse<boolean>>;
-     *    reply: (text: string, optionals?) => Promise<TelegramResponse<Message>>;
+     *    banChatMember: (until: number) => Promise
+     *    deleteMessage: () => Promise
+     *    reply: (text: string, optionals?) => Promise
      * 
      * note: deleteMessage and banChatMember doesn't works on private chats
      */
@@ -83,18 +83,6 @@ bot.editedMessage$.subscribe(data => {
 });
 ```
 
-Sending files:
-```js
-import { createReadStream } from "fs";
-import { Bot } from "api-telegram-bot";
-
-const TOKEN = "BOT_TOKEN";
-const bot = new Bot(TOKEN);
-
-const file = fs.createReadStream("/PATH/TO/AWESOME/PHOTO");
-bot.sendPhoto(send_to, file);
-```
-
 ## Enable debug log
 Start your application with DEBUG env variable containing 'api-telegram-bot' value.
 [Reference to debug package](https://www.npmjs.com/package/debug)
@@ -112,18 +100,15 @@ $ DEBUG=api-telegram-bot:polling npm start
 $ DEBUG=api-telegram-bot:webhook npm start
 ```
 
-# Bugs
-
-If you found a bug, open an issue on GitHub. If you want to help and know the solution, please, submit a pull request.
-
 # Reply Markup Builders
 
 ## [Reply Keyboard Markup](https://core.telegram.org/bots/api#replykeyboardmarkup)
 
 ```js
-import { ReplyKeyboardBuilder, Bot } from "api-telegram-bot";
+const { ReplyKeyboardBuilder, Bot } = require('api-telegram-bot');
 
 const TOKEN = "BOT_TOKEN";
+const CONTACT_ID = 'YOUR_TELEGRAM_ID';
 
 const bot = new Bot(TOKEN);
 const kbBuilder = new ReplyKeyboardBuilder();
@@ -135,7 +120,7 @@ const reply_markup = kbBuilder
   .appendRow()
     .addButton({ text: "Cancel" });
 
-bot.sendMessage("CONTACT_ID", "Confirm?", { reply_markup });
+bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup });
 ```
 
 ![Reply Keyboard Builder Result](https://image.ibb.co/h2g9N6/Screenshot_20171215_102656.png)
@@ -143,9 +128,10 @@ bot.sendMessage("CONTACT_ID", "Confirm?", { reply_markup });
 ## [Inline Keyboard](https://core.telegram.org/bots/api#inlinekeyboardmarkup)
 
 ```ts
-import { InlineKeyboardBuilder, Bot } from "api-telegram-bot";
+const { InlineKeyboardBuilder, Bot } = require('api-telegram-bot');
 
 const TOKEN = "BOT_TOKEN";
+const CONTACT_ID = 'YOUR_TELEGRAM_ID';
 
 const bot = new Bot(TOKEN);
 const kbBuilder = new InlineKeyboardBuilder();
@@ -167,23 +153,24 @@ See the message sent by code above:
 ### distributeButtonsInRows
 
 ```js
-import { InlineKeyboardBuilder, InlineKeyboardButton, Bot } from "api-telegram-bot";
+const { InlineKeyboardBuilder, InlineKeyboardButton, Bot } = require('api-telegram-bot');
 
-const TOKEN = "BOT_TOKEN";
+const BOT_TOKEN = 'BOT_TOKEN';
+const CONTACT_ID = 'YOUR_TELEGRAM_ID';
 
-const bot = new Bot(TOKEN);
+const bot = new Bot(BOT_TOKEN);
 const kbBuilder = new InlineKeyboardBuilder();
 const buttons = [
-  { text: "1", callback_data: "BTN_1" },
-  { text: "2", callback_data: "BTN_2" },
-  { text: "3", callback_data: "BTN_3" },
-  { text: "4", callback_data: "BTN_4" },
+  { text: '1', callback_data: 'BTN_1' },
+  { text: '2', callback_data: 'BTN_2' },
+  { text: '3', callback_data: 'BTN_3' },
+  { text: '4', callback_data: 'BTN_4' },
 ];
 
 // distribute 2 buttons for each row
 const reply_markup = kbBuilder.distributeButtonsInRows(buttons, 2);
 
-bot.sendMessage(CONTACT_ID, "Choose number", { reply_markup });
+bot.sendMessage(CONTACT_ID, "Choose a number", { reply_markup });
 ```
 
 ![distribute buttons result](https://image.ibb.co/mXPFUm/Screenshot_20171215_103502.png)
