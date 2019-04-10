@@ -98,7 +98,7 @@ export class Bot {
    *  [message_id, chat_id, fn],
    * ]
    */
-  private _menus: any[];
+  private _menuGenerators: any[];
   private config: I.Config;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
   private callbackQueriesHandlers: I.CallbackQueryHandler[];
@@ -122,7 +122,7 @@ export class Bot {
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
     this.callbackQueriesHandlers = [];
-    this._menus = [];
+    this._menuGenerators = [];
   }
 
   /** @ignore */
@@ -176,7 +176,7 @@ export class Bot {
     const { value, done } = await fg.next();
     const { message_id, chat: { id } } = value.result;
     if (!done) {
-      this._menus.unshift([message_id, id, fg]);
+      this._menuGenerators.unshift([message_id, id, fg]);
     }
   }
 
@@ -1294,7 +1294,7 @@ export class Bot {
 
   private removeMenuFn(f: any) {
     debug('Removing menu generator from array');
-    this._menus = this._menus.filter(([mid, cid, fn]) => {
+    this._menuGenerators = this._menuGenerators.filter(([mid, cid, fn]) => {
       return f !== fn;
     });
   }
@@ -1311,6 +1311,10 @@ export class Bot {
     }
   }
 
+  /**
+   * @returns true if founds a handler for callback_query, false otherwise
+   * @ignore
+   */
   private checkForCallbackQueryHandlers(update: I.CallbackQuery): boolean {
     if (!update) {
       return false;
@@ -1390,6 +1394,40 @@ export class Bot {
     return splitedText;
   }
 
+  private hasGeneratorMenuFn(cbkQuery: I.CallbackQuery): boolean {
+    if (this._menuGenerators.length === 0) {
+      return false;
+    }
+
+    const { message_id, chat } = cbkQuery.message;
+    const menu = this._menuGenerators.find(([messageId, chatId]) => message_id === messageId && chat.id === chatId);
+
+    if (!menu) {
+      return false;
+    }
+
+    const fn = menu[2];
+    this.runMenuFunction(fn, cbkQuery);
+    return true;
+  }
+
+  private canPropagateCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
+    const hasHandler = this.checkForCallbackQueryHandlers(cbkQuery);
+    if (hasHandler) {
+      debug('callback_query has a menu handler');
+      return false;
+    }
+
+    const hasMenuGenerator = this.hasGeneratorMenuFn(cbkQuery);
+    if (hasMenuGenerator) {
+      debug('callback_query has a generator function');
+      return false;
+    }
+
+    debug('handler or generator not found for callback_query, continue');
+    return true;
+  }
+
   private configObservables(origin: Observable<ExplicitTypedUpdate>) {
     const msgObservable = createFilteredUpdateObservable(origin, "message")
       .pipe(
@@ -1404,22 +1442,7 @@ export class Bot {
     createFilteredUpdateObservable(origin, "chosen_inline_result").subscribe(this.chosenInlineResult$);
     createFilteredUpdateObservable(origin, "callback_query")
         .pipe(
-          filter((cbkQuery) => !this.checkForCallbackQueryHandlers(cbkQuery.callback_query)),
-          filter((cbkQuery) => {
-            debug(`_menu array length: ${this._menus.length}`);
-            if (this._menus.length === 0) {
-              return true;
-            }
-
-            const { message_id, chat: { id } } = cbkQuery.callback_query.message;
-
-            const menu = this._menus.find(([messageId, chatId]) => message_id === messageId && id === chatId);
-            const fn = menu[2];
-
-            if (!menu) { return true; }
-            this.runMenuFunction(fn, cbkQuery.callback_query);
-            return false;
-          }),
+          filter(({ callback_query }) => this.canPropagateCallbackQuery(callback_query)),
         ).subscribe(this.callbackQuery$);
     createFilteredUpdateObservable(origin, "shipping_query").subscribe(this.shippingQuery$);
     createFilteredUpdateObservable(origin, "pre_checkout_query").subscribe(this.preCheckoutQuery$);
