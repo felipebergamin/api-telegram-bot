@@ -46,7 +46,6 @@ export class Polling {
     this.setStatus("NEW");
 
     this.observable = this.createObservable().pipe(share());
-    this.bot.polling = this;
   }
 
   /**
@@ -75,6 +74,11 @@ export class Polling {
   public get updates(): Observable<ExplicitTypedUpdate> {
     return this.observable
       .pipe(map((update) => checkUpdateType(update)));
+  }
+
+  public startPolling() {
+    // bot will subscribe to updates observable and polling will start
+    this.bot.polling = this;
   }
 
   /**
