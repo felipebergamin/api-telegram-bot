@@ -12,6 +12,8 @@ import { Polling } from "./Polling";
 import * as Types from "./types";
 import { Webhook } from "./Webhook";
 
+import { InlineMenuHandler } from "./gmenu";
+import { InlineMenuFunction, InlineMenuManager } from "./gmenu/manager";
 import {
   createCallbackQueryActions,
   createFilteredMessageObservable,
@@ -91,14 +93,7 @@ export class Bot {
   /** emits successful_payment message types from webhook or polling */
   public successfulPayment$ = new Subject<I.WrappedMessageActions>();
 
-  /**
-   * each item is an array with message_id, chat_id and a generator function
-   * [
-   *  [message_id, chat_id, fn],
-   *  [message_id, chat_id, fn],
-   * ]
-   */
-  private _menuGenerators: any[];
+  private _gMenuHandler: InlineMenuManager;
   private config: I.Config;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
   private callbackQueriesHandlers: I.CallbackQueryHandler[];
@@ -122,7 +117,6 @@ export class Bot {
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
     this.callbackQueriesHandlers = [];
-    this._menuGenerators = [];
   }
 
   /** @ignore */
@@ -172,12 +166,12 @@ export class Bot {
     return wh.getWebhook();
   }
 
-  public async sendMenu(fg: AsyncIterableIterator<I.TelegramResponse<I.Message>>) {
-    const { value, done } = await fg.next();
-    const { message_id, chat: { id } } = value.result;
-    if (!done) {
-      this._menuGenerators.unshift([message_id, id, fg]);
+  public async sendMenu(to: number|string, fg: InlineMenuFunction) {
+    if (!this._gMenuHandler) {
+      this._gMenuHandler = InlineMenuHandler(this);
     }
+
+    await this._gMenuHandler.sendMenu(to, fg);
   }
 
   /**
@@ -1292,25 +1286,6 @@ export class Bot {
     return false;
   }
 
-  private removeMenuFn(f: any) {
-    debug('Removing menu generator from array');
-    this._menuGenerators = this._menuGenerators.filter(([mid, cid, fn]) => {
-      return f !== fn;
-    });
-  }
-
-  private async runMenuFunction(fn: any, callbackQuery: I.CallbackQuery) {
-    debug('Running menu function');
-    const { done } = await fn.next([
-      callbackQuery,
-      createCallbackQueryActions(callbackQuery, this),
-    ]);
-
-    if (done) {
-      this.removeMenuFn(fn);
-    }
-  }
-
   /**
    * @returns true if founds a handler for callback_query, false otherwise
    * @ignore
@@ -1394,33 +1369,15 @@ export class Bot {
     return splitedText;
   }
 
-  private hasGeneratorMenuFn(cbkQuery: I.CallbackQuery): boolean {
-    if (this._menuGenerators.length === 0) {
-      return false;
-    }
-
-    const { message_id, chat } = cbkQuery.message;
-    const menu = this._menuGenerators.find(([messageId, chatId]) => message_id === messageId && chat.id === chatId);
-
-    if (!menu) {
-      return false;
-    }
-
-    const fn = menu[2];
-    this.runMenuFunction(fn, cbkQuery);
-    return true;
-  }
-
   private canPropagateCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
+    if (this._gMenuHandler && this._gMenuHandler.hasMenuForQuery(cbkQuery)) {
+      this._gMenuHandler.continueMenu(cbkQuery);
+      return;
+    }
+
     const hasHandler = this.checkForCallbackQueryHandlers(cbkQuery);
     if (hasHandler) {
       debug('callback_query has a menu handler');
-      return false;
-    }
-
-    const hasMenuGenerator = this.hasGeneratorMenuFn(cbkQuery);
-    if (hasMenuGenerator) {
-      debug('callback_query has a generator function');
       return false;
     }
 
