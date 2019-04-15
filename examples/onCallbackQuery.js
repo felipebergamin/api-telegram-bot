@@ -1,9 +1,10 @@
-const BOT_TOKEN = '';
-const CONTACT_ID = '';
+const BOT_TOKEN = 'REPLACE_WITH_BOT_TOKEN';
+const CONTACT_ID = 'REPLACE_WITH_TELEGRAM_ID';
 
-const { Bot, InlineKeyboardBuilder } = require('../dist');
+const { Bot, InlineKeyboardBuilder, Polling } = require('../dist');
 const bot = new Bot(BOT_TOKEN);
-bot.startPolling();
+const polling = new Polling(bot);
+polling.startPolling();
 
 /*
  * please note: when a received message match with a onReceiveReply function,
