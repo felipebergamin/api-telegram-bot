@@ -166,6 +166,14 @@ export class Bot {
     return wh.getWebhook();
   }
 
+  public async sendTextGenerator(to: number | string, fg: InlineMenuFunction) {
+    if (!this._gMenuHandler) {
+      this._gMenuHandler = InlineMenuHandler(this);
+    }
+
+    await this._gMenuHandler.startTextGenerator(to, fg);
+  }
+
   public async sendMenu(to: number|string, fg: InlineMenuFunction) {
     if (!this._gMenuHandler) {
       this._gMenuHandler = InlineMenuHandler(this);
@@ -1389,6 +1397,16 @@ export class Bot {
     const msgObservable = createFilteredUpdateObservable(origin, "message")
       .pipe(
         filter((update) => !this._checkRegisteredCallbacks(update.message)),
+        filter(({ message }) => {
+          if (message.reply_to_message) {
+            const hasHandler = this._gMenuHandler.hasHandlerForReply(message);
+            if (hasHandler) {
+              this._gMenuHandler.continueTextFn(message);
+              return false;
+            }
+          }
+          return true;
+        }),
         map((update) => ({ update, actions: createMessageActions(update.message, this) })),
       );
 

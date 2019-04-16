@@ -1,7 +1,13 @@
-import { AnswerCallbackQueryOptionals, InlineKeyboardMarkup } from '../../interfaces';
+import {
+  AnswerCallbackQueryOptionals,
+  InlineKeyboardMarkup,
+  SendMessageOptionals,
+} from '../../interfaces';
 import { InlineMenuFunction } from '../manager';
 
-export type ActionType = 'inlineMenu' | 'updateText' | 'updateMarkup' | 'answerQuery' | 'terminate' | 'switchMenuFn';
+export type ActionType =
+  'inlineMenu' | 'updateMenu' | 'answerQuery' | 'terminate' |
+  'switchMenuFn' | 'textMessage';
 
 export interface Action {
   data: any;
@@ -23,17 +29,10 @@ export function inlineMenu(data: { text: string, inline_keyboard: InlineKeyboard
   };
 }
 
-export function updateText(text: string): Action {
+export function updateMenu(inline_keyboard: InlineKeyboardMarkup, text?: string): Action {
   return {
-    data: { text },
-    type: 'updateText',
-  };
-}
-
-export function updateMarkup(inline_keyboard: InlineKeyboardMarkup): Action {
-  return {
-    data: { inline_keyboard },
-    type: 'updateMarkup',
+    data: { inline_keyboard, text },
+    type: 'updateMenu',
   };
 }
 
@@ -44,9 +43,9 @@ export function answerQuery(data: AnswerCallbackQueryOptionals = {}): Action {
   };
 }
 
-export function terminate(): Action {
+export function terminate(text?: string): Action {
   return {
-    data: {},
+    data: { text },
     type: 'terminate',
   };
 }
@@ -55,5 +54,12 @@ export function switchMenuFn(fn: InlineMenuFunction) {
   return {
     data: fn,
     type: 'switchMenuFn',
+  };
+}
+
+export function textMessage(text: string, optionals: SendMessageOptionals = {}) {
+  return {
+    data: { text, optionals },
+    type: 'textMessage',
   };
 }
