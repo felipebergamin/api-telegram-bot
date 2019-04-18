@@ -12,8 +12,9 @@ import { Polling } from "./Polling";
 import * as Types from "./types";
 import { Webhook } from "./Webhook";
 
-import { InlineMenuHandler } from "./gmenu";
-import { InlineMenuFunction, InlineMenuManager } from "./gmenu/manager";
+import { InlineMenuHandler } from "./generators";
+import { GeneratorsHandler } from "./interfaces";
+import { GeneratorFunction } from './types';
 import {
   createCallbackQueryActions,
   createFilteredMessageObservable,
@@ -93,7 +94,7 @@ export class Bot {
   /** emits successful_payment message types from webhook or polling */
   public successfulPayment$ = new Subject<I.WrappedMessageActions>();
 
-  private _gMenuHandler: InlineMenuManager;
+  private _generatorsHandler: GeneratorsHandler;
   private config: I.Config;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
   private callbackQueriesHandlers: I.CallbackQueryHandler[];
@@ -166,20 +167,20 @@ export class Bot {
     return wh.getWebhook();
   }
 
-  public async sendTextGenerator(to: number | string, fg: InlineMenuFunction) {
-    if (!this._gMenuHandler) {
-      this._gMenuHandler = InlineMenuHandler(this);
+  public async sendTextGenerator(to: number | string, fg: GeneratorFunction) {
+    if (!this._generatorsHandler) {
+      this._generatorsHandler = InlineMenuHandler(this);
     }
 
-    await this._gMenuHandler.startTextGenerator(to, fg);
+    await this._generatorsHandler.startTextGenerator(to, fg);
   }
 
-  public async sendMenu(to: number|string, fg: InlineMenuFunction) {
-    if (!this._gMenuHandler) {
-      this._gMenuHandler = InlineMenuHandler(this);
+  public async sendMenu(to: number | string, fg: GeneratorFunction) {
+    if (!this._generatorsHandler) {
+      this._generatorsHandler = InlineMenuHandler(this);
     }
 
-    await this._gMenuHandler.sendMenu(to, fg);
+    await this._generatorsHandler.startInlineKbGenerator(to, fg);
   }
 
   /**
@@ -1378,8 +1379,8 @@ export class Bot {
   }
 
   private canPropagateCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
-    if (this._gMenuHandler && this._gMenuHandler.hasMenuForQuery(cbkQuery)) {
-      this._gMenuHandler.continueMenu(cbkQuery);
+    if (this._generatorsHandler && this._generatorsHandler.hasMenuForQuery(cbkQuery)) {
+      this._generatorsHandler.continueKbGenerator(cbkQuery);
       return;
     }
 
@@ -1399,9 +1400,9 @@ export class Bot {
         filter((update) => !this._checkRegisteredCallbacks(update.message)),
         filter(({ message }) => {
           if (message.reply_to_message) {
-            const hasHandler = this._gMenuHandler.hasHandlerForReply(message);
+            const hasHandler = this._generatorsHandler.hasHandlerForReply(message);
             if (hasHandler) {
-              this._gMenuHandler.continueTextFn(message);
+              this._generatorsHandler.continueTextGenerator(message);
               return false;
             }
           }

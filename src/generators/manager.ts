@@ -1,51 +1,40 @@
-import { isFunction, isNullOrUndefined } from 'util';
-
 import * as Debug from 'debug';
+import { isNullOrUndefined } from 'util';
+
 import { Bot } from '../index';
+import { CallbackQuery, Message } from '../interfaces';
+import { GeneratorsHandler } from '../interfaces';
+import { GeneratorFunction } from '../types';
+import { Action } from './actions';
 import {
-  CallbackQuery,
-  Message,
-} from '../interfaces';
-import { Action, isAction, isActionsArray } from './actions';
+  indexForMessage,
+  indexForRepliedMsg,
+  isAction,
+  isActionsArray,
+  normalizePromise,
+} from './utils';
 
 const debug = Debug('api-telegram-bot:generators');
 
-function indexKey(msg: Message): string {
-  return `${msg.message_id}_${msg.chat.id}`;
+interface Indexes {
+  [key: string]: GeneratorFunction;
 }
 
-function indexForReply(msg: Message): string {
-  return `${msg.reply_to_message.message_id}_${msg.chat.id}`;
-}
+/**
+ * @param bot bot instance
+ * @ignore
+ */
+export const handler = (bot: Bot): GeneratorsHandler => {
+  const _inlineMenuGenerators: Indexes = {};
+  const _textGenerators: Indexes = {};
 
-export type InlineMenuFunction = IterableIterator<Action | Action[]> | AsyncIterableIterator<Action | Action[]>;
-
-export interface InlineMenuManager {
-  sendMenu: (to: string | number, fn: InlineMenuFunction) => void;
-  continueMenu: (cbkquery: CallbackQuery) => void;
-  hasMenuForQuery: (cbkquery: CallbackQuery) => boolean;
-  continueTextFn: (msg: Message) => void;
-  hasHandlerForReply: (msg: Message) => boolean;
-  startTextGenerator: (to: string | number, fn: InlineMenuFunction) => void;
-}
-
-export interface Indexes {
-  [key: string]: InlineMenuFunction;
-}
-
-async function normalizePromise(p: any): Promise<IteratorResult<Action | Action[]>> {
-  return (
-    'then' in p && isFunction(p.then)
-      ? await p
-      : p
-  );
-}
-
-export const handler = (bot: Bot): InlineMenuManager => {
-  const handlers: Indexes = {};
-  const replyHandlers: Indexes = {};
-
-  async function startTextGenerator(to: string | number, fn: InlineMenuFunction) {
+  /**
+   * receive a chat_id and a generator function to start a interaction managed by generator
+   * @param to contact id to send messages from generator
+   * @param fn generator function
+   * @ignore
+   */
+  async function startTextGenerator(to: string | number, fn: GeneratorFunction) {
     const { value } = await normalizePromise(fn.next());
 
     const firstAction = Array.isArray(value) ? value[0] : value;
@@ -56,29 +45,36 @@ export const handler = (bot: Bot): InlineMenuManager => {
     }
 
     try {
-      const { result } = await bot.sendMessage(to, firstAction.data.text, {
+      const { result: sentMsg } = await bot.sendMessage(to, firstAction.data.text, {
         ...firstAction.data.optionals,
         reply_markup: { force_reply: true },
       });
-      replyHandlers[indexKey(result)] = fn;
+      _textGenerators[indexForMessage(sentMsg)] = fn;
     } catch (err) {
       fn.throw(err);
     }
   }
 
-  async function continueTextFn(msg: Message) {
-    const fnIndexKey = indexForReply(msg);
-    debug(`continue generator from text: ${fnIndexKey}`);
+  /**
+   * receive a message and continue generator
+   * @param msg message received
+   */
+  async function continueTextGenerator(msg: Message) {
+    const fnIndexKey = indexForRepliedMsg(msg);
+    debug('continue generator for message %s on chat %s', msg.message_id, msg.chat.id);
 
-    if (fnIndexKey in replyHandlers) {
-      const fn = replyHandlers[fnIndexKey];
+    if (fnIndexKey in _textGenerators) {
+      const fn = _textGenerators[fnIndexKey];
 
-      const { value } = await normalizePromise(fn.next(msg));
-
-      let actions = value;
+      let { value: actions } = await normalizePromise(fn.next(msg));
 
       if (!Array.isArray(actions)) {
         actions = [actions];
+      }
+
+      if (!actions.every(isAction)) {
+        fn.throw(new Error('invalid action received from generator'));
+        return;
       }
 
       for (const action of actions) {
@@ -89,18 +85,18 @@ export const handler = (bot: Bot): InlineMenuManager => {
               ...action.data.optionals,
               reply_markup: { force_reply: true },
               reply_to_message_id: msg.message_id,
-            }).then((sentMessage) => {
-              const newIndex = indexKey(sentMessage.result);
-              replyHandlers[newIndex] = replyHandlers[fnIndexKey];
-              delete replyHandlers[fnIndexKey];
+            }).then(({ result: sentMsg }) => {
+              const newIndex = indexForMessage(sentMsg);
+              _textGenerators[newIndex] = _textGenerators[fnIndexKey];
+              delete _textGenerators[fnIndexKey];
             });
             break;
           case 'inlineMenu':
             bot.sendMessage(msg.chat.id, action.data.text, {
               reply_markup: { inline_keyboard: action.data.inline_keyboard },
-            }).then((sentMsg) => {
-              handlers[indexKey(sentMsg.result)] = fn;
-              delete replyHandlers[fnIndexKey];
+            }).then(({ result: sentMsg }) => {
+              _inlineMenuGenerators[indexForMessage(sentMsg)] = fn;
+              delete _textGenerators[fnIndexKey];
             });
             break;
           case 'terminate':
@@ -110,7 +106,7 @@ export const handler = (bot: Bot): InlineMenuManager => {
               });
             }
             fn.return();
-            delete replyHandlers[fnIndexKey];
+            delete _textGenerators[fnIndexKey];
             break;
           default:
             fn.throw(new Error('invalid action: ' + action.type));
@@ -119,7 +115,7 @@ export const handler = (bot: Bot): InlineMenuManager => {
     }
   }
 
-  async function sendMenu(to: string | number, fn: InlineMenuFunction) {
+  async function startInlineKbGenerator(to: string | number, fn: GeneratorFunction) {
     const ret = await normalizePromise(fn.next());
 
     if (isNullOrUndefined(ret.value)) {
@@ -148,18 +144,18 @@ export const handler = (bot: Bot): InlineMenuManager => {
 
     try {
       const { result } = await bot.sendMessage(to, text, { reply_markup: { inline_keyboard } });
-      handlers[indexKey(result)] = fn;
+      _inlineMenuGenerators[indexForMessage(result)] = fn;
     } catch (err) {
       fn.throw(err);
     }
   }
 
-  async function continueMenu(cbkQuery: CallbackQuery) {
-    const fnIndexKey = indexKey(cbkQuery.message);
+  async function continueKbGenerator(cbkQuery: CallbackQuery) {
+    const fnIndexKey = indexForMessage(cbkQuery.message);
     debug('continue generator from inline_menu: %s', fnIndexKey);
 
-    if (fnIndexKey in handlers) {
-      const fn = handlers[fnIndexKey];
+    if (fnIndexKey in _inlineMenuGenerators) {
+      const fn = _inlineMenuGenerators[fnIndexKey];
 
       const { value, done } = await normalizePromise(fn.next(cbkQuery));
       let actions = value;
@@ -176,7 +172,6 @@ export const handler = (bot: Bot): InlineMenuManager => {
 
         switch (type) {
           case 'inlineMenu':
-            debug('executing inlineMenu action');
             bot.editMessageText(data.text, {
               chat_id: cbkQuery.message.chat.id,
               message_id: cbkQuery.message.message_id,
@@ -184,7 +179,6 @@ export const handler = (bot: Bot): InlineMenuManager => {
             });
             break;
           case 'updateMenu':
-            debug('executing updateMenu action');
             data.text
               ? bot.editMessageText(data.text, {
                 chat_id: cbkQuery.message.chat.id,
@@ -198,28 +192,24 @@ export const handler = (bot: Bot): InlineMenuManager => {
               });
             break;
           case 'answerQuery':
-            debug('executing answerQuery action');
             bot.answerCallbackQuery(cbkQuery.id, data);
             break;
           case 'switchMenuFn':
-            debug('executing switchMenuFn action');
             const newFn = data;
             fn.return();
-            handlers[indexKey(cbkQuery.message)] = newFn;
-            continueMenu(cbkQuery);
+            _inlineMenuGenerators[indexForMessage(cbkQuery.message)] = newFn;
+            continueKbGenerator(cbkQuery);
             break;
           case 'textMessage':
-            debug('executing textMessage action');
             bot.sendMessage(cbkQuery.from.id, data.text, {
               ...data.optionals,
               reply_markup: { force_reply: true },
             }).then((sentMessage) => {
-              replyHandlers[indexKey(sentMessage.result)] = handlers[fnIndexKey];
-              delete handlers[fnIndexKey];
+              _textGenerators[indexForMessage(sentMessage.result)] = _inlineMenuGenerators[fnIndexKey];
+              delete _inlineMenuGenerators[fnIndexKey];
             });
             break;
           case 'terminate':
-            debug('executing terminate action');
             if (data.text) {
               bot.editMessageText(data.text, {
                 chat_id: cbkQuery.message.chat.id,
@@ -227,7 +217,7 @@ export const handler = (bot: Bot): InlineMenuManager => {
               });
             }
             fn.return();
-            delete handlers[fnIndexKey];
+            delete _inlineMenuGenerators[fnIndexKey];
             break;
           default:
             fn.throw(new Error(`invalid action type: ${type}`));
@@ -235,21 +225,21 @@ export const handler = (bot: Bot): InlineMenuManager => {
       }
 
       if (done) {
-        delete handlers[fnIndexKey];
+        delete _inlineMenuGenerators[fnIndexKey];
       }
     }
   }
 
-  const hasMenuForQuery = (cbkQuery: CallbackQuery) => (indexKey(cbkQuery.message) in handlers);
+  const hasMenuForQuery = (cbkQuery: CallbackQuery) => (indexForMessage(cbkQuery.message) in _inlineMenuGenerators);
 
-  const hasHandlerForReply = (msg: Message) => (indexForReply(msg) in replyHandlers);
+  const hasHandlerForReply = (msg: Message) => (indexForRepliedMsg(msg) in _textGenerators);
 
   return {
-    continueMenu,
-    continueTextFn,
+    continueKbGenerator,
+    continueTextGenerator,
     hasHandlerForReply,
     hasMenuForQuery,
-    sendMenu,
+    startInlineKbGenerator,
     startTextGenerator,
   };
 };

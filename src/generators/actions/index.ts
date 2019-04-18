@@ -3,7 +3,7 @@ import {
   InlineKeyboardMarkup,
   SendMessageOptionals,
 } from '../../interfaces';
-import { InlineMenuFunction } from '../manager';
+import { GeneratorFunction } from '../../types';
 
 export type ActionType =
   'inlineMenu' | 'updateMenu' | 'answerQuery' | 'terminate' |
@@ -12,14 +12,6 @@ export type ActionType =
 export interface Action {
   data: any;
   type: ActionType;
-}
-
-export function isAction(val: any): val is Action {
-  return typeof val === 'object' && val.data && val.type;
-}
-
-export function isActionsArray(val: any): val is Action[] {
-  return Array.isArray(val) && val.every(isAction);
 }
 
 export function inlineMenu(data: { text: string, inline_keyboard: InlineKeyboardMarkup }): Action {
@@ -50,7 +42,7 @@ export function terminate(text?: string): Action {
   };
 }
 
-export function switchMenuFn(fn: InlineMenuFunction) {
+export function switchMenuFn(fn: GeneratorFunction) {
   return {
     data: fn,
     type: 'switchMenuFn',
