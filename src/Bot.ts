@@ -1336,7 +1336,18 @@ export class Bot {
   }
 
   private configObservables(origin: Observable<ExplicitTypedUpdate>) {
-    return null;
+    origin
+      .pipe(
+        map(({ update }) => update),
+      )
+      .subscribe(this.update$);
+
+    origin
+      .pipe(
+        filter(({ type }) => type === 'message'),
+        map(({ update }) => ({ actions: createMessageActions(update.message, this), update })),
+      )
+      .subscribe(this.message$);
   }
 
   private emojify = (text: string) => this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
