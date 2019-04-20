@@ -29,70 +29,8 @@ export class Bot {
   private static MAX_MESSAGE_LENGTH = 4096;
 
   /** emits all message updates received on webhook or polling */
-  public message$ = new Subject<I.WrappedMessageActions>();
-  /** emits edited_message updates received on webhook or polling */
-  public editedMessage$ = new Subject<I.Update>();
-  /** emits channel_post updates from webhook or polling */
-  public channelPost$ = new Subject<I.Update>();
-  /** emits edited_channel_post updates from webhook or polling */
-  public editedChannelPost$ = new Subject<I.Update>();
-  /** emits inline_query updates from webhook or polling */
-  public inlineQuery$ = new Subject<I.Update>();
-  /** emits chosen_inline_result updates from webhook or polling */
-  public chosenInlineResult$ = new Subject<I.Update>();
-  /** emits callback_query updates from webhook or polling */
-  public callbackQuery$ = new Subject<I.Update>();
-  /** emits shipping_query updates from webhook or polling */
-  public shippingQuery$ = new Subject<I.Update>();
-  /** emits pre_checkout_query updates from webhook or polling */
-  public preCheckoutQuery$ = new Subject<I.Update>();
-
-  /** emits text message types from webhook or polling */
-  public text$ = new Subject<I.WrappedMessageActions>();
-  /** emits audio message types from webhook or polling */
-  public audio$ = new Subject<I.WrappedMessageActions>();
-  /** emits document message types from webhook or polling */
-  public document$ = new Subject<I.WrappedMessageActions>();
-  /** emits game message types from webhook or polling */
-  public game$ = new Subject<I.WrappedMessageActions>();
-  /** emits photo message types from webhook or polling */
-  public photo$ = new Subject<I.WrappedMessageActions>();
-  /** emits sticker message types from webhook or polling */
-  public sticker$ = new Subject<I.WrappedMessageActions>();
-  /** emits video message types from webhook or polling */
-  public video$ = new Subject<I.WrappedMessageActions>();
-  /** emits voice message types from webhook or polling */
-  public voice$ = new Subject<I.WrappedMessageActions>();
-  /** emits video_note message types from webhook or polling */
-  public videoNote$ = new Subject<I.WrappedMessageActions>();
-  /** emits contact message types from webhook or polling */
-  public contact$ = new Subject<I.WrappedMessageActions>();
-  /** emits location message types from webhook or polling */
-  public location$ = new Subject<I.WrappedMessageActions>();
-  /** emits venue message types from webhook or polling */
-  public venue$ = new Subject<I.WrappedMessageActions>();
-  /** emits new_chat_members message types from webhook or polling */
-  public newChatMembers$ = new Subject<I.WrappedMessageActions>();
-  /** emits left_chat_member message types from webhook or polling */
-  public leftChatMember$ = new Subject<I.WrappedMessageActions>();
-  /** emits new_chat_title message types from webhook or polling */
-  public newChatTitle$ = new Subject<I.WrappedMessageActions>();
-  /** emits new_chat_photo message types from webhook or polling */
-  public newChatPhoto$ = new Subject<I.WrappedMessageActions>();
-  /** emits delete_chat_photo message types from webhook or polling */
-  public deleteChatPhoto$ = new Subject<I.WrappedMessageActions>();
-  /** emits group_chat_created message types from webhook or polling */
-  public groupChatCreated$ = new Subject<I.WrappedMessageActions>();
-  /** emits supergroup_chat_created message types from webhook or polling */
-  public supergroupChatCreated$ = new Subject<I.WrappedMessageActions>();
-  /** emits channel_chat_created message types from webhook or polling */
-  public channelChatCreated$ = new Subject<I.WrappedMessageActions>();
-  /** emits pinned_message message types from webhook or polling */
-  public pinnedMessage$ = new Subject<I.WrappedMessageActions>();
-  /** emits invoice message types from webhook or polling */
-  public invoice$ = new Subject<I.WrappedMessageActions>();
-  /** emits successful_payment message types from webhook or polling */
-  public successfulPayment$ = new Subject<I.WrappedMessageActions>();
+  public message$: Subject<I.WrappedMessageActions>;
+  public update$: Subject<I.Update>;
 
   private _generatorsHandler: GeneratorsHandler;
   private config: I.Config;
@@ -115,6 +53,9 @@ export class Bot {
     if (!bot_token) {
       throw new Error("bot token undefined");
     }
+
+    this.update$ = new Subject();
+    this.message$ = new Subject();
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
     this.callbackQueriesHandlers = [];
@@ -1395,58 +1336,7 @@ export class Bot {
   }
 
   private configObservables(origin: Observable<ExplicitTypedUpdate>) {
-    const msgObservable = createFilteredUpdateObservable(origin, "message")
-      .pipe(
-        filter((update) => !this._checkRegisteredCallbacks(update.message)),
-        filter(({ message }) => {
-          if (message.reply_to_message) {
-            const hasHandler = this._generatorsHandler.hasHandlerForReply(message);
-            if (hasHandler) {
-              this._generatorsHandler.continueTextGenerator(message);
-              return false;
-            }
-          }
-          return true;
-        }),
-        map((update) => ({ update, actions: createMessageActions(update.message, this) })),
-      );
-
-    createFilteredUpdateObservable(origin, "edited_message").subscribe(this.editedMessage$);
-    createFilteredUpdateObservable(origin, "channel_post").subscribe(this.channelPost$);
-    createFilteredUpdateObservable(origin, "edited_channel_post").subscribe(this.editedChannelPost$);
-    createFilteredUpdateObservable(origin, "inline_query").subscribe(this.inlineQuery$);
-    createFilteredUpdateObservable(origin, "chosen_inline_result").subscribe(this.chosenInlineResult$);
-    createFilteredUpdateObservable(origin, "callback_query")
-        .pipe(
-          filter(({ callback_query }) => this.canPropagateCallbackQuery(callback_query)),
-        ).subscribe(this.callbackQuery$);
-    createFilteredUpdateObservable(origin, "shipping_query").subscribe(this.shippingQuery$);
-    createFilteredUpdateObservable(origin, "pre_checkout_query").subscribe(this.preCheckoutQuery$);
-
-    msgObservable.subscribe(this.message$);
-    createFilteredMessageObservable(this.message$, "text").subscribe(this.text$);
-    createFilteredMessageObservable(this.message$, "audio").subscribe(this.audio$);
-    createFilteredMessageObservable(this.message$, "document").subscribe(this.document$);
-    createFilteredMessageObservable(this.message$, "game").subscribe(this.game$);
-    createFilteredMessageObservable(this.message$, "photo").subscribe(this.photo$);
-    createFilteredMessageObservable(this.message$, "sticker").subscribe(this.sticker$);
-    createFilteredMessageObservable(this.message$, "video").subscribe(this.video$);
-    createFilteredMessageObservable(this.message$, "voice").subscribe(this.voice$);
-    createFilteredMessageObservable(this.message$, "video_note").subscribe(this.videoNote$);
-    createFilteredMessageObservable(this.message$, "contact").subscribe(this.contact$);
-    createFilteredMessageObservable(this.message$, "location").subscribe(this.location$);
-    createFilteredMessageObservable(this.message$, "venue").subscribe(this.venue$);
-    createFilteredMessageObservable(this.message$, "new_chat_members").subscribe(this.newChatMembers$);
-    createFilteredMessageObservable(this.message$, "left_chat_member").subscribe(this.leftChatMember$);
-    createFilteredMessageObservable(this.message$, "new_chat_title").subscribe(this.newChatTitle$);
-    createFilteredMessageObservable(this.message$, "new_chat_photo").subscribe(this.newChatPhoto$);
-    createFilteredMessageObservable(this.message$, "delete_chat_photo").subscribe(this.deleteChatPhoto$);
-    createFilteredMessageObservable(this.message$, "group_chat_created").subscribe(this.groupChatCreated$);
-    createFilteredMessageObservable(this.message$, "supergroup_chat_created").subscribe(this.supergroupChatCreated$);
-    createFilteredMessageObservable(this.message$, "channel_chat_created").subscribe(this.channelChatCreated$);
-    createFilteredMessageObservable(this.message$, "pinned_message").subscribe(this.pinnedMessage$);
-    createFilteredMessageObservable(this.message$, "invoice").subscribe(this.invoice$);
-    createFilteredMessageObservable(this.message$, "successful_payment").subscribe(this.successfulPayment$);
+    return null;
   }
 
   private emojify = (text: string) => this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
