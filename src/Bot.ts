@@ -21,15 +21,12 @@ import {
 } from "./utils";
 
 export class Bot {
-  /** @ignore */
-  private static MAX_MESSAGE_LENGTH = 4096;
-
-  private updates$: Subject<I.Update>;
+  private _updates$: Subject<I.Update>;
 
   private _generatorsHandler: I.GeneratorsHandler;
-  private config: I.Config;
-  private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
-  private callbackQueriesHandlers: I.CallbackQueryHandler[];
+  private _config: I.Config;
+  private _repliesCallbacks: I.OnReceiveReplyCallback[];
+  private _callbackQueriesHandlers: I.CallbackQueryHandler[];
   private _webhook: Webhook;
   private _polling: Polling;
 
@@ -40,18 +37,19 @@ export class Bot {
    * @param token Bot token
    * @param config Optional config object.
    */
-  constructor(private bot_token: string, { emojifyTexts = true, splitLongMessages = true, sendChatActionBeforeMsg = true }: I.Config = {}) {
+  constructor(private bot_token: string, { emojifyTexts = true, sendChatActionBeforeMsg = true }: I.Config = {}) {
     debug("constructing TelegramBotClient");
-    debug("Config: ", JSON.stringify({ emojifyTexts, splitLongMessages, sendChatActionBeforeMsg }));
+    debug("Config: ", JSON.stringify({ emojifyTexts, sendChatActionBeforeMsg }));
 
     if (!bot_token) {
       throw new Error("bot token undefined");
     }
 
-    this.updates$ = new Subject();
+    this._updates$ = new Subject();
 
-    this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
-    this.callbackQueriesHandlers = [];
+    this._config = { emojifyTexts, sendChatActionBeforeMsg };
+    this._callbackQueriesHandlers = [];
+    this._repliesCallbacks = [];
   }
 
   /** @ignore */
@@ -109,10 +107,10 @@ export class Bot {
   public updates(type: Types.UpdateType) {
     return (
       typeof type === 'string'
-        ? this.updates$.pipe(
+        ? this._updates$.pipe(
           filter((update) => type in update),
         )
-        : this.updates$
+        : this._updates$
     );
   }
 
@@ -166,28 +164,8 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
   public async sendMessage(chat_id: number | string, text: string, optionals: I.SendMessageOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-
     const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
 
-    // telegram message text can not be greater than 4096 characters
-    if (text.length > Bot.MAX_MESSAGE_LENGTH) {
-
-      // if bot config allow message split, throw an error
-      if (this.config.splitLongMessages) {
-        // Wraps text in chunks of 4096 characters
-        const splited_text = this.splitText(text, Bot.MAX_MESSAGE_LENGTH);
-
-        // send chunks sequentially
-        return splited_text.reduce((previous: Promise<I.TelegramResponse<I.Message>>, chunk: string, index) => {
-          // sendMessage call itself with a acceptable text length
-          // if this chunk is the last, pass optionals with reply handler callback
-          return previous
-            .then(() => this.sendMessage(chat_id, chunk, (index === splited_text.length - 1 ? optionals : optionalParams)));
-        }, Promise.resolve({} as I.TelegramResponse<I.Message>));
-      }
-    }
-
-    // from here on executes only if text <= 4096
     const json = {
       chat_id,
       text,
@@ -209,7 +187,7 @@ export class Bot {
       return sentmsg;
     };
 
-    if (this.config.sendChatActionBeforeMsg) {
+    if (this._config.sendChatActionBeforeMsg) {
       await this.sendChatAction(chat_id, "typing");
     }
     return await _sendmsg();
@@ -278,7 +256,7 @@ export class Bot {
       return sent;
     };
 
-    if (this.config.sendChatActionBeforeMsg) {
+    if (this._config.sendChatActionBeforeMsg) {
       await this.sendChatAction(chat_id, "upload_photo");
     }
     return await _sendphoto();
@@ -315,7 +293,7 @@ export class Bot {
       return sent;
     };
 
-    if (this.config.sendChatActionBeforeMsg) {
+    if (this._config.sendChatActionBeforeMsg) {
       await this.sendChatAction(chat_id, "upload_audio");
     }
     return await _sendaudio();
@@ -353,7 +331,7 @@ export class Bot {
       return sent;
     };
 
-    if (this.config.sendChatActionBeforeMsg) {
+    if (this._config.sendChatActionBeforeMsg) {
       await this.sendChatAction(chat_id, "upload_document");
     }
     return await _senddocument();
@@ -422,7 +400,7 @@ export class Bot {
       return sent;
     };
 
-    if (this.config.sendChatActionBeforeMsg) {
+    if (this._config.sendChatActionBeforeMsg) {
       await this.sendChatAction(chat_id, "upload_video");
     }
     return await _sendvideo();
@@ -1229,14 +1207,14 @@ export class Bot {
       debug("Message isn't a reply, skipping");
       return false;
     }
-    if (this.repliesCallbacks.length === 0) {
+    if (this._repliesCallbacks.length === 0) {
       debug(`There's no callback queries registered, skipping`);
       return false;
     }
-    debug(`I have ${this.repliesCallbacks.length} reply callbacks`);
+    debug(`I have ${this._repliesCallbacks.length} reply callbacks`);
 
     let i;
-    const cbk = this.repliesCallbacks.find((rc, index) => {
+    const cbk = this._repliesCallbacks.find((rc, index) => {
       if (rc.message_id === message.reply_to_message.message_id && rc.chat === message.from.id) {
         debug(`Reply handler found for message ${rc.message_id} from ${rc.chat}`);
         // save index
@@ -1253,7 +1231,7 @@ export class Bot {
     if (cbk) {
       cbk.f(message, createMessageActions(message, this), cbk.data);
       // remove handler from array
-      this.repliesCallbacks.splice(i, 1);
+      this._repliesCallbacks.splice(i, 1);
       // a handler was found, so return true
       return true;
     }
@@ -1271,7 +1249,7 @@ export class Bot {
     }
 
     debug(`Searching a callback_query handler for message ${update.message.message_id} on chat ${update.message.chat.id}`);
-    const handlerIndex = this.callbackQueriesHandlers.findIndex((h) => h.message_id === update.message.message_id && h.chat_id === update.message.chat.id);
+    const handlerIndex = this._callbackQueriesHandlers.findIndex((h) => h.message_id === update.message.message_id && h.chat_id === update.message.chat.id);
 
     if (handlerIndex < 0) {
       debug("Handler not found");
@@ -1279,9 +1257,9 @@ export class Bot {
     }
 
     debug(`Handler found on index ${handlerIndex}. Calling function now`);
-    const [handler] = this.callbackQueriesHandlers.splice(handlerIndex, 1);
+    const [handler] = this._callbackQueriesHandlers.splice(handlerIndex, 1);
     handler.f(update, createCallbackQueryActions(update, this), handler.data);
-    this.callbackQueriesHandlers.splice(handlerIndex, 1);
+    this._callbackQueriesHandlers.splice(handlerIndex, 1);
     return true;
   }
 
@@ -1294,7 +1272,7 @@ export class Bot {
       const { message_id, chat } = sentMsg.result;
 
       debug(`Registering reply handler to message ${message_id} on chat ${chat.id}`);
-      this.repliesCallbacks.push({
+      this._repliesCallbacks.push({
         chat: chat.id,
         data,
         message_id,
@@ -1315,7 +1293,7 @@ export class Bot {
         throw new Error(`onCallbackQuery: expected a function, received ${typeof cbk}`);
       }
 
-      this.callbackQueriesHandlers.unshift({
+      this._callbackQueriesHandlers.unshift({
         chat_id: sentMsg.chat.id,
         f: cbk,
         message_id: sentMsg.message_id,
@@ -1326,22 +1304,6 @@ export class Bot {
       debug("Handler was added");
       return sentMsg;
     }
-  }
-
-  private splitText(text: string, chunkLength: number): string[] {
-    const textLength = text.length;
-    const timesGreater = Math.ceil((textLength / chunkLength));
-    const splitedText = [];
-
-    for (let i = 0; i < timesGreater; i++) {
-      const start = Bot.MAX_MESSAGE_LENGTH * i;
-      const end = Bot.MAX_MESSAGE_LENGTH * (i + 1);
-
-      const piece = text.substring(start, end);
-
-      splitedText.push(piece);
-    }
-    return splitedText;
   }
 
   private canEmitCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
@@ -1393,8 +1355,8 @@ export class Bot {
         filter((update) => this.canEmitUpdate(update)),
         map((update) => update),
       )
-      .subscribe(this.updates$);
+      .subscribe(this._updates$);
   }
 
-  private emojify = (text: string) => this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
+  private emojify = (text: string) => this._config.emojifyTexts ? nodeEmoji.emojify(text) : text;
 }
