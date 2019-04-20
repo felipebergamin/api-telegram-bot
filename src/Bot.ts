@@ -7,15 +7,13 @@ import { filter, map } from "rxjs/operators";
 import { isFunction } from "util";
 
 import { debug } from "./debug";
-import * as I from "./interfaces";
+import { InlineMenuHandler } from "./generators";
 import { Polling } from "./Polling";
-import * as Types from "./types";
 import { Webhook } from "./Webhook";
 
-import { InlineMenuHandler } from "./generators";
-import { GeneratorFunction } from './types';
-import { MessageType } from "./types/MessageType";
-import { UpdateType } from "./types/UpdateType";
+import * as I from "./interfaces";
+import * as Types from "./types";
+
 import {
   createCallbackQueryActions,
   createMessageActions,
@@ -108,7 +106,7 @@ export class Bot {
    * Call without arguments to receive all types.
    * @param type type of updates to subscribe
    */
-  public updates(type: UpdateType) {
+  public updates(type: Types.UpdateType) {
     return (
       typeof type === 'string'
         ? this.updates$.pipe(
@@ -123,7 +121,7 @@ export class Bot {
    * Call without arguments to receive all types.
    * @param type type os message to receive
    */
-  public messages(type: MessageType) {
+  public messages(type: Types.MessageType) {
     const messages$ = this.updates('message');
 
     return (
@@ -135,7 +133,7 @@ export class Bot {
     );
   }
 
-  public async sendTextGenerator(to: number | string, fg: GeneratorFunction) {
+  public async sendTextGenerator(to: number | string, fg: Types.GeneratorFunction) {
     if (!this._generatorsHandler) {
       this._generatorsHandler = InlineMenuHandler(this);
     }
@@ -143,7 +141,7 @@ export class Bot {
     await this._generatorsHandler.startTextGenerator(to, fg);
   }
 
-  public async sendMenu(to: number | string, fg: GeneratorFunction) {
+  public async sendMenu(to: number | string, fg: Types.GeneratorFunction) {
     if (!this._generatorsHandler) {
       this._generatorsHandler = InlineMenuHandler(this);
     }
