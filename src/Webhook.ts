@@ -3,11 +3,10 @@ import * as Debug from "debug";
 import EventEmitter = require("events");
 import { IncomingMessage, ServerResponse } from "http";
 import { fromEvent, Observable } from "rxjs";
-import { map, share } from "rxjs/operators";
+import { share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { Update } from "./interfaces";
-import { checkUpdateType, ExplicitTypedUpdate } from "./utils";
 
 const debug = Debug("api-telegram-bot:webhook");
 
@@ -32,9 +31,8 @@ export class Webhook {
   /**
    * @return an observable that emits objects with the update received and a `type` field describing update type
    */
-  public get updates(): Observable<ExplicitTypedUpdate> {
-    return this.observable
-      .pipe(map((update) => checkUpdateType(update)));
+  public get updates(): Observable<Update> {
+    return this.observable;
   }
 
   /**

@@ -1,6 +1,4 @@
 import { ReadStream } from "fs";
-import { Observable } from "rxjs";
-import { filter, map } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
@@ -17,19 +15,17 @@ import {
   ReplyKeyboardRemove,
   SendMessageOptionals,
   TelegramResponse,
-  Update,
-  WrappedMessageActions,
 } from "./interfaces";
 
 /** @ignore */
-const _messageTypes = [
+export const _messageTypes = [
   "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
   "contact", "location", "venue", "new_chat_members", "left_chat_member", "new_chat_title",
   "new_chat_photo", "delete_chat_photo", "group_chat_created", "supergroup_chat_created",
   "channel_chat_created", "pinned_message", "invoice", "successful_payment",
 ];
 /** @ignore */
-const _updateTypes = [
+export const _updateTypes = [
   "message", "edited_message", "channel_post", "edited_channel_post",
   "inline_query", "chosen_inline_result", "callback_query", "shipping_query",
   "pre_checkout_query",
@@ -119,38 +115,3 @@ export const stringifyFormData = (formData: any) => {
 
   return formData;
 };
-
-export interface ExplicitTypedUpdate {
-  type: string;
-  update: Update;
-}
-
-/** @ignore */
-export const checkUpdateType = (update: Update): ExplicitTypedUpdate => {
-  for (const updateType of _updateTypes) {
-    if (updateType in update) {
-      return {
-        type: updateType,
-        update,
-      };
-    }
-  }
-
-  return {
-    type: null,
-    update,
-  };
-};
-
-/** @ignore */
-export const createFilteredUpdateObservable =
-  (originObservable: Observable<ExplicitTypedUpdate>, updateType: string): Observable<Update> =>
-    originObservable.pipe(
-      filter(({ type }) => type === updateType),
-      map(({ update }) => update),
-    );
-
-/** @ignore */
-export const createFilteredMessageObservable =
-  (originObservable: Observable<WrappedMessageActions>, messageType: string): Observable<WrappedMessageActions> =>
-    originObservable.pipe(filter(({ update }) => messageType in update.message));

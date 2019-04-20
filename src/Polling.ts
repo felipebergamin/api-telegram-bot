@@ -1,12 +1,11 @@
 import * as Debug from "debug";
 import { EventEmitter } from "events";
 import { Observable, Observer } from "rxjs";
-import { map, share } from "rxjs/operators";
+import { share } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { Update } from "./interfaces";
 import { PollingOptions } from "./interfaces/PollingOptions";
-import { checkUpdateType, ExplicitTypedUpdate } from "./utils";
 
 const debug = Debug("api-telegram-bot:polling");
 
@@ -71,9 +70,8 @@ export class Polling {
   /**
    * emits objects with the update received and a `type` field describing update type
    */
-  public get updates(): Observable<ExplicitTypedUpdate> {
-    return this.observable
-      .pipe(map((update) => checkUpdateType(update)));
+  public get updates(): Observable<Update> {
+    return this.observable;
   }
 
   /**
