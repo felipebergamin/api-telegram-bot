@@ -1,6 +1,4 @@
 import { ReadStream } from "fs";
-import { Observable } from "rxjs";
-import { filter, map } from "rxjs/operators";
 
 import { Bot } from "./Bot";
 import { debug } from "./debug";
@@ -17,8 +15,6 @@ import {
   ReplyKeyboardRemove,
   SendMessageOptionals,
   TelegramResponse,
-  Update,
-  WrappedMessageActions,
 } from "./interfaces";
 
 /** @ignore */
@@ -119,38 +115,3 @@ export const stringifyFormData = (formData: any) => {
 
   return formData;
 };
-
-export interface ExplicitTypedUpdate {
-  type: string;
-  update: Update;
-}
-
-/** @ignore */
-export const checkUpdateType = (update: Update): ExplicitTypedUpdate => {
-  for (const updateType of _updateTypes) {
-    if (updateType in update) {
-      return {
-        type: updateType,
-        update,
-      };
-    }
-  }
-
-  return {
-    type: null,
-    update,
-  };
-};
-
-/** @ignore */
-export const createFilteredUpdateObservable =
-  (originObservable: Observable<ExplicitTypedUpdate>, updateType: string): Observable<Update> =>
-    originObservable.pipe(
-      filter(({ type }) => type === updateType),
-      map(({ update }) => update),
-    );
-
-/** @ignore */
-export const createFilteredMessageObservable =
-  (originObservable: Observable<WrappedMessageActions>, messageType: string): Observable<WrappedMessageActions> =>
-    originObservable.pipe(filter(({ update }) => messageType in update.message));

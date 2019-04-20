@@ -13,18 +13,14 @@ import * as Types from "./types";
 import { Webhook } from "./Webhook";
 
 import { InlineMenuHandler } from "./generators";
-import { GeneratorsHandler } from "./interfaces";
 import { GeneratorFunction } from './types';
+import { MessageType } from "./types/MessageType";
 import { UpdateType } from "./types/UpdateType";
 import {
   createCallbackQueryActions,
-  createFilteredMessageObservable,
-  createFilteredUpdateObservable,
   createMessageActions,
-  ExplicitTypedUpdate,
   stringifyFormData,
 } from "./utils";
-import { MessageType } from "./types/MessageType";
 
 export class Bot {
   /** @ignore */
@@ -32,7 +28,7 @@ export class Bot {
 
   private updates$: Subject<I.Update>;
 
-  private _generatorsHandler: GeneratorsHandler;
+  private _generatorsHandler: I.GeneratorsHandler;
   private config: I.Config;
   private repliesCallbacks: I.OnReceiveReplyCallback[] = [];
   private callbackQueriesHandlers: I.CallbackQueryHandler[];
@@ -1393,20 +1389,13 @@ export class Bot {
     return true;
   }
 
-  private configObservables(origin: Observable<ExplicitTypedUpdate>) {
+  private configObservables(origin: Observable<I.Update>) {
     origin
       .pipe(
-        filter(({ update }) => this.canEmitUpdate(update)),
-        map(({ update }) => update),
+        filter((update) => this.canEmitUpdate(update)),
+        map((update) => update),
       )
       .subscribe(this.updates$);
-
-    /* origin
-      .pipe(
-        filter(({ type }) => type === 'message'),
-        map(({ update }) => ({ actions: createMessageActions(update.message, this), update })),
-      )
-      .subscribe(this.message$); */
   }
 
   private emojify = (text: string) => this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
