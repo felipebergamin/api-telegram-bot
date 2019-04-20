@@ -15,6 +15,7 @@ import { Webhook } from "./Webhook";
 import { InlineMenuHandler } from "./generators";
 import { GeneratorsHandler } from "./interfaces";
 import { GeneratorFunction } from './types';
+import { UpdateType } from "./types/UpdateType";
 import {
   createCallbackQueryActions,
   createFilteredMessageObservable,
@@ -23,14 +24,13 @@ import {
   ExplicitTypedUpdate,
   stringifyFormData,
 } from "./utils";
+import { MessageType } from "./types/MessageType";
 
 export class Bot {
   /** @ignore */
   private static MAX_MESSAGE_LENGTH = 4096;
 
-  /** emits all message updates received on webhook or polling */
-  public message$: Subject<I.WrappedMessageActions>;
-  public update$: Subject<I.Update>;
+  private updates$: Subject<I.Update>;
 
   private _generatorsHandler: GeneratorsHandler;
   private config: I.Config;
@@ -54,8 +54,7 @@ export class Bot {
       throw new Error("bot token undefined");
     }
 
-    this.update$ = new Subject();
-    this.message$ = new Subject();
+    this.updates$ = new Subject();
 
     this.config = { emojifyTexts, splitLongMessages, sendChatActionBeforeMsg };
     this.callbackQueriesHandlers = [];
@@ -106,6 +105,38 @@ export class Bot {
   public getWebhook() {
     const wh = new Webhook(this);
     return wh.getWebhook();
+  }
+
+  /**
+   * Subscribe specific types of update.
+   * Call without arguments to receive all types.
+   * @param type type of updates to subscribe
+   */
+  public updates(type: UpdateType) {
+    return (
+      typeof type === 'string'
+        ? this.updates$.pipe(
+          filter((update) => type in update),
+        )
+        : this.updates$
+    );
+  }
+
+  /**
+   * Subscribe specific types of messages.
+   * Call without arguments to receive all types.
+   * @param type type os message to receive
+   */
+  public messages(type: MessageType) {
+    const messages$ = this.updates('message');
+
+    return (
+      typeof type === 'string'
+        ? messages$.pipe(
+          filter((update) => type in update.message),
+        )
+        : messages$
+    );
   }
 
   public async sendTextGenerator(to: number | string, fg: GeneratorFunction) {
@@ -1319,7 +1350,7 @@ export class Bot {
     return splitedText;
   }
 
-  private canPropagateCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
+  private canEmitCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
     if (this._generatorsHandler && this._generatorsHandler.hasMenuForQuery(cbkQuery)) {
       this._generatorsHandler.continueKbGenerator(cbkQuery);
       return;
@@ -1335,19 +1366,47 @@ export class Bot {
     return true;
   }
 
+  private canEmitMessage(message: I.Message): boolean {
+    if (message.reply_to_message) {
+      if (this._generatorsHandler && this._generatorsHandler.hasHandlerForReply(message)) {
+        this._generatorsHandler.continueTextGenerator(message);
+        return false;
+      }
+    }
+
+    if (this._checkRegisteredCallbacks(message)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private canEmitUpdate(update: I.Update): boolean {
+    if ('callback_query' in update) {
+      return this.canEmitCallbackQuery(update.callback_query);
+    }
+
+    if ('message' in update) {
+      return this.canEmitMessage(update.message);
+    }
+
+    return true;
+  }
+
   private configObservables(origin: Observable<ExplicitTypedUpdate>) {
     origin
       .pipe(
+        filter(({ update }) => this.canEmitUpdate(update)),
         map(({ update }) => update),
       )
-      .subscribe(this.update$);
+      .subscribe(this.updates$);
 
-    origin
+    /* origin
       .pipe(
         filter(({ type }) => type === 'message'),
         map(({ update }) => ({ actions: createMessageActions(update.message, this), update })),
       )
-      .subscribe(this.message$);
+      .subscribe(this.message$); */
   }
 
   private emojify = (text: string) => this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
