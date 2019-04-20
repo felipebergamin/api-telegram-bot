@@ -157,14 +157,27 @@ export class Bot {
   }
 
   /**
-   * Send a simple text message.
+   * Send a simple text message or a sequence of messages.
+   * Note when sending a sequence of messages with an array:
+   * reply_markup, onReceiveReply and onReceiveCallbackQuery will work only with the last message from sequence.
    * @param chat_id Unique identifier for the target chat or username of the target channel.
-   * @param text Text to be sent.
+   * @param text String with text to send. Pass an array of strings and they'll be sent sequentially.
    * @param optionals An object with optional params that you want to send in request or a reply callback function
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public async sendMessage(chat_id: number | string, text: string, optionals: I.SendMessageOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+  public async sendMessage(chat_id: number | string, text: string|string[], optionals: I.SendMessageOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
     const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+
+    if (Array.isArray(text)) {
+      let sent: I.TelegramResponse<I.Message>;
+      const { reply_markup, ...optionalsWithoutMarkup } = optionalParams;
+
+      for (let i = 0; i < text.length; i++) {
+        sent = await this.sendMessage(chat_id, text[i], i === text.length - 1 ? optionals : optionalsWithoutMarkup);
+      }
+
+      return sent;
+    }
 
     const json = {
       chat_id,
@@ -172,25 +185,25 @@ export class Bot {
       ...optionals,
     };
 
-    const _sendmsg = async (): Promise<I.TelegramResponse<I.Message>> => {
-      const sentmsg = await this.makeRequest<I.Message>("sendMessage", { json });
-      this.registerReplyHandler(sentmsg, onReceiveReply, data);
-
-      if (onCallbackQuery) {
-        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-          return;
-        }
-        debug("registering callback_query handler");
-        this.addCallbackQueryHandler(sentmsg.result, onCallbackQuery, data);
-      }
-      return sentmsg;
-    };
-
     if (this._config.sendChatActionBeforeMsg) {
       await this.sendChatAction(chat_id, "typing");
     }
-    return await _sendmsg();
+
+    const sentmsg = await this.makeRequest<I.Message>("sendMessage", { json });
+    if (onReceiveReply) {
+      debug('registering onReceiveReply function');
+      this.registerReplyHandler(sentmsg, onReceiveReply, data);
+    }
+
+    if (onCallbackQuery) {
+      if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
+        debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
+        return sentmsg;
+      }
+      debug("registering callback_query handler");
+      this.addCallbackQueryHandler(sentmsg.result, onCallbackQuery, data);
+    }
+    return sentmsg;
   }
 
   /**
