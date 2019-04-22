@@ -968,7 +968,7 @@ export class Bot {
   }
 
   /**
-   * Use this method to pin a message in a supergroup.
+   * Use this method to pin a message in a group, a supergroup, or a channel.
    * @param chat_id Unique identifier for the target chat or username of the target supergroup
    * @param message_id Identifier of a message to pin
    * @param disable_notification Pass True, if it is not necessary to send a notification to all group members about the new pinned message. Default false
@@ -981,7 +981,7 @@ export class Bot {
   }
 
   /**
-   * Use this method to unpin a message in a supergroup chat.
+   * Use this method to unpin a message in a group, a supergroup, or a channel.
    * @param chat_id Unique identifier for the target chat or username of the target supergroup
    * @see {@link https://core.telegram.org/bots/api#unpinchatmessage}
    */
