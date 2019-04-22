@@ -10,6 +10,10 @@ export interface ChatMember {
    */
   status: string;
   /**
+   * Restricted only. True, if the user is a member of the chat at the moment of the request
+   */
+  is_member: boolean;
+  /**
    * Optional. Restricted and kicked only. Date when restrictions will be lifted for this user, unix time
    */
   until_date?: number;
