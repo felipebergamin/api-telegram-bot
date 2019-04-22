@@ -2,6 +2,7 @@ import { CallbackQuery } from "./CallbackQuery";
 import { ChosenInlineResult } from "./ChosenInlineResult";
 import { InlineQuery } from "./InlineQuery";
 import { Message } from "./Message";
+import { Poll } from "./Poll";
 import { PreCheckoutQuery } from "./PreCheckoutQuery";
 import { ShippingQuery } from "./ShippingQuery";
 
@@ -47,6 +48,11 @@ export interface Update {
    * Optional. New incoming pre-checkout query. Contains full information about checkout
    */
   pre_checkout_query?: PreCheckoutQuery;
+  /**
+   * New poll state.
+   * Bots receive only updates about polls, which are sent or stopped by the bot
+   */
+  poll: Poll;
 
   [propName: string]: any;
 }

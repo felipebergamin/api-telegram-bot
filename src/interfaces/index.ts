@@ -52,5 +52,7 @@ export { OnReceiveReplyCallback } from "./OnReceiveReplyCallback";
 export { WrappedMessageActions } from "./WrappedMessageActions";
 export { PollingOptions } from "./PollingOptions";
 export { GeneratorsHandler } from './GeneratorsHandler';
+export { Poll } from './Poll';
+export { PollOption } from './PollOption';
 
 export * from "./OptionalParams";

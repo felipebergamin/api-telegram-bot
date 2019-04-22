@@ -540,6 +540,43 @@ export class Bot {
   }
 
   /**
+   * Use this method to send a native poll. A native poll can't be sent to a private chat.
+   * @param chat_id Unique identifier for the target
+   * @param question Poll question, 1-255 characters
+   * @param options List of answer options, 2-10 strings 1-100 characters each
+   * @param optionals Optional parameters
+   * @see {@link https://core.telegram.org/bots/api#sendpoll}
+   */
+  public sendPoll(chat_id: string | number, question: string, options: string[], optionals: I.SendPollOptionals): Promise<I.TelegramResponse<I.Message>> {
+    const json = {
+      chat_id,
+      options,
+      question,
+      ...optionals,
+    };
+
+    return this.makeRequest<I.Message>("sendPoll", { json });
+  }
+
+  /**
+   * Use this method to stop a poll which was sent by the bot.
+   * On success, the stopped Poll with the final results is returned.
+   * @param chat_id Unique identifier for the target chat or username of the target channel
+   * @param message_id Identifier of the original message with the poll
+   * @param reply_markup A JSON-serialized object for a new message inline keyboard.
+   * @see {@link https://core.telegram.org/bots/api#stoppoll}
+   */
+  public stopPoll(chat_id: number | string, message_id: number, reply_markup?: Types.ReplyMarkup): Promise<I.TelegramResponse<I.Poll>> {
+    const json = {
+      chat_id,
+      message_id,
+      reply_markup,
+    };
+
+    return this.makeRequest<I.Poll>("stopPoll", { json });
+  }
+
+  /**
    * Attention: the sendMessage, sendPhoto, sendDocument, sendAudio and sendVideo methods automatically sends their repective chat actions before send data.
    * Use this method when you need to tell the user that something is happening on the bot"s side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
    * @param chat_id Unique identifier for the target chat or username of the target channel

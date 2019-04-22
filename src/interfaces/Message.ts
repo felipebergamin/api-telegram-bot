@@ -8,6 +8,7 @@ import { Invoice } from "./Invoice";
 import { Location } from "./Location";
 import { MessageEntity } from "./MessageEntity";
 import { PhotoSize } from "./PhotoSize";
+import { Poll } from "./Poll";
 import { Sticker } from "./Sticker";
 import { SuccessfulPayment } from "./SuccessfulPayment";
 import { User } from "./User";
@@ -81,6 +82,10 @@ export interface Message {
   location: Location;
   /**  Message is a venue, information about the venue */
   venue: Venue;
+  /**
+   * Message is a native poll, information about the poll
+   */
+  poll: Poll;
   /**
    * New members that were added to the group or supergroup
    * and information about them (the bot itself may be one of these members)
