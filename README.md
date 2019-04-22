@@ -4,7 +4,7 @@ Node.js module for [Telegram Bot API](https://core.telegram.org/bots/api).
 
 Talk with [@botfather](https://telegram.me/BotFather) on Telegram to create your bot.
 
-This module is updated with Telegram API version **4.1**. Except with Telegram Passport.
+This module is updated with Telegram API version **4.2**. Except with Telegram Passport.
 
 # API reference
 
