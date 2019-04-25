@@ -1,5 +1,4 @@
 import * as Debug from 'debug';
-import { isNullOrUndefined } from 'util';
 
 import { Bot } from '../index';
 import { CallbackQuery, Message } from '../interfaces';
@@ -28,30 +27,55 @@ export const handler = (bot: Bot): GeneratorsHandler => {
   const _inlineMenuGenerators: Indexes = {};
   const _textGenerators: Indexes = {};
 
-  /**
-   * receive a chat_id and a generator function to start a interaction managed by generator
-   * @param to contact id to send messages from generator
-   * @param fn generator function
-   * @ignore
-   */
-  async function startTextGenerator(to: string | number, fn: GeneratorFunction) {
-    const { value } = await normalizePromise(fn.next());
+  async function startGenerator(contact_id: string | number, fn: GeneratorFunction) {
+    const { value, done } = await normalizePromise(fn.next());
 
-    const firstAction = Array.isArray(value) ? value[0] : value;
-
-    if (!isAction(firstAction) || firstAction.type !== 'textMessage') {
-      fn.throw(new Error('invalid action received'));
+    if (!isAction(value) && !isActionsArray(value)) {
+      if (!done) {
+        fn.throw(new Error('invalid value yielded by generator'));
+      }
       return;
     }
 
-    try {
-      const { result: sentMsg } = await bot.sendMessage(to, firstAction.data.text, {
-        ...firstAction.data.optionals,
-        reply_markup: { force_reply: true },
-      });
-      _textGenerators[indexForMessage(sentMsg)] = fn;
-    } catch (err) {
-      fn.throw(err);
+    const firstAction = Array.isArray(value) ? value[0] : value;
+
+    switch (firstAction.type) {
+      case 'textMessage':
+        try {
+          const { result: sentMsg } = await bot.sendMessage(contact_id, firstAction.data.text, {
+            ...firstAction.data.optionals,
+            reply_markup: { force_reply: true },
+          });
+
+          if (!done) {
+            _textGenerators[indexForMessage(sentMsg)] = fn;
+          }
+        } catch (err) {
+          fn.throw(err);
+        }
+        break;
+      case 'inlineMenu':
+        try {
+          const { text, inline_keyboard } = firstAction.data;
+          const { result } = await bot.sendMessage(
+            contact_id,
+            text,
+            {
+              reply_markup: {
+                inline_keyboard,
+              },
+            },
+          );
+
+          if (!done) {
+            _inlineMenuGenerators[indexForMessage(result)] = fn;
+          }
+        } catch (err) {
+          fn.throw(err);
+        }
+        break;
+      default:
+        fn.throw(new Error('invalid action type received: ' + firstAction.type));
     }
   }
 
@@ -115,41 +139,6 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     }
   }
 
-  async function startInlineKbGenerator(to: string | number, fn: GeneratorFunction) {
-    const ret = await normalizePromise(fn.next());
-
-    if (isNullOrUndefined(ret.value)) {
-      throw new Error('No action yielded by generator');
-    }
-
-    const action = isActionsArray(ret.value) ? ret.value[0] : ret.value;
-
-    if (!isAction(action)) {
-      throw new Error('yielded value isn\'t an action');
-    }
-
-    const { data, type } = action;
-
-    if (!type || type !== 'inlineMenu') {
-      fn.return();
-      throw new Error('first action must me inlineMenu');
-    }
-
-    const { text, inline_keyboard } = data;
-
-    if (isNullOrUndefined(text) || isNullOrUndefined(inline_keyboard)) {
-      fn.return();
-      throw new Error('undefined text or inline_keyboard');
-    }
-
-    try {
-      const { result } = await bot.sendMessage(to, text, { reply_markup: { inline_keyboard } });
-      _inlineMenuGenerators[indexForMessage(result)] = fn;
-    } catch (err) {
-      fn.throw(err);
-    }
-  }
-
   async function continueKbGenerator(cbkQuery: CallbackQuery) {
     const fnIndexKey = indexForMessage(cbkQuery.message);
     debug('continue generator from inline_menu: %s', fnIndexKey);
@@ -179,7 +168,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
             });
             break;
           case 'updateMenu':
-            data.text
+            typeof data.text === 'string'
               ? bot.editMessageText(data.text, {
                 chat_id: cbkQuery.message.chat.id,
                 message_id: cbkQuery.message.message_id,
@@ -239,7 +228,6 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     continueTextGenerator,
     hasHandlerForReply,
     hasMenuForQuery,
-    startInlineKbGenerator,
-    startTextGenerator,
+    startGenerator,
   };
 };

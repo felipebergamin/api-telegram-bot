@@ -131,20 +131,12 @@ export class Bot {
     );
   }
 
-  public async sendTextGenerator(to: number | string, fg: Types.GeneratorFunction) {
+  public async startGenerator(to: number | string, fg: Types.GeneratorFunction) {
     if (!this._generatorsHandler) {
       this._generatorsHandler = InlineMenuHandler(this);
     }
 
-    await this._generatorsHandler.startTextGenerator(to, fg);
-  }
-
-  public async sendMenu(to: number | string, fg: Types.GeneratorFunction) {
-    if (!this._generatorsHandler) {
-      this._generatorsHandler = InlineMenuHandler(this);
-    }
-
-    await this._generatorsHandler.startInlineKbGenerator(to, fg);
+    await this._generatorsHandler.startGenerator(to, fg);
   }
 
   /**
