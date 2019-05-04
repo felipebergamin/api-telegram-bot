@@ -1,30 +1,30 @@
 import {
   AnswerCallbackQueryOptionals,
-  InlineKeyboardMarkup,
+  InlineKeyboardButton,
   SendMessageOptionals,
 } from '../../interfaces';
 import { GeneratorFunction } from '../../types';
 
 export type ActionType =
-  'inlineMenu' | 'updateMenu' | 'answerQuery' | 'terminate' |
-  'switchMenuFn' | 'textMessage';
+  'inlineMenu' | 'answerQuery' |
+  'switchFn' | 'textMessage' | 'deleteMessage';
 
 export interface Action {
   data: any;
   type: ActionType;
 }
 
-export function inlineMenu(data: { text: string, inline_keyboard: InlineKeyboardMarkup }): Action {
+export function deleteMessage(): Action {
   return {
-    data,
-    type: 'inlineMenu',
+    data: {},
+    type: 'deleteMessage',
   };
 }
 
-export function updateMenu(inline_keyboard: InlineKeyboardMarkup, text?: string): Action {
+export function inlineMenu(data: { text: string, inline_keyboard: InlineKeyboardButton[][] }): Action {
   return {
-    data: { inline_keyboard, text },
-    type: 'updateMenu',
+    data,
+    type: 'inlineMenu',
   };
 }
 
@@ -35,21 +35,14 @@ export function answerQuery(data: AnswerCallbackQueryOptionals = {}): Action {
   };
 }
 
-export function terminate(text?: string): Action {
-  return {
-    data: { text },
-    type: 'terminate',
-  };
-}
-
-export function switchMenuFn(fn: GeneratorFunction) {
+export function switchFn(fn: GeneratorFunction): Action {
   return {
     data: fn,
-    type: 'switchMenuFn',
+    type: 'switchFn',
   };
 }
 
-export function textMessage(text: string, optionals: SendMessageOptionals = {}) {
+export function textMessage(text: string, optionals: SendMessageOptionals = {}): Action {
   return {
     data: { text, optionals },
     type: 'textMessage',

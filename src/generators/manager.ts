@@ -44,7 +44,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
         try {
           const { result: sentMsg } = await bot.sendMessage(contact_id, firstAction.data.text, {
             ...firstAction.data.optionals,
-            reply_markup: { force_reply: true },
+            reply_markup: { force_reply: !done },
           });
 
           if (!done) {
@@ -90,52 +90,76 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     if (fnIndexKey in _textGenerators) {
       const fn = _textGenerators[fnIndexKey];
 
-      let { value: actions } = await normalizePromise(fn.next(msg));
+      const { value, done } = await normalizePromise(fn.next(msg));
+      let actions: Action[];
 
-      if (!Array.isArray(actions)) {
-        actions = [actions];
+      if (done) {
+        debug('Generator was done, removing function from index');
+        delete _textGenerators[fnIndexKey];
       }
 
-      if (!actions.every(isAction)) {
-        fn.throw(new Error('invalid action received from generator'));
-        return;
+      if (!isActionsArray(value)) {
+        // here, value isn't an array of actions
+        if (!isAction(value)) {
+          // here, value is neither an action nor an array of actions
+          if (!done) {
+            // so if no action was yielded AND function isn't done, throw error
+            fn.throw(new Error('invalid action yielded'));
+          }
+          return;
+        }
+        // here, value is a single action
+        actions = [value];
+      } else {
+        actions = value;
       }
 
       for (const action of actions) {
         debug('received action with type: %s', action.type);
+
         switch (action.type) {
           case 'textMessage':
             bot.sendMessage(msg.chat.id, action.data.text, {
               ...action.data.optionals,
-              reply_markup: { force_reply: true },
+              reply_markup: { force_reply: !done },
               reply_to_message_id: msg.message_id,
             }).then(({ result: sentMsg }) => {
-              const newIndex = indexForMessage(sentMsg);
-              _textGenerators[newIndex] = _textGenerators[fnIndexKey];
+              if (!done) {
+                _textGenerators[indexForMessage(sentMsg)] = _textGenerators[fnIndexKey];
+              }
               delete _textGenerators[fnIndexKey];
             });
             break;
+
           case 'inlineMenu':
             bot.sendMessage(msg.chat.id, action.data.text, {
               reply_markup: { inline_keyboard: action.data.inline_keyboard },
+              reply_to_message_id: msg.message_id,
             }).then(({ result: sentMsg }) => {
-              _inlineMenuGenerators[indexForMessage(sentMsg)] = fn;
+              if (!done) {
+                _inlineMenuGenerators[indexForMessage(sentMsg)] = fn;
+              }
               delete _textGenerators[fnIndexKey];
             });
             break;
-          case 'terminate':
-            if (action.data.text) {
-              bot.sendMessage(msg.chat.id, action.data.text, {
-                reply_to_message_id: msg.message_id,
-              });
-            }
-            fn.return();
-            delete _textGenerators[fnIndexKey];
+
+          case 'deleteMessage':
+            bot.deleteMessage(msg.chat.id, msg.message_id);
             break;
+
+          case 'switchFn':
+            const newFn = action.data;
+            if (!done) {
+              fn.return();
+            }
+            _textGenerators[fnIndexKey] = newFn;
+            continueTextGenerator(msg);
+            break;
+
           default:
             fn.throw(new Error('invalid action: ' + action.type));
-        }
-      }
+        } // switch
+      } // for
     }
   }
 
@@ -147,81 +171,87 @@ export const handler = (bot: Bot): GeneratorsHandler => {
       const fn = _inlineMenuGenerators[fnIndexKey];
 
       const { value, done } = await normalizePromise(fn.next(cbkQuery));
-      let actions = value;
+      let actions: Action[];
 
-      const isArray = (val: any): val is Action[] => Array.isArray(val);
+      if (done) {
+        debug('generator was done, remove it from index');
+        delete _inlineMenuGenerators[fnIndexKey];
+      }
 
-      if (!isArray(actions)) {
-        actions = [actions];
+      if (!isActionsArray(value)) {
+        // here, value isn't an array of actions
+        if (!isAction(value)) {
+          // here, value is neither an action nor an array of actions
+          if (!done) {
+            // so if no action was yielded AND function isn't done, throw error
+            fn.throw(new Error('invalid action yielded'));
+          }
+          return;
+        }
+        // here, value is a single action
+        actions = [value];
+      } else {
+        actions = value;
       }
 
       for (const action of actions) {
-        const { data, type } = action;
-        debug(`received action of type ${type}`);
+        debug(`received action of type ${action.type}`);
 
-        switch (type) {
+        switch (action.type) {
           case 'inlineMenu':
-            bot.editMessageText(data.text, {
+            bot.editMessageText(action.data.text, {
               chat_id: cbkQuery.message.chat.id,
               message_id: cbkQuery.message.message_id,
-              reply_markup: { inline_keyboard: data.inline_keyboard },
+              reply_markup: { inline_keyboard: action.data.inline_keyboard },
             });
             break;
-          case 'updateMenu':
-            typeof data.text === 'string'
-              ? bot.editMessageText(data.text, {
-                chat_id: cbkQuery.message.chat.id,
-                message_id: cbkQuery.message.message_id,
-                reply_markup: { inline_keyboard: data.inline_keyboard },
-              })
-              : bot.editMessageReplyMarkup({
-                chat_id: cbkQuery.message.chat.id,
-                message_id: cbkQuery.message.message_id,
-                reply_markup: { inline_keyboard: data.inline_keyboard },
-              });
-            break;
+
           case 'answerQuery':
-            bot.answerCallbackQuery(cbkQuery.id, data);
+            bot.answerCallbackQuery(cbkQuery.id, action.data);
             break;
-          case 'switchMenuFn':
-            const newFn = data;
-            fn.return();
-            _inlineMenuGenerators[indexForMessage(cbkQuery.message)] = newFn;
+
+          case 'switchFn':
+            const newFn = action.data;
+            if (!done) {
+              fn.return();
+            }
+            _inlineMenuGenerators[fnIndexKey] = newFn;
             continueKbGenerator(cbkQuery);
             break;
+
           case 'textMessage':
-            bot.sendMessage(cbkQuery.from.id, data.text, {
-              ...data.optionals,
-              reply_markup: { force_reply: true },
+            bot.sendMessage(cbkQuery.from.id, action.data.text, {
+              ...action.data.optionals,
+              reply_markup: { force_reply: !done },
+              reply_to_message_id: cbkQuery.message.message_id,
             }).then((sentMessage) => {
-              _textGenerators[indexForMessage(sentMessage.result)] = _inlineMenuGenerators[fnIndexKey];
+              if (!done) {
+                _textGenerators[indexForMessage(sentMessage.result)] = _inlineMenuGenerators[fnIndexKey];
+              }
               delete _inlineMenuGenerators[fnIndexKey];
             });
             break;
-          case 'terminate':
-            if (data.text) {
-              bot.editMessageText(data.text, {
-                chat_id: cbkQuery.message.chat.id,
-                message_id: cbkQuery.message.message_id,
-              });
-            }
-            fn.return();
-            delete _inlineMenuGenerators[fnIndexKey];
-            break;
-          default:
-            fn.throw(new Error(`invalid action type: ${type}`));
-        }
-      }
 
-      if (done) {
-        delete _inlineMenuGenerators[fnIndexKey];
-      }
+          case 'deleteMessage':
+            bot.deleteMessage(cbkQuery.message.chat.id, cbkQuery.message.message_id);
+            break;
+
+          default:
+            fn.throw(new Error(`invalid action type: ${action.type}`));
+        } // switch
+      } // for
     }
   }
 
-  const hasMenuForQuery = (cbkQuery: CallbackQuery) => (indexForMessage(cbkQuery.message) in _inlineMenuGenerators);
+  const hasMenuForQuery = (cbkQuery: CallbackQuery) => {
+    debug('hasMenuForQuery: ' + indexForMessage(cbkQuery.message));
+    return indexForMessage(cbkQuery.message) in _inlineMenuGenerators;
+  };
 
-  const hasHandlerForReply = (msg: Message) => (indexForRepliedMsg(msg) in _textGenerators);
+  const hasHandlerForReply = (msg: Message) => {
+    debug('hasHandlerForReply: ', indexForRepliedMsg(msg));
+    return indexForRepliedMsg(msg) in _textGenerators;
+  };
 
   return {
     continueKbGenerator,
