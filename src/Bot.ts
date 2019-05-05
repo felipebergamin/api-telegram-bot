@@ -90,6 +90,18 @@ export class Bot {
   }
 
   /**
+   * Receive a function that will be called for each generator stored in memory
+   * Receive an object with timestamps: `startedAt`, `lastInteraction` and the `id` defined in startGenerator() function
+   * Must return true for generators that could be removed from memory, false otherwise
+   * @param cbk callback function that will be called for each generator
+   */
+  public cleanGenerators(cbk: I.GeneratorsCleanerFn) {
+    if (this._generatorsHandler) {
+      this._generatorsHandler.cleanGenerators(cbk);
+    }
+  }
+
+  /**
    * create a webhook to receive updates
    * returns a request handler function to be used with express or node http
    * @return http request handler
@@ -131,12 +143,18 @@ export class Bot {
     );
   }
 
-  public async startGenerator(to: number | string, fg: Types.GeneratorFunction) {
+  /**
+   * Receive a messages generator and start it
+   * @param to Contact ID to send messages
+   * @param fg Generator function
+   * @param id You can use this to identify this generator when call cleanGenerators()
+   */
+  public async startGenerator(to: number | string, fg: Types.GeneratorFunction, id?: number | string) {
     if (!this._generatorsHandler) {
       this._generatorsHandler = InlineMenuHandler(this);
     }
 
-    await this._generatorsHandler.startGenerator(to, fg);
+    await this._generatorsHandler.startGenerator(to, fg, id);
   }
 
   /**

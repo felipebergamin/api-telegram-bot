@@ -51,7 +51,7 @@ export { WebhookInfo } from "./WebhookInfo";
 export { OnReceiveReplyCallback } from "./OnReceiveReplyCallback";
 export { WrappedMessageActions } from "./WrappedMessageActions";
 export { PollingOptions } from "./PollingOptions";
-export { GeneratorsHandler } from './GeneratorsHandler';
+export { GeneratorsHandler, GeneratorsCleanerFn } from './GeneratorsHandler';
 export { Poll } from './Poll';
 export { PollOption } from './PollOption';
 

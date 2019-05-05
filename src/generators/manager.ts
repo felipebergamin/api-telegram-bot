@@ -2,7 +2,7 @@ import * as Debug from 'debug';
 
 import { Bot } from '../index';
 import { CallbackQuery, Message } from '../interfaces';
-import { GeneratorsHandler } from '../interfaces';
+import { GeneratorsCleanerFn, GeneratorsHandler } from '../interfaces';
 import { GeneratorFunction } from '../types';
 import { Action } from './actions';
 import {
@@ -15,8 +15,15 @@ import {
 
 const debug = Debug('api-telegram-bot:generators');
 
+interface GeneratorInfo {
+  id: number | string;
+  startedAt: number;
+  lastInteraction: number;
+  fn: GeneratorFunction;
+}
+
 interface Indexes {
-  [key: string]: GeneratorFunction;
+  [key: string]: GeneratorInfo;
 }
 
 /**
@@ -27,7 +34,68 @@ export const handler = (bot: Bot): GeneratorsHandler => {
   const _inlineMenuGenerators: Indexes = {};
   const _textGenerators: Indexes = {};
 
-  async function startGenerator(contact_id: string | number, fn: GeneratorFunction) {
+  // tslint:disable:no-console
+  setInterval(() => {
+    console.log('-- keys --');
+    console.log(Object.keys(_inlineMenuGenerators));
+    console.log(Object.keys(_textGenerators));
+  }, 5000);
+
+  function touchGenerator(store: Indexes, index: string) {
+    debug('touching generator on index: %s', index);
+    store[index] = {
+      ...store[index],
+      lastInteraction: Date.now(),
+    };
+  }
+
+  function deleteIndex(store: Indexes, index: string) {
+    store[index] = null;
+    delete store[index];
+  }
+
+  function storeTextGenerator(index: string, fn: GeneratorFunction, id?: number | string) {
+    _textGenerators[index] = {
+      fn,
+      id,
+      lastInteraction: Date.now(),
+      startedAt: Date.now(),
+    };
+  }
+
+  function storeMarkupGenerator(index: string, fn: GeneratorFunction, id?: number | string) {
+    _inlineMenuGenerators[index] = {
+      fn,
+      id,
+      lastInteraction: Date.now(),
+      startedAt: Date.now(),
+    };
+  }
+
+  function cleanGenerators(shouldBeRemoved: GeneratorsCleanerFn) {
+    for (const key of Object.keys(_inlineMenuGenerators)) {
+      const genInfo = _inlineMenuGenerators[key];
+
+      if (shouldBeRemoved({ lastInteraction: genInfo.startedAt, startedAt: genInfo.lastInteraction, id: genInfo.id })) {
+        debug(`removing index ${key} from _inlineMenuGenerators`);
+        genInfo.fn.return();
+        deleteIndex(_inlineMenuGenerators, key);
+      }
+    }
+
+    for (const key of Object.keys(_textGenerators)) {
+      const genInfo = _textGenerators[key];
+
+      if (shouldBeRemoved({ lastInteraction: genInfo.startedAt, startedAt: genInfo.lastInteraction, id: genInfo.id })) {
+        debug(`removing index ${key} from _textGenerators`);
+        genInfo.fn.return();
+        deleteIndex(_textGenerators, key);
+      }
+    }
+  }
+
+  async function startGenerator(contact_id: string | number, fn: GeneratorFunction, id?: number | string) {
+    debug('starting new generator with contact: %d', contact_id);
     const { value, done } = await normalizePromise(fn.next());
 
     if (!isAction(value) && !isActionsArray(value)) {
@@ -38,6 +106,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     }
 
     const firstAction = Array.isArray(value) ? value[0] : value;
+    debug('generator started with %s action', firstAction.type);
 
     switch (firstAction.type) {
       case 'textMessage':
@@ -48,7 +117,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
           });
 
           if (!done) {
-            _textGenerators[indexForMessage(sentMsg)] = fn;
+            storeTextGenerator(indexForMessage(sentMsg), fn, id);
           }
         } catch (err) {
           fn.throw(err);
@@ -68,7 +137,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
           );
 
           if (!done) {
-            _inlineMenuGenerators[indexForMessage(result)] = fn;
+            storeMarkupGenerator(indexForMessage(result), fn, id);
           }
         } catch (err) {
           fn.throw(err);
@@ -88,14 +157,21 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     debug('continue generator for message %s on chat %s', msg.message_id, msg.chat.id);
 
     if (fnIndexKey in _textGenerators) {
-      const fn = _textGenerators[fnIndexKey];
+      console.log( // tslint:disable-line
+        '0- started: %d lastInteraction: %d',
+        _textGenerators[fnIndexKey].startedAt,
+        _textGenerators[fnIndexKey].lastInteraction,
+      );
+      touchGenerator(_textGenerators, fnIndexKey);
+
+      const { fn, id } = _textGenerators[fnIndexKey];
 
       const { value, done } = await normalizePromise(fn.next(msg));
       let actions: Action[];
 
       if (done) {
         debug('Generator was done, removing function from index');
-        delete _textGenerators[fnIndexKey];
+        deleteIndex(_textGenerators, fnIndexKey);
       }
 
       if (!isActionsArray(value)) {
@@ -137,7 +213,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
               reply_to_message_id: msg.message_id,
             }).then(({ result: sentMsg }) => {
               if (!done) {
-                _inlineMenuGenerators[indexForMessage(sentMsg)] = fn;
+                storeMarkupGenerator(indexForMessage(sentMsg), fn, id);
               }
               delete _textGenerators[fnIndexKey];
             });
@@ -152,7 +228,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
             if (!done) {
               fn.return();
             }
-            _textGenerators[fnIndexKey] = newFn;
+            storeTextGenerator(fnIndexKey, newFn, id);
             continueTextGenerator(msg);
             break;
 
@@ -168,14 +244,15 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     debug('continue generator from inline_menu: %s', fnIndexKey);
 
     if (fnIndexKey in _inlineMenuGenerators) {
-      const fn = _inlineMenuGenerators[fnIndexKey];
+      touchGenerator(_inlineMenuGenerators, fnIndexKey);
+      const { fn, id } = _inlineMenuGenerators[fnIndexKey];
 
       const { value, done } = await normalizePromise(fn.next(cbkQuery));
       let actions: Action[];
 
       if (done) {
         debug('generator was done, remove it from index');
-        delete _inlineMenuGenerators[fnIndexKey];
+        deleteIndex(_inlineMenuGenerators, fnIndexKey);
       }
 
       if (!isActionsArray(value)) {
@@ -215,7 +292,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
             if (!done) {
               fn.return();
             }
-            _inlineMenuGenerators[fnIndexKey] = newFn;
+            storeMarkupGenerator(fnIndexKey, newFn, id);
             continueKbGenerator(cbkQuery);
             break;
 
@@ -228,7 +305,7 @@ export const handler = (bot: Bot): GeneratorsHandler => {
               if (!done) {
                 _textGenerators[indexForMessage(sentMessage.result)] = _inlineMenuGenerators[fnIndexKey];
               }
-              delete _inlineMenuGenerators[fnIndexKey];
+              deleteIndex(_inlineMenuGenerators, fnIndexKey);
             });
             break;
 
@@ -243,17 +320,12 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     }
   }
 
-  const hasMenuForQuery = (cbkQuery: CallbackQuery) => {
-    debug('hasMenuForQuery: ' + indexForMessage(cbkQuery.message));
-    return indexForMessage(cbkQuery.message) in _inlineMenuGenerators;
-  };
+  const hasMenuForQuery = (cbkQuery: CallbackQuery) => indexForMessage(cbkQuery.message) in _inlineMenuGenerators;
 
-  const hasHandlerForReply = (msg: Message) => {
-    debug('hasHandlerForReply: ', indexForRepliedMsg(msg));
-    return indexForRepliedMsg(msg) in _textGenerators;
-  };
+  const hasHandlerForReply = (msg: Message) => indexForRepliedMsg(msg) in _textGenerators;
 
   return {
+    cleanGenerators,
     continueKbGenerator,
     continueTextGenerator,
     hasHandlerForReply,
