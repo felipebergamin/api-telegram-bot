@@ -1,7 +1,6 @@
-const BOT_TOKEN = 'REPLACE_WITH_BOT_TOKEN';
-const CONTACT_ID = 'REPLACE_WITH_TELEGRAM_ID';
+const { BOT_TOKEN, CONTACT_ID } = process.env;
 
-const { Bot, InlineKeyboardBuilder, Polling } = require('../dist');
+const { Bot, KeyboardBuilder, Polling } = require('../dist');
 const bot = new Bot(BOT_TOKEN);
 const polling = new Polling(bot);
 polling.startPolling();
@@ -10,7 +9,7 @@ polling.startPolling();
  * please note: when a received message match with a onReceiveReply function,
  * this message will not be delivered by observables
  */
-bot.text$.subscribe(({ update, actions }) => {
+bot.messages('text').subscribe(({ update, actions }) => {
   actions.reply(`You send:\n\n${update.message.text}`);
 });
 
@@ -33,10 +32,10 @@ const endConversation = (cbkQuery, actions, data) => {
 };
 
 const askAboutCoffee = (message, actions) => {
-  const kb = new InlineKeyboardBuilder()
-  const { inline_keyboard } = kb
-    .addButton({ text: 'Yes', callback_data: 'YES' })
-    .addButton({ text: 'No', callback_data: 'NO' });
+  const inline_keyboard = KeyboardBuilder()
+    .button({ text: 'Yes', callback_data: 'YES' })
+    .button({ text: 'No', callback_data: 'NO' })
+    .keyboard;
 
   actions.reply(
     `Tell me, ${message.text}, do you like coffee?`,

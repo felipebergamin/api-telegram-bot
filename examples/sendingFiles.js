@@ -1,8 +1,9 @@
 const { createReadStream } = require('fs');
+const { join } = require('path');
 const { Bot } = require('../dist');
 
-const TOKEN = "BOT_TOKEN";
-const bot = new Bot(TOKEN);
+const { BOT_TOKEN, CONTACT_ID } = process.env;
+const bot = new Bot(BOT_TOKEN);
+const file = createReadStream(join(__dirname, 'image.png'));
 
-const file = createReadStream("/PATH/TO/AWESOME/PHOTO");
-bot.sendPhoto(send_to, file);
+bot.sendPhoto(CONTACT_ID, file);
