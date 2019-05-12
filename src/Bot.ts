@@ -116,7 +116,7 @@ export class Bot {
    * Call without arguments to receive all types.
    * @param type type of updates to subscribe
    */
-  public updates(type: Types.UpdateType) {
+  public updates(type: Types.UpdateType): Observable<I.Update> {
     return (
       typeof type === 'string'
         ? this._updates$.pipe(
@@ -131,13 +131,16 @@ export class Bot {
    * Call without arguments to receive all types.
    * @param type type os message to receive
    */
-  public messages(type: Types.MessageType) {
-    const messages$ = this.updates('message');
+  public messages(type: Types.MessageType): Observable<I.WrappedMessageActions> {
+    const messages$ = this.updates('message')
+      .pipe(
+        map((update) => ({ update, actions: createMessageActions(update.message, this) })),
+      );
 
     return (
       typeof type === 'string'
         ? messages$.pipe(
-          filter((update) => type in update.message),
+          filter((update) => type in update.update.message),
         )
         : messages$
     );
