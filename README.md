@@ -8,13 +8,14 @@ This module is updated with Telegram API version **4.2**. Except with Telegram P
 
 # API reference
 
-[Click Here (v5.2)](http://apitelegrambot.tech/v5.2.0)
+[Click Here (v6.0 TESTING)](http://apitelegrambot.tech/v6beta)
 
 ### Older Versions
 
 - [v4.0.2](http://apitelegrambot.tech/v4.0.2/)
 - [v5.0.x](http://apitelegrambot.tech/v5.0.0)
 - [v5.1.x](http://apitelegrambot.tech/v5.1.0)
+- [v5.2.x](http://apitelegrambot.tech/v5.2.0)
 
 ### Examples
 
@@ -31,12 +32,12 @@ Before run any example code, please install deps with `npm i` and run `npm run b
 
 ### Install
 ```sh
-npm install api-telegram-bot
+npm install api-telegram-bot@beta
 ```
 ### Start coding
 
 ```js
-import { Bot, Polling } from "api-telegram-bot";
+const { Bot, Polling } = require('api-telegram-bot');
 // or using commonjs imports
 // const { Bot } = require("api-telegram-bot");
 
@@ -46,7 +47,7 @@ const bot = new Bot(TOKEN);
 const polling = new Polling(bot);
 
 // subscribe to all message types (texts, photos, videos, and others)
-bot.message$.subscribe(data => {
+bot.messages().subscribe(data => {
   // data is a object with 2 props:
   //   data.update - is the update received,
   //   data.actions - actions object with some helper functions
@@ -55,7 +56,7 @@ bot.message$.subscribe(data => {
 });
 
 // subscribe only to text messages
-bot.text$.subscribe(
+bot.messages('text').subscribe(
   // my opinion: use object destructuring allows a more beautiful code
   ({ update, actions }) => {
 
@@ -77,7 +78,7 @@ bot.text$.subscribe(
 );
 
 // NOTE: message actions are provided only for message updates (text, photo, ...)
-bot.editedMessage$.subscribe(data => {
+bot.messages('edited_messages').subscribe(data => {
   // no actions here
   console.log(data);
 });
@@ -105,22 +106,19 @@ $ DEBUG=api-telegram-bot:webhook npm start
 ## [Reply Keyboard Markup](https://core.telegram.org/bots/api#replykeyboardmarkup)
 
 ```js
-const { ReplyKeyboardBuilder, Bot } = require('api-telegram-bot');
+const { KeyboardBuilder } = require('api-telegram-bot');
 
-const TOKEN = "BOT_TOKEN";
-const CONTACT_ID = 'YOUR_TELEGRAM_ID';
-
+const TOKEN = 'BOT_TOKEN';
+const CONTACT_ID = 'CONTACT_ID';
 const bot = new Bot(TOKEN);
-const kbBuilder = new ReplyKeyboardBuilder();
 
-const reply_markup = kbBuilder
-  .appendRow()
-    .addButton({ text: "Yes" })
-    .addButton({ text: "No" })
-  .appendRow()
-    .addButton({ text: "Cancel" });
+const { keyboard } = KeyboardBuilder()
+  .button({ text: "Yes" })
+  .button({ text: "No" })
+  .newRow()
+  .button('Cancel');
 
-bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup });
+bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup: { keyboard, resize_keyboard: true } });
 ```
 
 ![Reply Keyboard Builder Result](https://image.ibb.co/h2g9N6/Screenshot_20171215_102656.png)
@@ -128,54 +126,24 @@ bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup });
 ## [Inline Keyboard](https://core.telegram.org/bots/api#inlinekeyboardmarkup)
 
 ```ts
-const { InlineKeyboardBuilder, Bot } = require('api-telegram-bot');
+const { KeyboardBuilder, Bot } = require('api-telegram-bot');
 
-const TOKEN = "BOT_TOKEN";
+const TOKEN = 'BOT_TOKEN';
 const CONTACT_ID = 'YOUR_TELEGRAM_ID';
 
 const bot = new Bot(TOKEN);
-const kbBuilder = new InlineKeyboardBuilder();
 
-const reply_markup = kbBuilder
-  .appendRow()
-    .addButton({ text: "Yes", callback_data: "YES" })
-    .addButton({ text: "No", callback_data: "NO" })
-  .appendRow()
-    .addButton({ text: "Cancel", callback_data: "CANCEL" });
+const inline_keyboard = KeyboardBuilder()
+  .newRow()
+    .button({ text: "Yes", callback_data: "YES" })
+    .button({ text: "No", callback_data: "NO" })
+  .newRow()
+    .button({ text: "Cancel", callback_data: "CANCEL" })
+  .keyboard;
 
-bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup });
+bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup: { inline_keyboard } });
 ```
 
 See the message sent by code above:
 
 ![Inline Keyboard Builder Result](https://image.ibb.co/kQOH9m/Screenshot_20171215_095919.png)
-
-### distributeButtonsInRows
-
-```js
-const { InlineKeyboardBuilder, InlineKeyboardButton, Bot } = require('api-telegram-bot');
-
-const BOT_TOKEN = 'BOT_TOKEN';
-const CONTACT_ID = 'YOUR_TELEGRAM_ID';
-
-const bot = new Bot(BOT_TOKEN);
-const kbBuilder = new InlineKeyboardBuilder();
-const buttons = [
-  { text: '1', callback_data: 'BTN_1' },
-  { text: '2', callback_data: 'BTN_2' },
-  { text: '3', callback_data: 'BTN_3' },
-  { text: '4', callback_data: 'BTN_4' },
-];
-
-// distribute 2 buttons for each row
-const reply_markup = kbBuilder.distributeButtonsInRows(buttons, 2);
-
-bot.sendMessage(CONTACT_ID, "Choose a number", { reply_markup });
-```
-
-![distribute buttons result](https://image.ibb.co/mXPFUm/Screenshot_20171215_103502.png)
-
-# What still need to be done
-
-- Write tests
-- Implement Telegram Passport support
