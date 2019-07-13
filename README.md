@@ -8,7 +8,7 @@ This module is updated with Telegram API version **4.2**. Except with Telegram P
 
 # API reference
 
-[Click Here (v6.0 TESTING)](http://apitelegrambot.tech/v6beta)
+[Click Here](http://apitelegrambot.tech/v6.0.2)
 
 ### Older Versions
 
@@ -32,7 +32,7 @@ Before run any example code, please install deps with `npm i` and run `npm run b
 
 ### Install
 ```sh
-npm install api-telegram-bot@beta
+npm install api-telegram-bot
 ```
 ### Start coding
 
