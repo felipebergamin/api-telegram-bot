@@ -33,15 +33,18 @@ export class Polling {
   private receivedStopSignal: boolean;
   /** @ignore */
   private observable: Observable<Update>;
+  /** @ignore */
+  private bot: Bot;
 
   /** @constructor */
-  constructor(private bot: Bot, { limit = 100, offset = 0, allowed_updates = [], timeout = 10 }: PollingOptions = {}) {
+  constructor(bot: Bot, { limit = 100, offset = 0, allowed_updates = [], timeout = 10 }: PollingOptions = {}) {
     this._events = new EventEmitter();
     this.offset = offset;
     this.limit = limit;
     this.allowed_updates = allowed_updates;
     this.timeout = timeout;
     this.receivedStopSignal = false;
+    this.bot = bot;
     this.setStatus("NEW");
 
     this.observable = this.createObservable().pipe(share());

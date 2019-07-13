@@ -15,7 +15,6 @@ export class Webhook {
   private _events = new EventEmitter();
   /** @ignore */
   private observable: Observable<Update>;
-  private receivedStopSinal: boolean;
 
   /**
    * class constructor
@@ -23,7 +22,7 @@ export class Webhook {
    * @constructor
    * @param bot Bot instance
    */
-  constructor(private bot: Bot) {
+  constructor(bot: Bot) {
     this.observable = this._createObservable().pipe(share());
     bot.webhook = this;
   }
