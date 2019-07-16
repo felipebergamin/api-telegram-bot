@@ -1,6 +1,6 @@
 const { Bot, Polling, GeneratorActions } = require('../dist');
-const BOT_TOKEN = '668481099:AAH-dnu_NmaDBvP0z1VJ95DLIq-TVX0gANg';
-const CONTACT = '58683621';
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const CONTACT = process.env.CONTACT_ID;
 
 const { answerQuery, inlineMenu, switchFn, textMessage } = GeneratorActions;
 
