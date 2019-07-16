@@ -34,13 +34,6 @@ export const handler = (bot: Bot): GeneratorsHandler => {
   const _inlineMenuGenerators: Indexes = {};
   const _textGenerators: Indexes = {};
 
-  // tslint:disable:no-console
-  setInterval(() => {
-    console.log('-- keys --');
-    console.log(Object.keys(_inlineMenuGenerators));
-    console.log(Object.keys(_textGenerators));
-  }, 5000);
-
   function touchGenerator(store: Indexes, index: string) {
     debug('touching generator on index: %s', index);
     store[index] = {
@@ -50,8 +43,10 @@ export const handler = (bot: Bot): GeneratorsHandler => {
   }
 
   function deleteIndex(store: Indexes, index: string) {
+    debug(`Generators: deleting index ${index}`);
     store[index] = null;
     delete store[index];
+    debug(`${Object.keys(store).length} remaining`);
   }
 
   function storeTextGenerator(index: string, fn: GeneratorFunction, id?: number | string) {
@@ -157,11 +152,6 @@ export const handler = (bot: Bot): GeneratorsHandler => {
     debug('continue generator for message %s on chat %s', msg.message_id, msg.chat.id);
 
     if (fnIndexKey in _textGenerators) {
-      console.log( // tslint:disable-line
-        '0- started: %d lastInteraction: %d',
-        _textGenerators[fnIndexKey].startedAt,
-        _textGenerators[fnIndexKey].lastInteraction,
-      );
       touchGenerator(_textGenerators, fnIndexKey);
 
       const { fn, id } = _textGenerators[fnIndexKey];

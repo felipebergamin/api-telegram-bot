@@ -48,3 +48,11 @@ export function textMessage(text: string, optionals: SendMessageOptionals = {}):
     type: 'textMessage',
   };
 }
+
+export const GeneratorActions = {
+  answerQuery,
+  deleteMessage,
+  inlineMenu,
+  switchFn,
+  textMessage,
+};
