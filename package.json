@@ -26,18 +26,18 @@
   },
   "homepage": "https://github.com/felipebergamin/api-telegram-bot#readme",
   "dependencies": {
-    "debug": "^2.6.0",
+    "debug": "^4.1.1",
     "node-emoji": "^1.7.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
-    "@types/debug": "0.0.30",
-    "@types/jest": "^24.0.11",
+    "@types/debug": "^4.1.4",
+    "@types/jest": "^24.0.15",
     "@types/node-emoji": "^1.4.0",
-    "@types/request-promise-native": "^1.0.15",
-    "jest": "^24.7.1",
+    "@types/request-promise-native": "^1.0.16",
+    "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "tslint": "^5.13.1",
     "typedoc": "^0.14.2",
