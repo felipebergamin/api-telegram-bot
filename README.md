@@ -1,3 +1,7 @@
+# I'm not maintaining this package anymore
+
+---
+
 # Telegram Bot API for Node.js
 
 Node.js module for [Telegram Bot API](https://core.telegram.org/bots/api).
