@@ -1,15 +1,16 @@
-import * as Debug from "debug";
-import { EventEmitter } from "events";
-import { Observable, Observer } from "rxjs";
-import { share } from "rxjs/operators";
+import { EventEmitter } from 'events';
+import { Observable, Observer } from 'rxjs';
+import { share } from 'rxjs/operators';
 
-import { Bot } from "./Bot";
-import { Update } from "./interfaces";
-import { PollingOptions } from "./interfaces/PollingOptions";
+import Bot from './Bot';
+import { Update, PollingOptions } from './interfaces';
 
-const debug = Debug("api-telegram-bot:polling");
-
-export type PollingStatus = "NEW" | "FETCHING" | "STOPPED" | "FETCH_DONE" | "ERROR";
+export type PollingStatus =
+  | 'NEW'
+  | 'FETCHING'
+  | 'STOPPED'
+  | 'FETCH_DONE'
+  | 'ERROR';
 
 /** @beta */
 export class Polling {
@@ -17,49 +18,54 @@ export class Polling {
    * Last error on polling
    */
   public lastError: any;
+
   /** @ignore */
-  private _status: PollingStatus;
+  private status: PollingStatus = 'NEW';
+
   /** @ignore */
-  private _events: EventEmitter;
+  private events: EventEmitter;
+
   /** @ignore */
   private offset: number;
+
   /** @ignore */
   private limit: number;
+
   /** @ignore */
   private allowed_updates: string[];
+
   /** @ignore */
   private timeout: number;
+
   /** @ignore */
   private receivedStopSignal: boolean;
+
   /** @ignore */
   private observable: Observable<Update>;
+
   /** @ignore */
   private bot: Bot;
 
   /** @constructor */
-  constructor(bot: Bot, { limit = 100, offset = 0, allowed_updates = [], timeout = 10 }: PollingOptions = {}) {
-    this._events = new EventEmitter();
+  constructor(
+    bot: Bot,
+    {
+      limit = 100,
+      offset = 0,
+      allowed_updates = [],
+      timeout = 10,
+    }: PollingOptions = {}
+  ) {
+    this.events = new EventEmitter();
     this.offset = offset;
     this.limit = limit;
     this.allowed_updates = allowed_updates;
     this.timeout = timeout;
     this.receivedStopSignal = false;
     this.bot = bot;
-    this.setStatus("NEW");
+    this.setStatus('NEW');
 
     this.observable = this.createObservable().pipe(share());
-  }
-
-  /**
-   * Flag to polling state. Could be:
-   * - "NEW": polling wasn't started yet
-   * - "FETCHING": bot has a open connection waiting for updates
-   * - "STOPPED": .stopPolling() was called and the last fetch was completed
-   * - "FETCH_DONE": last fetch was completed and a new fetch will be started
-   * - "ERROR": last fetch returned an error
-   */
-  public get status(): PollingStatus {
-    return this._status;
   }
 
   /**
@@ -67,7 +73,7 @@ export class Polling {
    * E.g. return true is `stopPolling()` was called
    */
   public get isPolling(): boolean {
-    return ['NEW', 'STOPPED'].indexOf(this._status) === -1;
+    return ['NEW', 'STOPPED'].indexOf(this.status) === -1;
   }
 
   /**
@@ -82,7 +88,7 @@ export class Polling {
    */
   public startPolling() {
     // bot will subscribe to updates observable and polling will start
-    this.bot.polling = this;
+    this.bot.setPolling(this);
   }
 
   /**
@@ -92,50 +98,43 @@ export class Polling {
    * @returns a promise that will be fulfilled when last fetch was done
    */
   public stopPolling(): Promise<void> {
-    debug("Stop polling");
     this.receivedStopSignal = true;
-    return this.status === "STOPPED"
+    return this.status === 'STOPPED'
       ? Promise.resolve()
       : new Promise((resolve, reject) => {
-          const onStopCbk = (status) => {
-            debug("CBK: " + status);
-            if (status === "STOPPED") {
+          const onStopCbk = (status: PollingStatus) => {
+            if (status === 'STOPPED') {
               /*
                 call get updates one last time only to set offset on telegram servers
                 if we don't update offset, updates received by last polling fetch
                 will be received again if we call getUpdates()
               */
-              this.bot.getUpdates({ offset: this.offset, limit: 1 })
+              this.bot
+                .getUpdates({ offset: this.offset, limit: 1 })
                 .then(() => resolve())
                 .catch((err) => reject(err));
-              this._events.removeListener("STATUS_CHANGED", onStopCbk);
+              this.events.removeListener('STATUS_CHANGED', onStopCbk);
             }
           };
 
-          this._events.on("STATUS_CHANGED", onStopCbk);
+          this.events.on('STATUS_CHANGED', onStopCbk);
         });
   }
 
+  public getStatus() {
+    return this.status;
+  }
+
   private setStatus(status: PollingStatus) {
-    this._status = status;
-    this._events.emit("STATUS_CHANGED", status);
-    debug("Status changed to %s", status);
+    this.status = status;
+    this.events.emit('STATUS_CHANGED', status);
   }
 
   /** @ignore */
   private createObservable(): Observable<Update> {
     return Observable.create((observer: Observer<Update>) => {
-      debug("Creating Observable");
-
-      const getUpdates = async () => {
-        this.setStatus("FETCHING");
-        debug("Getting updates: %j", {
-          allowed_updates: this.allowed_updates,
-          limit: this.limit,
-          offset: this.offset,
-          timeout: this.timeout,
-        });
-
+      const getUpdates = async (): Promise<void> => {
+        this.setStatus('FETCHING');
         try {
           const updates = await this.bot.getUpdates({
             allowed_updates: this.allowed_updates,
@@ -145,31 +144,25 @@ export class Polling {
           });
 
           this.setStatus('FETCH_DONE');
-          debug(`received ${updates.result.length} updates`);
           if (updates.ok && updates.result.length > 0) {
-            this.offset = updates.result[updates.result.length - 1].update_id + 1;
-            for (const u of updates.result) {
-              observer.next(u);
-            }
+            this.offset =
+              updates.result[updates.result.length - 1].update_id + 1;
+            updates.result.forEach((update) => observer.next(update));
           }
         } catch (err) {
-
           this.lastError = err;
-          this.setStatus("ERROR");
-
-          debug("error on fetch updates");
+          this.setStatus('ERROR');
           observer.error(err);
         }
 
         if (!this.receivedStopSignal) {
-          return await getUpdates();
+          return getUpdates();
         }
-        debug(`Stop flag is ${this.receivedStopSignal}, stopping polling`);
-        this.setStatus("STOPPED");
-        observer.complete();
+        this.setStatus('STOPPED');
+        return observer.complete();
       };
 
-      getUpdates();
+      return getUpdates();
     });
   }
 }

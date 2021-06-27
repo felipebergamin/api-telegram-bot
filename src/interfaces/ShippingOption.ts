@@ -1,4 +1,4 @@
-import { LabeledPrice } from "./LabeledPrice";
+import { LabeledPrice } from './LabeledPrice';
 
 export interface ShippingOption {
   /** Shipping option identifier */

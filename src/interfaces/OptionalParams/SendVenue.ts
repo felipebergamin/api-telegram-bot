@@ -1,7 +1,7 @@
-import { ForceReply} from "../ForceReply";
-import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
-import { ReplyKeyboardMarkup} from "../ReplyKeyboardMarkup";
-import { ReplyKeyboardRemove} from "../ReplyKeyboardRemove";
+import { ForceReply } from '../ForceReply';
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
+import { ReplyKeyboardMarkup } from '../ReplyKeyboardMarkup';
+import { ReplyKeyboardRemove } from '../ReplyKeyboardRemove';
 
 export interface SendVenueOptionals {
   /**
@@ -24,5 +24,9 @@ export interface SendVenueOptionals {
   /**
    * Additional interface options.
    */
-  reply_markup?: InlineKeyboardMarkup|ReplyKeyboardMarkup|ReplyKeyboardRemove|ForceReply;
+  reply_markup?:
+    | InlineKeyboardMarkup
+    | ReplyKeyboardMarkup
+    | ReplyKeyboardRemove
+    | ForceReply;
 }

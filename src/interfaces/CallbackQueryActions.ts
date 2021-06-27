@@ -1,10 +1,13 @@
-import { ForceReply } from "./ForceReply";
-import { InlineKeyboardMarkup } from "./InlineKeyboardMarkup";
-import { Message } from "./Message";
-import { AnswerCallbackQueryOptionals, EditMessageTextOptionals } from "./OptionalParams";
-import { ReplyKeyboardMarkup } from "./ReplyKeyboardMarkup";
-import { ReplyKeyboardRemove } from "./ReplyKeyboardRemove";
-import { TelegramResponse } from "./TelegramResponse";
+import { ForceReply } from './ForceReply';
+import { InlineKeyboardMarkup } from './InlineKeyboardMarkup';
+import { Message } from './Message';
+import {
+  AnswerCallbackQueryOptionals,
+  EditMessageTextOptionals,
+} from './OptionalParams';
+import { ReplyKeyboardMarkup } from './ReplyKeyboardMarkup';
+import { ReplyKeyboardRemove } from './ReplyKeyboardRemove';
+import { TelegramResponse } from './TelegramResponse';
 
 export interface CallbackQueryActions {
   /**
@@ -21,10 +24,20 @@ export interface CallbackQueryActions {
    */
   deleteMessage?: () => Promise<TelegramResponse<boolean>>;
 
-  answerQuery?: (opt?: AnswerCallbackQueryOptionals) => Promise<TelegramResponse<boolean>>;
+  answerQuery?: (
+    opt?: AnswerCallbackQueryOptionals
+  ) => Promise<TelegramResponse<boolean>>;
 
-  editMessageText?: (text: string, opt?: EditMessageTextOptionals) => Promise<TelegramResponse<Message | boolean>>;
+  editMessageText?: (
+    text: string,
+    opt?: EditMessageTextOptionals
+  ) => Promise<TelegramResponse<Message | boolean>>;
 
-  editMessageReplyMarkup?: (reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply)
-    => Promise<TelegramResponse<Message | boolean>>;
+  editMessageReplyMarkup?: (
+    reply_markup:
+      | InlineKeyboardMarkup
+      | ReplyKeyboardMarkup
+      | ReplyKeyboardRemove
+      | ForceReply
+  ) => Promise<TelegramResponse<Message | boolean>>;
 }

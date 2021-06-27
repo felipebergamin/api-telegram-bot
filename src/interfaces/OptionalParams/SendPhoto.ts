@@ -1,9 +1,9 @@
-import { OnReplyCallbackFunction } from "../../types";
-import { CallbackQueryHandlerFunction } from "../CallbackQueryHandler";
-import { ForceReply} from "../ForceReply";
-import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
-import { ReplyKeyboardMarkup} from "../ReplyKeyboardMarkup";
-import { ReplyKeyboardRemove} from "../ReplyKeyboardRemove";
+import { OnReplyCallbackFunction } from '../../types';
+import { CallbackQueryHandlerFunction } from '../CallbackQueryHandler';
+import { ForceReply } from '../ForceReply';
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
+import { ReplyKeyboardMarkup } from '../ReplyKeyboardMarkup';
+import { ReplyKeyboardRemove } from '../ReplyKeyboardRemove';
 
 export interface SendPhotoOptionals {
   /**
@@ -26,7 +26,11 @@ export interface SendPhotoOptionals {
    * A JSON-serialized object for an inline keyboard, custom reply keyboard,
    * instructions to remove reply keyboard or to force a reply from the user.
    */
-  reply_markup?: InlineKeyboardMarkup|ReplyKeyboardMarkup|ReplyKeyboardRemove|ForceReply;
+  reply_markup?:
+    | InlineKeyboardMarkup
+    | ReplyKeyboardMarkup
+    | ReplyKeyboardRemove
+    | ForceReply;
   /**
    * a function that will be called if user reply the sent message.
    * Note: the user must explicity reply the message (tap message on telegram app and "Reply")

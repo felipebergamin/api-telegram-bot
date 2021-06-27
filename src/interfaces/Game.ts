@@ -1,6 +1,6 @@
-import { Animation } from "./Animation";
-import { MessageEntity } from "./MessageEntity";
-import { PhotoSize } from "./PhotoSize";
+import { Animation } from './Animation';
+import { MessageEntity } from './MessageEntity';
+import { PhotoSize } from './PhotoSize';
 
 export interface Game {
   /** Title of the game */

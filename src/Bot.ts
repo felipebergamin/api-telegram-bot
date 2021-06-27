@@ -1,92 +1,80 @@
-/* tslint:disable:max-line-length */
-import { ReadStream } from "fs";
-import * as nodeEmoji from "node-emoji";
-import * as request from "request-promise-native";
-import { Observable, Subject } from "rxjs";
-import { filter, map } from "rxjs/operators";
-import { isFunction } from "util";
+import { ReadStream } from 'fs';
+import * as nodeEmoji from 'node-emoji';
+import * as request from 'request-promise-native';
+import { Observable, Subject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
-import { debug } from "./debug";
-import { InlineMenuHandler } from "./generators";
-import { Polling } from "./Polling";
-import { Webhook } from "./Webhook";
+import { Polling } from './Polling';
+import Webhook from './Webhook';
 
-import * as I from "./interfaces";
-import * as Types from "./types";
+import * as I from './interfaces';
+import * as Types from './types';
 
 import {
   createCallbackQueryActions,
   createMessageActions,
   stringifyFormData,
-} from "./utils";
+} from './utils';
 
-export class Bot {
-  private _updates$: Subject<I.Update>;
+const isFunction = (param: unknown): boolean => typeof param === 'function';
 
-  private _generatorsHandler: I.GeneratorsHandler;
-  private _config: I.Config;
-  private _repliesCallbacks: I.OnReceiveReplyCallback[];
-  private _callbackQueriesHandlers: I.CallbackQueryHandler[];
-  private _webhook: Webhook;
-  private _polling: Polling;
+export default class Bot {
+  private updates$: Subject<I.Update>;
+
+  private generatorsHandler: I.GeneratorsHandler | null = null;
+
+  private config: I.Config;
+
+  private repliesCallbacks: I.OnReceiveReplyCallback[];
+
+  private callbackQueriesHandlers: I.CallbackQueryHandler[];
+
+  private webhook: Webhook | null = null;
+
+  private polling: Polling | null;
 
   /**
    * Constructs bot client
    *
    * @constructor
-   * @param token Bot token
+   * @param bot_token Bot token
    * @param config Optional config object.
    */
-  constructor(private bot_token: string, { emojifyTexts = true, sendChatActionBeforeMsg = true }: I.Config = {}) {
-    debug("constructing TelegramBotClient");
-    debug("Config: ", JSON.stringify({ emojifyTexts, sendChatActionBeforeMsg }));
-
+  constructor(private bot_token: string, config: I.Config = {}) {
     if (!bot_token) {
-      throw new Error("bot token undefined");
+      throw new Error('bot token undefined');
     }
-
-    this._updates$ = new Subject();
-
-    this._config = { emojifyTexts, sendChatActionBeforeMsg };
-    this._callbackQueriesHandlers = [];
-    this._repliesCallbacks = [];
+    const { emojifyTexts = true, sendChatActionBeforeMsg = true } = config;
+    this.updates$ = new Subject();
+    this.polling = null;
+    this.config = { emojifyTexts, sendChatActionBeforeMsg };
+    this.callbackQueriesHandlers = [];
+    this.repliesCallbacks = [];
   }
 
   /** @ignore */
-  public set webhook(webhook: Webhook) {
-    if (this._webhook) {
-      throw new Error("Trying to set a webhook reference, but another webhook was set");
+  public linkToWebhook(webhook: Webhook) {
+    if (this.webhook) {
+      throw new Error(
+        'Trying to set a webhook reference, but another webhook was set'
+      );
     }
-
-    if (webhook && webhook instanceof Webhook) {
-      debug("setting webhook reference");
-      this.configObservables(webhook.updates);
-      this._webhook = webhook;
-    }
+    this.configObservables(webhook.updates);
+    this.webhook = webhook;
   }
 
-  /**
-   * @return Webhook instance reference
-   */
-  public get webhook() {
-    return this._webhook;
-  }
-
-  public set polling(polling: Polling) {
-    if (this._polling && this._polling.isPolling) {
-      this._polling.stopPolling();
+  public setPolling(polling: Polling) {
+    if (this.polling && this.polling.isPolling) {
+      this.polling.stopPolling();
     }
 
-    if (polling && polling instanceof Polling) {
-      debug("setting polling reference");
-      this.configObservables(polling.updates);
-      this._polling = polling;
-    }
+    this.configObservables(polling.updates);
+    this.polling = polling;
   }
 
-  /** @return Polling intance reference */
-  public get polling() {
-    return this._polling;
+  /** @return Polling instance reference */
+  public getPolling() {
+    return this.polling;
   }
 
   /**
@@ -96,8 +84,8 @@ export class Bot {
    * @param cbk callback function that will be called for each generator
    */
   public cleanGenerators(cbk: I.GeneratorsCleanerFn) {
-    if (this._generatorsHandler) {
-      this._generatorsHandler.cleanGenerators(cbk);
+    if (this.generatorsHandler) {
+      this.generatorsHandler.cleanGenerators(cbk);
     }
   }
 
@@ -116,14 +104,10 @@ export class Bot {
    * Call without arguments to receive all types.
    * @param type type of updates to subscribe
    */
-  public updates(type: Types.UpdateType): Observable<I.Update> {
-    return (
-      typeof type === 'string'
-        ? this._updates$.pipe(
-          filter((update) => type in update),
-        )
-        : this._updates$
-    );
+  public updates(type?: Types.UpdateType): Observable<I.Update> {
+    return typeof type === 'string'
+      ? this.updates$.pipe(filter((update) => type in update))
+      : this.updates$;
   }
 
   /**
@@ -131,33 +115,26 @@ export class Bot {
    * Call without arguments to receive all types.
    * @param type type os message to receive
    */
-  public messages(type: Types.MessageType): Observable<I.WrappedMessageActions> {
-    const messages$ = this.updates('message')
-      .pipe(
-        map((update) => ({ update, actions: createMessageActions(update.message, this) })),
-      );
-
-    return (
-      typeof type === 'string'
-        ? messages$.pipe(
-          filter((update) => type in update.update.message),
-        )
-        : messages$
+  public messages(
+    type?: Types.MessageType
+  ): Observable<I.WrappedMessageActions> {
+    const messages$ = this.updates('message').pipe(
+      map((update) => ({
+        update,
+        actions: update.message
+          ? createMessageActions(update.message, this)
+          : null,
+      }))
     );
-  }
 
-  /**
-   * Receive a messages generator and start it
-   * @param to Contact ID to send messages
-   * @param fg Generator function
-   * @param id You can use this to identify this generator when call cleanGenerators()
-   */
-  public async startGenerator(to: number | string, fg: Types.GeneratorFunction, id?: number | string) {
-    if (!this._generatorsHandler) {
-      this._generatorsHandler = InlineMenuHandler(this);
-    }
-
-    await this._generatorsHandler.startGenerator(to, fg, id);
+    return type
+      ? messages$.pipe(
+          filter(
+            (update) =>
+              !!update.update?.message && type in update.update.message
+          )
+        )
+      : messages$;
   }
 
   /**
@@ -166,7 +143,7 @@ export class Bot {
    * @returns getMe result
    */
   public getMe(): Promise<I.TelegramResponse<I.User>> {
-    return this.makeRequest<I.User>("getMe");
+    return this.makeRequest<I.User>('getMe');
   }
 
   /**
@@ -178,19 +155,13 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request or a reply callback function
    * @see {@link https://core.telegram.org/bots/api#sendmessage}
    */
-  public async sendMessage(chat_id: number | string, text: string|string[], optionals: I.SendMessageOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
-
-    if (Array.isArray(text)) {
-      let sent: I.TelegramResponse<I.Message>;
-      const { reply_markup, ...optionalsWithoutMarkup } = optionalParams;
-
-      for (let i = 0; i < text.length; i++) {
-        sent = await this.sendMessage(chat_id, text[i], i === text.length - 1 ? optionals : optionalsWithoutMarkup);
-      }
-
-      return sent;
-    }
+  public async sendMessage(
+    chat_id: number | string,
+    text: string,
+    optionals: I.SendMessageOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals;
 
     const json = {
       chat_id,
@@ -198,25 +169,27 @@ export class Bot {
       ...optionals,
     };
 
-    if (this._config.sendChatActionBeforeMsg) {
-      await this.sendChatAction(chat_id, "typing");
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, 'typing');
     }
 
-    const sentmsg = await this.makeRequest<I.Message>("sendMessage", { json });
+    const sentMsg = await this.makeRequest<I.Message>('sendMessage', { json });
     if (onReceiveReply) {
-      debug('registering onReceiveReply function');
-      this.registerReplyHandler(sentmsg, onReceiveReply, data);
+      this.registerReplyHandler(sentMsg, onReceiveReply, data);
     }
 
     if (onCallbackQuery) {
-      if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-        debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-        return sentmsg;
+      if (
+        !(
+          optionalParams.reply_markup &&
+          'inline_keyboard' in optionalParams.reply_markup
+        )
+      ) {
+        return sentMsg;
       }
-      debug("registering callback_query handler");
-      this.addCallbackQueryHandler(sentmsg.result, onCallbackQuery, data);
+      this.addCallbackQueryHandler(sentMsg.result, onCallbackQuery, data);
     }
-    return sentmsg;
+    return sentMsg;
   }
 
   /**
@@ -226,14 +199,18 @@ export class Bot {
    * @param optionals method optional params
    * @see {@link https://core.telegram.org/bots/api#sendmediagroup}
    */
-  public sendMediaGroup(chat_id: number | string, media: I.InputMedia[], optionals: I.SendMediaGroupOptionals): Promise<I.TelegramResponse<I.Message[]>> {
+  public sendMediaGroup(
+    chat_id: number | string,
+    media: I.InputMedia[],
+    optionals: I.SendMediaGroupOptionals
+  ): Promise<I.TelegramResponse<I.Message[]>> {
     const formData = {
       chat_id,
       media,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message[]>("sendMediaGroup", { formData });
+    return this.makeRequest<I.Message[]>('sendMediaGroup', { formData });
   }
 
   /**
@@ -244,10 +221,20 @@ export class Bot {
    * @param disable_notification Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
    * @see {@link https://core.telegram.org/bots/api#forwardmessage}
    */
-  public forwardMessage(chat_id: number | string, from_chat_id: number | string, message_id: number, disable_notification: boolean = false): Promise<I.TelegramResponse<I.Message>> {
-    const params = { chat_id, from_chat_id, message_id, disable_notification };
+  public forwardMessage(
+    chat_id: number | string,
+    from_chat_id: number | string,
+    message_id: number,
+    disable_notification: boolean = false
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const params = {
+      chat_id,
+      from_chat_id,
+      message_id,
+      disable_notification,
+    };
 
-    return this.makeRequest<I.Message>("forwardMessage", { json: params });
+    return this.makeRequest<I.Message>('forwardMessage', { json: params });
   }
 
   /**
@@ -257,8 +244,13 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendphoto}
    */
-  public async sendPhoto(chat_id: number | string, photo: ReadStream | string, optionals: I.SendPhotoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+  public async sendPhoto(
+    chat_id: number | string,
+    photo: ReadStream | string,
+    optionals: I.SendPhotoOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals;
 
     const formData = {
       chat_id,
@@ -266,26 +258,29 @@ export class Bot {
       ...optionalParams,
     };
 
-    const _sendphoto = async (): Promise<I.TelegramResponse<I.Message>> => {
-      const sent = await this.makeRequest<I.Message>("sendPhoto", { formData });
+    const send = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>('sendPhoto', { formData });
 
       if (onCallbackQuery) {
-        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-          return;
+        if (
+          !(
+            optionalParams.reply_markup &&
+            'inline_keyboard' in optionalParams.reply_markup
+          )
+        ) {
+          return sent;
         }
-        debug("registering callback_query handler");
         this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
       }
 
-      this.registerReplyHandler(sent, onReceiveReply, data);
+      if (onReceiveReply) this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
-    if (this._config.sendChatActionBeforeMsg) {
-      await this.sendChatAction(chat_id, "upload_photo");
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, 'upload_photo');
     }
-    return await _sendphoto();
+    return send();
   }
 
   /**
@@ -295,34 +290,41 @@ export class Bot {
    * @param optionals optional api method params
    * @see {@link https://core.telegram.org/bots/api#sendaudio}
    */
-  public async sendAudio(chat_id: number | string, audio: ReadStream | string, optionals: I.SendAudioOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+  public async sendAudio(
+    chat_id: number | string,
+    audio: ReadStream | string,
+    optionals: I.SendAudioOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals;
     const formData = {
       audio,
       chat_id,
       ...optionalParams,
     };
 
-    const _sendaudio = async (): Promise<I.TelegramResponse<I.Message>> => {
-      const sent = await this.makeRequest<I.Message>("sendAudio", { formData });
+    const send = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>('sendAudio', { formData });
 
       if (onCallbackQuery) {
-        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-          return;
+        if (
+          !(
+            optionalParams.reply_markup &&
+            'inline_keyboard' in optionalParams.reply_markup
+          )
+        ) {
+          return sent;
         }
-        debug("registering callback_query handler");
         this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
       }
-
-      this.registerReplyHandler(sent, onReceiveReply, data);
+      if (onReceiveReply) this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
-    if (this._config.sendChatActionBeforeMsg) {
-      await this.sendChatAction(chat_id, "upload_audio");
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, 'upload_audio');
     }
-    return await _sendaudio();
+    return send();
   }
 
   /**
@@ -332,35 +334,45 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#senddocument}
    */
-  public async sendDocument(chat_id: number | string, doc: ReadStream | string, optionals: I.SendDocumentOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+  public async sendDocument(
+    chat_id: number | string,
+    document: ReadStream | string,
+    optionals: I.SendDocumentOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals;
 
     const formData = {
       chat_id,
-      document: doc,
+      document,
       ...optionalParams,
     };
 
-    const _senddocument = async (): Promise<I.TelegramResponse<I.Message>> => {
-      const sent = await this.makeRequest<I.Message>("sendDocument", { formData });
+    const send = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>('sendDocument', {
+        formData,
+      });
 
       if (onCallbackQuery) {
-        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-          return;
+        if (
+          !(
+            optionalParams.reply_markup &&
+            'inline_keyboard' in optionalParams.reply_markup
+          )
+        ) {
+          return sent;
         }
-        debug("registering callback_query handler");
         this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
       }
 
-      this.registerReplyHandler(sent, onReceiveReply, data);
+      if (onReceiveReply) this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
-    if (this._config.sendChatActionBeforeMsg) {
-      await this.sendChatAction(chat_id, "upload_document");
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, 'upload_document');
     }
-    return await _senddocument();
+    return send();
   }
 
   /**
@@ -370,8 +382,13 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendsticker}
    */
-  public async sendSticker(chat_id: number | string, sticker: ReadStream | string, optionals?: I.SendStickerOptionals): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+  public async sendSticker(
+    chat_id: number | string,
+    sticker: ReadStream | string,
+    optionals?: I.SendStickerOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals || {};
 
     const formData = {
       chat_id,
@@ -379,18 +396,21 @@ export class Bot {
       ...optionalParams,
     };
 
-    const sent = await this.makeRequest<I.Message>("sendSticker", { formData });
+    const sent = await this.makeRequest<I.Message>('sendSticker', { formData });
 
     if (onCallbackQuery) {
-      if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-        debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-        return;
+      if (
+        !(
+          optionalParams.reply_markup &&
+          'inline_keyboard' in optionalParams.reply_markup
+        )
+      ) {
+        return sent;
       }
-      debug("registering callback_query handler");
       this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
     }
 
-    this.registerReplyHandler(sent, onReceiveReply, data);
+    if (onReceiveReply) this.registerReplyHandler(sent, onReceiveReply, data);
     return sent;
   }
 
@@ -401,8 +421,13 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendvideo}
    */
-  public async sendVideo(chat_id: number | string, video: ReadStream | string, optionals: I.SendVideoOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+  public async sendVideo(
+    chat_id: number | string,
+    video: ReadStream | string,
+    optionals: I.SendVideoOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals;
 
     const formData = {
       chat_id,
@@ -410,26 +435,29 @@ export class Bot {
       ...optionalParams,
     };
 
-    const _sendvideo = async (): Promise<I.TelegramResponse<I.Message>> => {
-      const sent = await this.makeRequest<I.Message>("sendVideo", { formData });
+    const send = async (): Promise<I.TelegramResponse<I.Message>> => {
+      const sent = await this.makeRequest<I.Message>('sendVideo', { formData });
 
       if (onCallbackQuery) {
-        if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-          debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-          return;
+        if (
+          !(
+            optionalParams.reply_markup &&
+            'inline_keyboard' in optionalParams.reply_markup
+          )
+        ) {
+          return sent;
         }
-        debug("registering callback_query handler");
         this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
       }
 
-      this.registerReplyHandler(sent, onReceiveReply, data);
+      if (onReceiveReply) this.registerReplyHandler(sent, onReceiveReply, data);
       return sent;
     };
 
-    if (this._config.sendChatActionBeforeMsg) {
-      await this.sendChatAction(chat_id, "upload_video");
+    if (this.config.sendChatActionBeforeMsg) {
+      await this.sendChatAction(chat_id, 'upload_video');
     }
-    return await _sendvideo();
+    return send();
   }
 
   /**
@@ -439,14 +467,18 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendvoice}
    */
-  public sendVoice(chat_id: number | string, voice: ReadStream | string, optionals?: I.SendVoiceOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendVoice(
+    chat_id: number | string,
+    voice: ReadStream | string,
+    optionals?: I.SendVoiceOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const formData = {
       chat_id,
       voice,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("sendVoice", { formData });
+    return this.makeRequest<I.Message>('sendVoice', { formData });
   }
 
   /**
@@ -457,8 +489,14 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendlocation}
    */
-  public async sendLocation(chat_id: number | string, latitude: number, longitude: number, optionals: I.SendLocationOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
-    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } = optionals;
+  public async sendLocation(
+    chat_id: number | string,
+    latitude: number,
+    longitude: number,
+    optionals: I.SendLocationOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
+    const { data, onReceiveReply, onCallbackQuery, ...optionalParams } =
+      optionals;
 
     const json = {
       chat_id,
@@ -467,18 +505,21 @@ export class Bot {
       ...optionalParams,
     };
 
-    const sent = await this.makeRequest<I.Message>("sendLocation", { json });
+    const sent = await this.makeRequest<I.Message>('sendLocation', { json });
 
     if (onCallbackQuery) {
-      if (!(optionalParams.reply_markup && "inline_keyboard" in optionalParams.reply_markup)) {
-        debug("received callback_query handler function, but message doesn't contains a inline_keyboard");
-        return;
+      if (
+        !(
+          optionalParams.reply_markup &&
+          'inline_keyboard' in optionalParams.reply_markup
+        )
+      ) {
+        return sent;
       }
-      debug("registering callback_query handler");
       this.addCallbackQueryHandler(sent.result, onCallbackQuery, data);
     }
 
-    this.registerReplyHandler(sent, onReceiveReply, data);
+    if (onReceiveReply) this.registerReplyHandler(sent, onReceiveReply, data);
     return sent;
   }
 
@@ -489,14 +530,20 @@ export class Bot {
    * @param optionals optional method params
    * @see {@link https://core.telegram.org/bots/api#editmessagelivelocation}
    */
-  public editMessageLiveLocation(latitude: number, longitude: number, optionals: I.EditMessageLiveLocationOptionals): Promise<I.TelegramResponse<I.Message | boolean>> {
+  public editMessageLiveLocation(
+    latitude: number,
+    longitude: number,
+    optionals: I.EditMessageLiveLocationOptionals
+  ): Promise<I.TelegramResponse<I.Message | boolean>> {
     const json = {
       latitude,
       longitude,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message | boolean>("editMessageLiveLocation", { json });
+    return this.makeRequest<I.Message | boolean>('editMessageLiveLocation', {
+      json,
+    });
   }
 
   /**
@@ -504,10 +551,14 @@ export class Bot {
    * @param optionals method params, see telegram docs to know how to use
    * @see {@link https://core.telegram.org/bots/api#stopmessagelivelocation}
    */
-  public stopMessageLiveLocation(optionals: I.StopMessageLiveLocationOptionals): Promise<I.TelegramResponse<I.Message | boolean>> {
+  public stopMessageLiveLocation(
+    optionals: I.StopMessageLiveLocationOptionals
+  ): Promise<I.TelegramResponse<I.Message | boolean>> {
     const json = optionals || {};
 
-    return this.makeRequest<I.Message | boolean>("stopMessageLiveLocation", { json });
+    return this.makeRequest<I.Message | boolean>('stopMessageLiveLocation', {
+      json,
+    });
   }
 
   /**
@@ -520,7 +571,14 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendvenue}
    */
-  public sendVenue(chat_id: number | string, latitude: number, longitude: number, title: string, address: string, optionals?: I.SendVenueOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendVenue(
+    chat_id: number | string,
+    latitude: number,
+    longitude: number,
+    title: string,
+    address: string,
+    optionals?: I.SendVenueOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const json = {
       address,
       chat_id,
@@ -530,7 +588,7 @@ export class Bot {
       title,
     };
 
-    return this.makeRequest<I.Message>("sendVenue", { json });
+    return this.makeRequest<I.Message>('sendVenue', { json });
   }
 
   /**
@@ -541,7 +599,12 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendcontact}
    */
-  public sendContact(chat_id: number | string, phone_number: string, first_name: string, optionals?: I.SendContactOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendContact(
+    chat_id: number | string,
+    phone_number: string,
+    first_name: string,
+    optionals?: I.SendContactOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const json = {
       chat_id,
       first_name,
@@ -549,7 +612,7 @@ export class Bot {
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("sendContact", { json });
+    return this.makeRequest<I.Message>('sendContact', { json });
   }
 
   /**
@@ -560,7 +623,12 @@ export class Bot {
    * @param optionals Optional parameters
    * @see {@link https://core.telegram.org/bots/api#sendpoll}
    */
-  public sendPoll(chat_id: string | number, question: string, options: string[], optionals: I.SendPollOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendPoll(
+    chat_id: string | number,
+    question: string,
+    options: string[],
+    optionals: I.SendPollOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const json = {
       chat_id,
       options,
@@ -568,7 +636,7 @@ export class Bot {
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("sendPoll", { json });
+    return this.makeRequest<I.Message>('sendPoll', { json });
   }
 
   /**
@@ -579,27 +647,34 @@ export class Bot {
    * @param reply_markup A JSON-serialized object for a new message inline keyboard.
    * @see {@link https://core.telegram.org/bots/api#stoppoll}
    */
-  public stopPoll(chat_id: number | string, message_id: number, reply_markup?: Types.ReplyMarkup): Promise<I.TelegramResponse<I.Poll>> {
+  public stopPoll(
+    chat_id: number | string,
+    message_id: number,
+    reply_markup?: Types.ReplyMarkup
+  ): Promise<I.TelegramResponse<I.Poll>> {
     const json = {
       chat_id,
       message_id,
       reply_markup,
     };
 
-    return this.makeRequest<I.Poll>("stopPoll", { json });
+    return this.makeRequest<I.Poll>('stopPoll', { json });
   }
 
   /**
-   * Attention: the sendMessage, sendPhoto, sendDocument, sendAudio and sendVideo methods automatically sends their repective chat actions before send data.
+   * Attention: the sendMessage, sendPhoto, sendDocument, sendAudio and sendVideo methods automatically sends their respective chat actions before send data.
    * Use this method when you need to tell the user that something is happening on the bot"s side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
    * @param chat_id Unique identifier for the target chat or username of the target channel
    * @param action Type of action to broadcast. Choose one, depending on what the user is about to receive: `typing` for text messages, `upload_photo` for photos, `record_video` or `upload_video` for videos, `record_audio` or `upload_audio` for audio files, `upload_document` for general files, `find_location` for location data.
    * @see {@link https://core.telegram.org/bots/api#sendchataction}
    */
-  public sendChatAction(chat_id: number | string, action: string): Promise<I.TelegramResponse<boolean>> {
+  public sendChatAction(
+    chat_id: number | string,
+    action: string
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = { chat_id, action };
 
-    return this.makeRequest<boolean>("sendChatAction", { json });
+    return this.makeRequest<boolean>('sendChatAction', { json });
   }
 
   /**
@@ -608,13 +683,18 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#getuserprofilephotos}
    */
-  public getUserProfilePhotos(user_id: number | string, optionals?: I.GetUserProfilePhotosOptionals): Promise<I.TelegramResponse<I.UserProfilePhotos>> {
+  public getUserProfilePhotos(
+    user_id: number | string,
+    optionals?: I.GetUserProfilePhotosOptionals
+  ): Promise<I.TelegramResponse<I.UserProfilePhotos>> {
     const json = {
       user_id,
       ...optionals,
     };
 
-    return this.makeRequest<I.UserProfilePhotos>("getUserProfilePhotos", { json });
+    return this.makeRequest<I.UserProfilePhotos>('getUserProfilePhotos', {
+      json,
+    });
   }
 
   /**
@@ -630,7 +710,7 @@ export class Bot {
   public getFile(file_id: string): Promise<I.TelegramResponse<I.File>> {
     const json = { file_id };
 
-    return this.makeRequest<I.File>("getFile", { json });
+    return this.makeRequest<I.File>('getFile', { json });
   }
 
   /**
@@ -642,10 +722,14 @@ export class Bot {
    * @param until_date Date when the user will be unbanned, unix time.
    * @see {@link https://core.telegram.org/bots/api#kickchatmember}
    */
-  public kickChatMember(chat_id: number | string, user_id: number, until_date?: number): Promise<I.TelegramResponse<boolean>> {
+  public kickChatMember(
+    chat_id: number | string,
+    user_id: number,
+    until_date?: number
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = { chat_id, user_id, until_date };
 
-    return this.makeRequest<boolean>("kickChatMember", { json });
+    return this.makeRequest<boolean>('kickChatMember', { json });
   }
 
   /**
@@ -653,10 +737,12 @@ export class Bot {
    * @param chat_id 	Unique identifier for the target chat or username of the target supergroup or channel
    * @see {@link https://core.telegram.org/bots/api#leavechat}
    */
-  public leaveChat(chat_id: number | string): Promise<I.TelegramResponse<boolean>> {
+  public leaveChat(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = { chat_id };
 
-    return this.makeRequest<boolean>("leaveChat", { json });
+    return this.makeRequest<boolean>('leaveChat', { json });
   }
 
   /**
@@ -665,10 +751,13 @@ export class Bot {
    * @param user_id Unique identifier of the target user
    * @see {@link https://core.telegram.org/bots/api#unbanchatmember}
    */
-  public unbanChatMember(chat_id: number | string, user_id: number): Promise<I.TelegramResponse<boolean>> {
+  public unbanChatMember(
+    chat_id: number | string,
+    user_id: number
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = { chat_id, user_id };
 
-    return this.makeRequest<boolean>("unbanChatMember", { json });
+    return this.makeRequest<boolean>('unbanChatMember', { json });
   }
 
   /**
@@ -676,10 +765,12 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat or username of the target supergroup or channel
    * @see {@link https://core.telegram.org/bots/api#unbanchatmember}
    */
-  public getChat(chat_id: number | string): Promise<I.TelegramResponse<I.Chat>> {
+  public getChat(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<I.Chat>> {
     const json = { chat_id };
 
-    return this.makeRequest<I.Chat>("getChat", { json });
+    return this.makeRequest<I.Chat>('getChat', { json });
   }
 
   /**
@@ -687,10 +778,12 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat or username of the target supergroup or channel
    * @see {@link https://core.telegram.org/bots/api#getchatadministrators}
    */
-  public getChatAdministrators(chat_id: number | string): Promise<I.TelegramResponse<I.ChatMember[]>> {
+  public getChatAdministrators(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<I.ChatMember[]>> {
     const json = { chat_id };
 
-    return this.makeRequest<I.ChatMember[]>("getChatAdministrators", { json });
+    return this.makeRequest<I.ChatMember[]>('getChatAdministrators', { json });
   }
 
   /**
@@ -698,10 +791,12 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat or username of the target supergroup or channel
    * @see {@link https://core.telegram.org/bots/api#getchatmemberscount}
    */
-  public getChatMembersCount(chat_id: number | string): Promise<I.TelegramResponse<number>> {
+  public getChatMembersCount(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<number>> {
     const json = { chat_id };
 
-    return this.makeRequest<number>("getChatMembersCount", { json });
+    return this.makeRequest<number>('getChatMembersCount', { json });
   }
 
   /**
@@ -710,10 +805,13 @@ export class Bot {
    * @param user_id Unique identifier of the target user
    * @see {@link https://core.telegram.org/bots/api#getchatmember}
    */
-  public getChatMember(chat_id: number | string, user_id: number): Promise<I.TelegramResponse<I.ChatMember>> {
+  public getChatMember(
+    chat_id: number | string,
+    user_id: number
+  ): Promise<I.TelegramResponse<I.ChatMember>> {
     const json = { chat_id, user_id };
 
-    return this.makeRequest<I.ChatMember>("getChatMember", { json });
+    return this.makeRequest<I.ChatMember>('getChatMember', { json });
   }
 
   /**
@@ -722,13 +820,16 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#answercallbackquery}
    */
-  public answerCallbackQuery(callback_query_id: string, optionals?: I.AnswerCallbackQueryOptionals): Promise<I.TelegramResponse<boolean>> {
+  public answerCallbackQuery(
+    callback_query_id: string,
+    optionals?: I.AnswerCallbackQueryOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = {
       callback_query_id,
       ...optionals,
     };
 
-    return this.makeRequest<boolean>("answerCallbackQuery", { json });
+    return this.makeRequest<boolean>('answerCallbackQuery', { json });
   }
 
   /**
@@ -737,13 +838,16 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#editmessagetext}
    */
-  public editMessageText(text: string, optionals?: I.EditMessageTextOptionals): Promise<I.TelegramResponse<I.Message | boolean>> {
+  public editMessageText(
+    text: string,
+    optionals?: I.EditMessageTextOptionals
+  ): Promise<I.TelegramResponse<I.Message | boolean>> {
     const json = {
       text,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message | boolean>("editMessageText", { json });
+    return this.makeRequest<I.Message | boolean>('editMessageText', { json });
   }
 
   /**
@@ -751,10 +855,14 @@ export class Bot {
    * @param optionals Method params, see telegram docs to know how to use
    * @see {@link https://core.telegram.org/bots/api#editmessagecaption}
    */
-  public editMessageCaption(optionals?: I.EditMessageCaptionOptionals): Promise<I.TelegramResponse<I.Message | boolean>> {
+  public editMessageCaption(
+    optionals?: I.EditMessageCaptionOptionals
+  ): Promise<I.TelegramResponse<I.Message | boolean>> {
     const json = optionals;
 
-    return this.makeRequest<I.Message | boolean>("editMessageCaption", { json });
+    return this.makeRequest<I.Message | boolean>('editMessageCaption', {
+      json,
+    });
   }
 
   /**
@@ -762,10 +870,14 @@ export class Bot {
    * @param optionals Object with method params
    * @see {@link https://core.telegram.org/bots/api#editmessagereplymarkup}
    */
-  public editMessageReplyMarkup(optionals?: I.EditMessageReplyMarkupOptionals): Promise<I.TelegramResponse<I.Message | boolean>> {
+  public editMessageReplyMarkup(
+    optionals?: I.EditMessageReplyMarkupOptionals
+  ): Promise<I.TelegramResponse<I.Message | boolean>> {
     const json = optionals;
 
-    return this.makeRequest<I.Message | boolean>("editMessageReplyMarkup", { json });
+    return this.makeRequest<I.Message | boolean>('editMessageReplyMarkup', {
+      json,
+    });
   }
 
   /**
@@ -776,31 +888,39 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#answerinlinequery}
    */
-  public answerInlineQuery(inline_query_id: string, results: any[], optionals?: I.AnswerInlineQueryOptionals): Promise<I.TelegramResponse<boolean>> {
+  public answerInlineQuery(
+    inline_query_id: string,
+    results: any[],
+    optionals?: I.AnswerInlineQueryOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = {
       inline_query_id,
       results,
       ...optionals,
     };
 
-    return this.makeRequest<boolean>("answerInlineQuery", { json });
+    return this.makeRequest<boolean>('answerInlineQuery', { json });
   }
 
   /**
    * Use this method to send a game.
    * @param chat_id Unique identifier for the target chat
-   * @param game_short_name Short name of the game, serves as the unique identifier for the game. Set up your games via Botfather.
+   * @param game_short_name Short name of the game, serves as the unique identifier for the game. Set up your games via BotFather.
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#sendgame}
    */
-  public sendGame(chat_id: number, game_short_name: string, optionals?: I.SendGameOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendGame(
+    chat_id: number,
+    game_short_name: string,
+    optionals?: I.SendGameOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const json = {
       chat_id,
       game_short_name,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("sendGame", { json });
+    return this.makeRequest<I.Message>('sendGame', { json });
   }
 
   /**
@@ -810,14 +930,18 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#setgamescore}
    */
-  public setGameScore(user_id: number, score: number, optionals?: I.SetGameScoreOptionals): Promise<I.TelegramResponse<I.Message | boolean>> {
+  public setGameScore(
+    user_id: number,
+    score: number,
+    optionals?: I.SetGameScoreOptionals
+  ): Promise<I.TelegramResponse<I.Message | boolean>> {
     const json = {
       user_id,
       ...optionals,
       score,
     };
 
-    return this.makeRequest<I.Message | boolean>("setGameScore", { json });
+    return this.makeRequest<I.Message | boolean>('setGameScore', { json });
   }
 
   /**
@@ -826,13 +950,16 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#getgamehighscores}
    */
-  public getGameHighScores(user_id: number, optionals?: I.GetGameHighScoresOptionals): Promise<I.TelegramResponse<I.GameHighScore[]>> {
+  public getGameHighScores(
+    user_id: number,
+    optionals?: I.GetGameHighScoresOptionals
+  ): Promise<I.TelegramResponse<I.GameHighScore[]>> {
     const json = {
       user_id,
       ...optionals,
     };
 
-    return this.makeRequest<I.GameHighScore[]>("getGameHighScores", { json });
+    return this.makeRequest<I.GameHighScore[]>('getGameHighScores', { json });
   }
 
   /**
@@ -840,10 +967,12 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#getupdates}
    */
-  public getUpdates(optionals?: I.GetUpdatesOptionals): Promise<I.TelegramResponse<I.Update[]>> {
+  public getUpdates(
+    optionals?: I.GetUpdatesOptionals
+  ): Promise<I.TelegramResponse<I.Update[]>> {
     const json = optionals || {};
 
-    return this.makeRequest<I.Update[]>("getUpdates", { json });
+    return this.makeRequest<I.Update[]>('getUpdates', { json });
   }
 
   /**
@@ -852,13 +981,16 @@ export class Bot {
    * @param optionals An object with optional params that you want to send in request.
    * @see {@link https://core.telegram.org/bots/api#setwebhook}
    */
-  public setWebhook(url: string, optionals?: I.SetWebhookOptionals): Promise<I.TelegramResponse<boolean>> {
+  public setWebhook(
+    url: string,
+    optionals?: I.SetWebhookOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = {
       url,
       ...optionals,
     };
 
-    return this.makeRequest<boolean>("setWebhook", { formData });
+    return this.makeRequest<boolean>('setWebhook', { formData });
   }
 
   /**
@@ -866,7 +998,7 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#deletewebhook}
    */
   public deleteWebhook(): Promise<I.TelegramResponse<boolean>> {
-    return this.makeRequest<boolean>("deleteWebhook");
+    return this.makeRequest<boolean>('deleteWebhook');
   }
 
   /**
@@ -874,18 +1006,23 @@ export class Bot {
    * @see {@link https://core.telegram.org/bots/api#deletewebhook}
    */
   public getWebhookInfo(): Promise<I.TelegramResponse<I.WebhookInfo>> {
-    return this.makeRequest<I.WebhookInfo>("getWebhookInfo");
+    return this.makeRequest<I.WebhookInfo>('getWebhookInfo');
   }
 
   /**
    * Use this method to delete a message, including service messages.
-   * Check Telegram official documentation to learn abot limitations.
+   * Check Telegram official documentation to learn about limitations.
    * @param chat_id Unique identifier for the target chat or username of the target channel
    * @param message_id Identifier of the message to delete
    * @see {@link https://core.telegram.org/bots/api#deletemessage}
    */
-  public deleteMessage(chat_id: number | string, message_id: number | string): Promise<I.TelegramResponse<boolean>> {
-    return this.makeRequest<boolean>("deleteMessage", { formData: { chat_id, message_id } });
+  public deleteMessage(
+    chat_id: number | string,
+    message_id: number | string
+  ): Promise<I.TelegramResponse<boolean>> {
+    return this.makeRequest<boolean>('deleteMessage', {
+      formData: { chat_id, message_id },
+    });
   }
 
   /**
@@ -895,14 +1032,18 @@ export class Bot {
    * @param options Object with optionals parameters
    * @see {@link https://core.telegram.org/bots/api#restrictchatmember}
    */
-  public restrictChatMember(chat_id: number | string, user_id: number | string, options: I.RestrictChatMemberOptionals): Promise<I.TelegramResponse<boolean>> {
+  public restrictChatMember(
+    chat_id: number | string,
+    user_id: number | string,
+    options: I.RestrictChatMemberOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = {
       chat_id,
       user_id,
       ...options,
     };
 
-    return this.makeRequest<boolean>("restrictChatMember", { formData });
+    return this.makeRequest<boolean>('restrictChatMember', { formData });
   }
 
   /**
@@ -912,14 +1053,18 @@ export class Bot {
    * @param options Object with optionals parameters
    * @see {@link https://core.telegram.org/bots/api#promotechatmember}
    */
-  public promoteChatMember(chat_id: number | string, user_id: number | string, options: I.PromoteChatMemberOptionals): Promise<I.TelegramResponse<boolean>> {
+  public promoteChatMember(
+    chat_id: number | string,
+    user_id: number | string,
+    options: I.PromoteChatMemberOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = {
       chat_id,
       user_id,
       ...options,
     };
 
-    return this.makeRequest<boolean>("promoteChatMember", { formData });
+    return this.makeRequest<boolean>('promoteChatMember', { formData });
   }
 
   /**
@@ -927,10 +1072,12 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat or username of the target channel
    * @see {@link https://core.telegram.org/bots/api#exportchatinvitelink}
    */
-  public exportChatInviteLink(chat_id: number | string): Promise<I.TelegramResponse<string>> {
+  public exportChatInviteLink(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<string>> {
     const formData = { chat_id };
 
-    return this.makeRequest<string>("exportChatInviteLink", { formData });
+    return this.makeRequest<string>('exportChatInviteLink', { formData });
   }
 
   /**
@@ -939,10 +1086,13 @@ export class Bot {
    * @param photo New chat photo.
    * @see {@link https://core.telegram.org/bots/api#setchatphoto}
    */
-  public setChatPhoto(chat_id: number | string, photo: ReadStream): Promise<I.TelegramResponse<boolean>> {
+  public setChatPhoto(
+    chat_id: number | string,
+    photo: ReadStream
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { chat_id, photo };
 
-    return this.makeRequest<boolean>("setChatPhoto", { formData });
+    return this.makeRequest<boolean>('setChatPhoto', { formData });
   }
 
   /**
@@ -950,10 +1100,12 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat or username of the target channel
    * @see {@link https://core.telegram.org/bots/api#deletechatphoto}
    */
-  public deleteChatPhoto(chat_id: number | string): Promise<I.TelegramResponse<boolean>> {
+  public deleteChatPhoto(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { chat_id };
 
-    return this.makeRequest<boolean>("deleteChatPhoto", { formData });
+    return this.makeRequest<boolean>('deleteChatPhoto', { formData });
   }
 
   /**
@@ -962,10 +1114,13 @@ export class Bot {
    * @param title New chat title, 1-255 characters
    * @see {@link https://core.telegram.org/bots/api#setchattitle}
    */
-  public setChatTitle(chat_id: number | string, title: string): Promise<I.TelegramResponse<boolean>> {
+  public setChatTitle(
+    chat_id: number | string,
+    title: string
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { chat_id, title };
 
-    return this.makeRequest<boolean>("setChatTitle", { formData });
+    return this.makeRequest<boolean>('setChatTitle', { formData });
   }
 
   /**
@@ -974,10 +1129,13 @@ export class Bot {
    * @param description New chat description, 0-255 characters
    * @see {@link https://core.telegram.org/bots/api#setchatdescription}
    */
-  public setChatDescription(chat_id: number | string, description: string): Promise<I.TelegramResponse<boolean>> {
+  public setChatDescription(
+    chat_id: number | string,
+    description: string
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { chat_id, description };
 
-    return this.makeRequest<boolean>("setChatDescription", { formData });
+    return this.makeRequest<boolean>('setChatDescription', { formData });
   }
 
   /**
@@ -987,10 +1145,14 @@ export class Bot {
    * @param disable_notification Pass True, if it is not necessary to send a notification to all group members about the new pinned message. Default false
    * @see {@link https://core.telegram.org/bots/api#pinchatmessage}
    */
-  public pinChatMessage(chat_id: number | string, message_id: number | string, disable_notification = false): Promise<I.TelegramResponse<boolean>> {
+  public pinChatMessage(
+    chat_id: number | string,
+    message_id: number | string,
+    disable_notification = false
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { chat_id, message_id, disable_notification };
 
-    return this.makeRequest<boolean>("pinChatMessage", { formData });
+    return this.makeRequest<boolean>('pinChatMessage', { formData });
   }
 
   /**
@@ -998,10 +1160,12 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat or username of the target supergroup
    * @see {@link https://core.telegram.org/bots/api#unpinchatmessage}
    */
-  public unpinChatMessage(chat_id: number | string): Promise<I.TelegramResponse<boolean>> {
+  public unpinChatMessage(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { chat_id };
 
-    return this.makeRequest<boolean>("unpinChatMessage", { formData });
+    return this.makeRequest<boolean>('unpinChatMessage', { formData });
   }
 
   /**
@@ -1009,10 +1173,12 @@ export class Bot {
    * @param name Name of the sticker set
    * @see {@link https://core.telegram.org/bots/api#getstickerset}
    */
-  public getStickerSet(name: string): Promise<I.TelegramResponse<I.StickerSet>> {
+  public getStickerSet(
+    name: string
+  ): Promise<I.TelegramResponse<I.StickerSet>> {
     const formData = { name };
 
-    return this.makeRequest<I.StickerSet>("getStickerSet", { formData });
+    return this.makeRequest<I.StickerSet>('getStickerSet', { formData });
   }
 
   /**
@@ -1021,10 +1187,13 @@ export class Bot {
    * @param png_sticker Png image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px.
    * @see {@link https://core.telegram.org/bots/api#uploadstickerfile}
    */
-  public uploadStickerFile(user_id: number, png_sticker: ReadStream): Promise<I.TelegramResponse<I.File>> {
+  public uploadStickerFile(
+    user_id: number,
+    png_sticker: ReadStream
+  ): Promise<I.TelegramResponse<I.File>> {
     const formData = { user_id, png_sticker };
 
-    return this.makeRequest<I.File>("uploadStickerFile", { formData });
+    return this.makeRequest<I.File>('uploadStickerFile', { formData });
   }
 
   /**
@@ -1037,7 +1206,14 @@ export class Bot {
    * @param options Object with optionals parameters
    * @see {@link https://core.telegram.org/bots/api#createnewstickerset}
    */
-  public createNewStickerSet(user_id: number | string, name: string, title: string, png_sticker: ReadStream | string, emojis: string, options: I.CreateNewStickerSetOptionals): Promise<I.TelegramResponse<boolean>> {
+  public createNewStickerSet(
+    user_id: number | string,
+    name: string,
+    title: string,
+    png_sticker: ReadStream | string,
+    emojis: string,
+    options: I.CreateNewStickerSetOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = {
       emojis,
       name,
@@ -1047,7 +1223,7 @@ export class Bot {
       user_id,
     };
 
-    return this.makeRequest<boolean>("createNewStickerSet", { formData });
+    return this.makeRequest<boolean>('createNewStickerSet', { formData });
   }
 
   /**
@@ -1055,25 +1231,30 @@ export class Bot {
    * @param chat_id Unique identifier for the target chat
    * @param sticker_set_name Name of the sticker set to be set as the group sticker set
    */
-  public setChatStickerSet(chat_id: number | string, sticker_set_name: string): Promise<I.TelegramResponse<boolean>> {
+  public setChatStickerSet(
+    chat_id: number | string,
+    sticker_set_name: string
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = {
       chat_id,
       sticker_set_name,
     };
 
-    return this.makeRequest<boolean>("setChatStickerSet", { json });
+    return this.makeRequest<boolean>('setChatStickerSet', { json });
   }
 
   /**
    * Use this method to delete a group sticker set from a supergroup.
    * @param chat_id Unique identifier for the target chat or username of the target supergroup
    */
-  public deleteChatStickerSet(chat_id: number | string): Promise<I.TelegramResponse<boolean>> {
+  public deleteChatStickerSet(
+    chat_id: number | string
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = {
       chat_id,
     };
 
-    return this.makeRequest<boolean>("deleteChatStickerSet", { json });
+    return this.makeRequest<boolean>('deleteChatStickerSet', { json });
   }
 
   /**
@@ -1085,7 +1266,13 @@ export class Bot {
    * @param [mask_position] A JSON-serialized object for position where the mask should be placed on faces
    * @see {@link https://core.telegram.org/bots/api#addstickertoset}
    */
-  public addStickerToSet(user_id: number | string, name: string, png_sticker: ReadStream | string, emojis: string, mask_position?: I.MaskPosition): Promise<I.TelegramResponse<boolean>> {
+  public addStickerToSet(
+    user_id: number | string,
+    name: string,
+    png_sticker: ReadStream | string,
+    emojis: string,
+    mask_position?: I.MaskPosition
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = {
       emojis,
       mask_position,
@@ -1094,7 +1281,7 @@ export class Bot {
       user_id,
     };
 
-    return this.makeRequest<boolean>("addStickerToSet", { formData });
+    return this.makeRequest<boolean>('addStickerToSet', { formData });
   }
 
   /**
@@ -1103,10 +1290,13 @@ export class Bot {
    * @param position New sticker position in the set, zero-based
    * @see {@link https://core.telegram.org/bots/api#setstickerpositioninset}
    */
-  public setStickerPositionInSet(sticker: string, position: number): Promise<I.TelegramResponse<boolean>> {
+  public setStickerPositionInSet(
+    sticker: string,
+    position: number
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { sticker, position };
 
-    return this.makeRequest<boolean>("setStickerPositionInSet", { formData });
+    return this.makeRequest<boolean>('setStickerPositionInSet', { formData });
   }
 
   /**
@@ -1115,14 +1305,24 @@ export class Bot {
    * @param title Product name, 1-32 characters
    * @param description Product description, 1-255 characters
    * @param payload Bot-defined invoice payload, 1-128 bytes.
-   * @param provider_token Payments provider token, obtained via Botfather
+   * @param provider_token Payments provider token, obtained via BotFather
    * @param start_parameter Unique deep-linking parameter that can be used to generate this invoice when used as a start parameter
    * @param currency Three-letter ISO 4217 currency code
    * @param prices Price breakdown, a list of components
    * @param optionals Optional method params
    * @see {@link https://core.telegram.org/bots/api#sendinvoice}
    */
-  public sendInvoice(chat_id: number, title: string, description: string, payload: string, provider_token: string, start_parameter: string, currency: string, prices: I.LabeledPrice[], optionals: I.SendInvoiceOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendInvoice(
+    chat_id: number,
+    title: string,
+    description: string,
+    payload: string,
+    provider_token: string,
+    start_parameter: string,
+    currency: string,
+    prices: I.LabeledPrice[],
+    optionals: I.SendInvoiceOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const json = {
       chat_id,
       currency,
@@ -1135,7 +1335,7 @@ export class Bot {
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("sendInvoice", { json });
+    return this.makeRequest<I.Message>('sendInvoice', { json });
   }
 
   /**
@@ -1145,14 +1345,18 @@ export class Bot {
    * @param optionals Object with optional parameters
    * @see {@link https://core.telegram.org/bots/api#answershippingquery}
    */
-  public answerShippingQuery(shipping_query_id: string, ok: boolean, optionals: I.AnswerShippingQueryOptionals): Promise<I.TelegramResponse<boolean>> {
+  public answerShippingQuery(
+    shipping_query_id: string,
+    ok: boolean,
+    optionals: I.AnswerShippingQueryOptionals
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = {
       ok,
       shipping_query_id,
       ...optionals,
     };
 
-    return this.makeRequest<boolean>("answerShippingQuery", { json });
+    return this.makeRequest<boolean>('answerShippingQuery', { json });
   }
 
   /**
@@ -1162,14 +1366,18 @@ export class Bot {
    * @param error_message Required if ok is False. Error message in human readable form that explains the reason for failure to proceed with the checkout
    * @see {@link https://core.telegram.org/bots/api#answerprecheckoutquery}
    */
-  public answerPreCheckoutQuery(pre_checkout_query_id: string, ok: boolean, error_message?: string): Promise<I.TelegramResponse<boolean>> {
+  public answerPreCheckoutQuery(
+    pre_checkout_query_id: string,
+    ok: boolean,
+    error_message?: string
+  ): Promise<I.TelegramResponse<boolean>> {
     const json = {
       error_message,
       ok,
       pre_checkout_query_id,
     };
 
-    return this.makeRequest<boolean>("answerPreCheckoutQuery", { json });
+    return this.makeRequest<boolean>('answerPreCheckoutQuery', { json });
   }
 
   /**
@@ -1177,10 +1385,12 @@ export class Bot {
    * @param sticker File identifier of the sticker
    * @see {@link https://core.telegram.org/bots/api#deletestickerfromset}
    */
-  public deleteStickerFromSet(sticker: string): Promise<I.TelegramResponse<boolean>> {
+  public deleteStickerFromSet(
+    sticker: string
+  ): Promise<I.TelegramResponse<boolean>> {
     const formData = { sticker };
 
-    return this.makeRequest<boolean>("deleteStickerFromSet", { formData });
+    return this.makeRequest<boolean>('deleteStickerFromSet', { formData });
   }
 
   /**
@@ -1190,13 +1400,16 @@ export class Bot {
    * @param optionals Optional params, see Telegram Official API for a complete reference
    * @see {@link https://core.telegram.org/bots/api#editmessagemedia}
    */
-  public editMessageMedia(media: I.InputMedia, optionals: I.EditMessageMediaOptionals = {}): Promise<I.TelegramResponse<I.Message>> {
+  public editMessageMedia(
+    media: I.InputMedia,
+    optionals: I.EditMessageMediaOptionals = {}
+  ): Promise<I.TelegramResponse<I.Message>> {
     const formData = {
       media,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("editMessageMedia", { formData });
+    return this.makeRequest<I.Message>('editMessageMedia', { formData });
   }
 
   /**
@@ -1206,46 +1419,51 @@ export class Bot {
    * @param optionals Optional params
    * @see {@link https://core.telegram.org/bots/api#sendanimation}
    */
-  public sendAnimation(chat_id: number | string, animation: ReadStream | string, optionals: I.SendAnimationOptionals): Promise<I.TelegramResponse<I.Message>> {
+  public sendAnimation(
+    chat_id: number | string,
+    animation: ReadStream | string,
+    optionals: I.SendAnimationOptionals
+  ): Promise<I.TelegramResponse<I.Message>> {
     const formData = {
       animation,
       chat_id,
       ...optionals,
     };
 
-    return this.makeRequest<I.Message>("sendAnimation", { formData });
+    return this.makeRequest<I.Message>('sendAnimation', { formData });
   }
 
-  private makeRequest<T>(api_method: string, params: any = {}): Promise<I.TelegramResponse<T>> {
-    debug("makeRequest ", api_method);
+  private makeRequest<T>(
+    api_method: string,
+    params: any = {}
+  ): Promise<I.TelegramResponse<T>> {
     if (!this.bot_token) {
-      debug("Error: bot token isn't defined");
-      throw new Error("Telegram Bot Token undefined");
+      throw new Error('Telegram Bot Token undefined');
     }
 
     const uri = `https://api.telegram.org/bot${this.bot_token}/${api_method}`;
+    const requestProps = { ...params };
 
-    if (params.json && params.json.text) {
-      debug("Emojify text");
-      params.json.text = this.emojify(params.json.text);
+    if (requestProps.json && requestProps.json.text) {
+      requestProps.json.text = this.emojify(requestProps.json.text);
     }
 
-    if (params.formData && params.formData.caption) {
-      debug("Emojify caption");
-      params.formData.caption = this.emojify(params.formData.caption);
+    if (requestProps.formData && requestProps.formData.caption) {
+      requestProps.formData.caption = this.emojify(
+        requestProps.formData.caption
+      );
     }
 
-    if ("formData" in params) {
-      params.formData = stringifyFormData(params.formData);
+    if ('formData' in requestProps) {
+      requestProps.formData = stringifyFormData(requestProps.formData);
     }
 
-    debug("fetching telegram api");
-    return request.post(
-      {
+    return request
+      .post({
         uri,
-        ...params,
-        transform: (body, response) => {
-          if (typeof body === "string") {
+        ...requestProps,
+        transform: (body: unknown) => {
+          if (typeof body === 'string') {
             try {
               return JSON.parse(body);
             } catch (err) {
@@ -1255,8 +1473,8 @@ export class Bot {
 
           return body;
         },
-      },
-    ).promise();
+      })
+      .promise();
   }
 
   /**
@@ -1265,21 +1483,20 @@ export class Bot {
    * Return true if a callback handler was found, false otherwise.
    * @param message received message
    */
-  private _checkRegisteredCallbacks(message: I.Message): boolean {
+  private checkRegisteredCallbacks(message: I.Message): boolean {
     if (!message.reply_to_message) {
-      debug("Message isn't a reply, skipping");
       return false;
     }
-    if (this._repliesCallbacks.length === 0) {
-      debug(`There's no callback queries registered, skipping`);
+    if (this.repliesCallbacks.length === 0) {
       return false;
     }
-    debug(`I have ${this._repliesCallbacks.length} reply callbacks`);
 
-    let i;
-    const cbk = this._repliesCallbacks.find((rc, index) => {
-      if (rc.message_id === message.reply_to_message.message_id && rc.chat === message.from.id) {
-        debug(`Reply handler found for message ${rc.message_id} from ${rc.chat}`);
+    let i: number = -1;
+    const cbk = this.repliesCallbacks.find((rc, index) => {
+      if (
+        rc.message_id === message.reply_to_message.message_id &&
+        rc.chat === message.from.id
+      ) {
         // save index
         i = index;
         // return true for find() function
@@ -1294,11 +1511,10 @@ export class Bot {
     if (cbk) {
       cbk.f(message, createMessageActions(message, this), cbk.data);
       // remove handler from array
-      this._repliesCallbacks.splice(i, 1);
+      this.repliesCallbacks.splice(i, 1);
       // a handler was found, so return true
       return true;
     }
-    debug(`Reply handler not found for message ${message.reply_to_message.message_id} from ${message.from.id}`);
     return false;
   }
 
@@ -1311,31 +1527,36 @@ export class Bot {
       return false;
     }
 
-    debug(`Searching a callback_query handler for message ${update.message.message_id} on chat ${update.message.chat.id}`);
-    const handlerIndex = this._callbackQueriesHandlers.findIndex((h) => h.message_id === update.message.message_id && h.chat_id === update.message.chat.id);
+    const handlerIndex = this.callbackQueriesHandlers.findIndex(
+      (h) =>
+        h.message_id === update.message?.message_id &&
+        h.chat_id === update.message.chat.id
+    );
 
     if (handlerIndex < 0) {
-      debug("Handler not found");
       return false;
     }
 
-    debug(`Handler found on index ${handlerIndex}. Calling function now`);
-    const [handler] = this._callbackQueriesHandlers.splice(handlerIndex, 1);
+    const [handler] = this.callbackQueriesHandlers.splice(handlerIndex, 1);
     handler.f(update, createCallbackQueryActions(update, this), handler.data);
-    this._callbackQueriesHandlers.splice(handlerIndex, 1);
+    this.callbackQueriesHandlers.splice(handlerIndex, 1);
     return true;
   }
 
-  private registerReplyHandler(sentMsg: I.TelegramResponse<I.Message>, cbk: Types.OnReplyCallbackFunction, data: any): I.TelegramResponse<I.Message> {
+  private registerReplyHandler(
+    sentMsg: I.TelegramResponse<I.Message>,
+    cbk: Types.OnReplyCallbackFunction,
+    data: any
+  ): I.TelegramResponse<I.Message> {
     if (cbk) {
-
       if (!isFunction(cbk)) {
-        throw new Error(`registerReplyHandler: expected a function, received ${typeof cbk}`);
+        throw new Error(
+          `registerReplyHandler: expected a function, received ${typeof cbk}`
+        );
       }
       const { message_id, chat } = sentMsg.result;
 
-      debug(`Registering reply handler to message ${message_id} on chat ${chat.id}`);
-      this._repliesCallbacks.push({
+      this.repliesCallbacks.push({
         chat: chat.id,
         data,
         message_id,
@@ -1347,65 +1568,53 @@ export class Bot {
     return sentMsg;
   }
 
-  private addCallbackQueryHandler(sentMsg: I.Message, cbk: I.CallbackQueryHandlerFunction, data?: any) {
-    if (sentMsg && cbk) {
-      debug(`Adding callback_query handler to message ${sentMsg.message_id} on chat ${sentMsg.chat.id}`);
+  private addCallbackQueryHandler(
+    sentMsg: I.Message,
+    cbk: I.CallbackQueryHandlerFunction,
+    data?: any
+  ) {
+    this.callbackQueriesHandlers.unshift({
+      chat_id: sentMsg.chat.id,
+      f: cbk,
+      message_id: sentMsg.message_id,
 
-      if (!isFunction(cbk)) {
-        debug(`Ops, callback handler must be a function, received a ${typeof cbk}`);
-        throw new Error(`onCallbackQuery: expected a function, received ${typeof cbk}`);
-      }
-
-      this._callbackQueriesHandlers.unshift({
-        chat_id: sentMsg.chat.id,
-        f: cbk,
-        message_id: sentMsg.message_id,
-
-        data,
-      });
-
-      debug("Handler was added");
-      return sentMsg;
-    }
+      data,
+    });
+    return sentMsg;
   }
 
   private canEmitCallbackQuery(cbkQuery: I.CallbackQuery): boolean {
-    if (this._generatorsHandler && this._generatorsHandler.hasMenuForQuery(cbkQuery)) {
-      this._generatorsHandler.continueKbGenerator(cbkQuery);
-      return;
-    }
-
-    const hasHandler = this.checkForCallbackQueryHandlers(cbkQuery);
-    if (hasHandler) {
-      debug('callback_query has a menu handler');
+    if (
+      this.generatorsHandler &&
+      this.generatorsHandler.hasMenuForQuery(cbkQuery)
+    ) {
+      this.generatorsHandler.continueKbGenerator(cbkQuery);
       return false;
     }
-
-    debug('handler or generator not found for callback_query, continue');
-    return true;
+    const hasHandler = this.checkForCallbackQueryHandlers(cbkQuery);
+    return !hasHandler;
   }
 
   private canEmitMessage(message: I.Message): boolean {
     if (message.reply_to_message) {
-      if (this._generatorsHandler && this._generatorsHandler.hasHandlerForReply(message)) {
-        this._generatorsHandler.continueTextGenerator(message);
+      if (
+        this.generatorsHandler &&
+        this.generatorsHandler.hasHandlerForReply(message)
+      ) {
+        this.generatorsHandler.continueTextGenerator(message);
         return false;
       }
     }
 
-    if (this._checkRegisteredCallbacks(message)) {
-      return false;
-    }
-
-    return true;
+    return !this.checkRegisteredCallbacks(message);
   }
 
   private canEmitUpdate(update: I.Update): boolean {
-    if ('callback_query' in update) {
+    if (update.callback_query) {
       return this.canEmitCallbackQuery(update.callback_query);
     }
 
-    if ('message' in update) {
+    if (update.message) {
       return this.canEmitMessage(update.message);
     }
 
@@ -1416,10 +1625,11 @@ export class Bot {
     origin
       .pipe(
         filter((update) => this.canEmitUpdate(update)),
-        map((update) => update),
+        map((update) => update)
       )
-      .subscribe(this._updates$);
+      .subscribe(this.updates$);
   }
 
-  private emojify = (text: string) => this._config.emojifyTexts ? nodeEmoji.emojify(text) : text;
+  private emojify = (text: string) =>
+    this.config.emojifyTexts ? nodeEmoji.emojify(text) : text;
 }

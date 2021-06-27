@@ -1,21 +1,21 @@
-import { Animation } from "./Animation";
-import { Audio } from "./Audio";
-import { Chat } from "./Chat";
-import { Contact } from "./Contact";
-import { Document } from "./Document";
-import { Game } from "./Game";
-import { Invoice } from "./Invoice";
-import { Location } from "./Location";
-import { MessageEntity } from "./MessageEntity";
-import { PhotoSize } from "./PhotoSize";
-import { Poll } from "./Poll";
-import { Sticker } from "./Sticker";
-import { SuccessfulPayment } from "./SuccessfulPayment";
-import { User } from "./User";
-import { Venue } from "./Venue";
-import { Video } from "./Video";
-import { VideoNote } from "./VideoNote";
-import { Voice } from "./Voice";
+import { Animation } from './Animation';
+import { Audio } from './Audio';
+import { Chat } from './Chat';
+import { Contact } from './Contact';
+import { Document } from './Document';
+import { Game } from './Game';
+import { Invoice } from './Invoice';
+import { Location } from './Location';
+import { MessageEntity } from './MessageEntity';
+import { PhotoSize } from './PhotoSize';
+import { Poll } from './Poll';
+import { Sticker } from './Sticker';
+import { SuccessfulPayment } from './SuccessfulPayment';
+import { User } from './User';
+import { Venue } from './Venue';
+import { Video } from './Video';
+import { VideoNote } from './VideoNote';
+import { Voice } from './Voice';
 
 export interface Message {
   /** Unique message identifier inside this chat */

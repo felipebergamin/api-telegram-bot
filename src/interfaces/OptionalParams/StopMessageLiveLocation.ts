@@ -1,10 +1,10 @@
-import { InlineKeyboardMarkup } from "../InlineKeyboardMarkup";
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
 
 export interface StopMessageLiveLocationOptionals {
   /**
    * Required if inline_message_id is not specified. Unique identifier for the target chat
    */
-  chat_id?:	number|string;
+  chat_id?: number | string;
   /**
    * Required if inline_message_id is not specified. Identifier of the sent message
    */

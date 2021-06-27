@@ -1,5 +1,5 @@
-import { ChatPhoto } from "./ChatPhoto";
-import { Message } from "./Message";
+import { ChatPhoto } from './ChatPhoto';
+import { Message } from './Message';
 
 export interface Chat {
   /** Unique identifier for this chat. */

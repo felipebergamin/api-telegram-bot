@@ -1,10 +1,12 @@
 import { InlineKeyboardButton, KeyboardButton } from '../interfaces';
-import { isEmpty, lastRowIndex, lastRowOf } from './utils';
+import { isEmpty, lastRowOf } from './utils';
+
+type Button = string | InlineKeyboardButton | KeyboardButton;
 
 /**
  * A helper function to build telegram keyboard
  */
-export function KeyboardBuilder(keyboard = [[]]) {
+export function KeyboardBuilder(keyboard: Button[][] = [[]]) {
   return {
     keyboard,
 
@@ -14,10 +16,7 @@ export function KeyboardBuilder(keyboard = [[]]) {
     newRow() {
       return isEmpty(lastRowOf(keyboard))
         ? KeyboardBuilder([...keyboard])
-        : KeyboardBuilder([
-          ...keyboard,
-          [],
-        ]);
+        : KeyboardBuilder([...keyboard, []]);
     },
 
     /**
@@ -25,12 +24,12 @@ export function KeyboardBuilder(keyboard = [[]]) {
      * @param btn InlineKeyboardButton, KeyboardButton or a simple string
      */
     button(btn: string | InlineKeyboardButton | KeyboardButton) {
-      keyboard[lastRowIndex(keyboard)] = [
-        ...lastRowOf(keyboard),
-        typeof btn === 'object' ? { ...btn } : btn,
-      ];
-
-      return KeyboardBuilder([...keyboard]);
+      const lastRow = keyboard.length - 1;
+      return KeyboardBuilder(
+        keyboard.map((row, index) => (index === lastRow ? [...row, btn] : row))
+      );
     },
   };
 }
+
+export default KeyboardBuilder;

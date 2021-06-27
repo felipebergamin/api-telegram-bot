@@ -1,5 +1,5 @@
-import { Location } from "./Location";
-import { User } from "./User";
+import { Location } from './Location';
+import { User } from './User';
 
 export interface ChosenInlineResult {
   /** The unique identifier for the result that was chosen */

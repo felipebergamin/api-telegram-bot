@@ -1,4 +1,4 @@
-import { Sticker } from "./Sticker";
+import { Sticker } from './Sticker';
 
 export interface StickerSet {
   /** Sticker set name */

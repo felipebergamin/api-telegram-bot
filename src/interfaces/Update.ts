@@ -1,10 +1,10 @@
-import { CallbackQuery } from "./CallbackQuery";
-import { ChosenInlineResult } from "./ChosenInlineResult";
-import { InlineQuery } from "./InlineQuery";
-import { Message } from "./Message";
-import { Poll } from "./Poll";
-import { PreCheckoutQuery } from "./PreCheckoutQuery";
-import { ShippingQuery } from "./ShippingQuery";
+import { CallbackQuery } from './CallbackQuery';
+import { ChosenInlineResult } from './ChosenInlineResult';
+import { InlineQuery } from './InlineQuery';
+import { Message } from './Message';
+import { Poll } from './Poll';
+import { PreCheckoutQuery } from './PreCheckoutQuery';
+import { ShippingQuery } from './ShippingQuery';
 
 export interface Update {
   /**

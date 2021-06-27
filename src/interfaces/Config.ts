@@ -1,5 +1,4 @@
 export interface Config {
-
   /**
    * if true, texts will be emojified before send. Default: `true`
    * @see {@link https://www.npmjs.com/package/node-emoji }

@@ -1,6 +1,6 @@
-import { Message } from "./Message";
-import { SendMessageOptionals } from "./OptionalParams/SendMessage";
-import { TelegramResponse } from "./TelegramResponse";
+import { Message } from './Message';
+import { SendMessageOptionals } from './OptionalParams/SendMessage';
+import { TelegramResponse } from './TelegramResponse';
 
 export interface MessageActions {
   /**
@@ -22,5 +22,8 @@ export interface MessageActions {
    * @param text text to be sent
    * @param optionals optional params
    */
-  reply: (text: string, optionals?: SendMessageOptionals) => Promise<TelegramResponse<Message>>;
+  reply: (
+    text: string,
+    optionals?: SendMessageOptionals
+  ) => Promise<TelegramResponse<Message>>;
 }

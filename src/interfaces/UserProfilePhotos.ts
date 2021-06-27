@@ -1,4 +1,4 @@
-import { PhotoSize } from "./PhotoSize";
+import { PhotoSize } from './PhotoSize';
 
 export interface UserProfilePhotos {
   /** Total number of profile pictures the target user has */

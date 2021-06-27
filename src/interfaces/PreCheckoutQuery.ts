@@ -1,5 +1,5 @@
-import { OrderInfo } from "./OrderInfo";
-import { User } from "./User";
+import { OrderInfo } from './OrderInfo';
+import { User } from './User';
 
 export interface PreCheckoutQuery {
   /**

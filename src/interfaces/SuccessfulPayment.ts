@@ -1,4 +1,4 @@
-import { OrderInfo } from "./OrderInfo";
+import { OrderInfo } from './OrderInfo';
 
 export interface SuccessfulPayment {
   /**

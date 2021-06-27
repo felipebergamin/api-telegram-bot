@@ -1,4 +1,4 @@
-import { OnReplyCallbackFunction } from "../types";
+import { OnReplyCallbackFunction } from '../types';
 
 export interface OnReceiveReplyCallback {
   /**
