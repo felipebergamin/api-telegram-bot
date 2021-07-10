@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "build": "tslint --project . && rm -rf dist && tsc && echo 'Build task ok'",
+    "build": "rm -rf dist && tsc",
     "docs": "rm -rf docs && typedoc --excludePrivate --mode file --out docs src",
     "prepublishOnly": "tslint --project . && rm -rf dist && tsc"
   },
@@ -44,9 +44,9 @@
     "eslint-import-resolver-typescript": "^2.4.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
-    "jest": "^24.8.0",
+    "jest": "^27.0.6",
     "prettier": "^2.3.1",
-    "ts-jest": "^24.0.2",
+    "ts-jest": "^27.0.3",
     "typedoc": "^0.14.2",
     "typescript": "^4.3.4"
   }
