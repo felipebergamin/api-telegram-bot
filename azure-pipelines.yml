@@ -7,6 +7,7 @@ trigger:
 - master
 pr:
 - master
+- develop
 
 pool:
   vmImage: ubuntu-latest

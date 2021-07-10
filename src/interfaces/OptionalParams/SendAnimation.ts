@@ -1,9 +1,9 @@
-import { ReadStream } from "fs";
+import { ReadStream } from 'fs';
 
-import { ForceReply } from "../ForceReply";
-import { InlineKeyboardMarkup } from "../InlineKeyboardMarkup";
-import { ReplyKeyboardMarkup } from "../ReplyKeyboardMarkup";
-import { ReplyKeyboardRemove } from "../ReplyKeyboardRemove";
+import { ForceReply } from '../ForceReply';
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
+import { ReplyKeyboardMarkup } from '../ReplyKeyboardMarkup';
+import { ReplyKeyboardRemove } from '../ReplyKeyboardRemove';
 
 export interface SendAnimationOptionals {
   /** Duration of sent animation in seconds */
@@ -23,5 +23,9 @@ export interface SendAnimationOptionals {
   /** If the message is a reply, ID of the original message */
   reply_to_message_id: number;
   /** Additional interface options */
-  reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply;
+  reply_markup:
+    | InlineKeyboardMarkup
+    | ReplyKeyboardMarkup
+    | ReplyKeyboardRemove
+    | ForceReply;
 }

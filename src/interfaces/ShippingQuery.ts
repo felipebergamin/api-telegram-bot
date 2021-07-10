@@ -1,5 +1,5 @@
-import { ShippingAddress } from "./ShippingAddress";
-import { User } from "./User";
+import { ShippingAddress } from './ShippingAddress';
+import { User } from './User';
 
 export interface ShippingQuery {
   /**

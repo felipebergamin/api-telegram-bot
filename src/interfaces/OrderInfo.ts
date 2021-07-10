@@ -1,4 +1,4 @@
-import { ShippingAddress } from "./ShippingAddress";
+import { ShippingAddress } from './ShippingAddress';
 
 export interface OrderInfo {
   /** Optional. User name */

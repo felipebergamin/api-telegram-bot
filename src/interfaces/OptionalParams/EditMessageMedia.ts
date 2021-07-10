@@ -1,4 +1,4 @@
-import { InlineKeyboardMarkup } from "../InlineKeyboardMarkup";
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
 
 export interface EditMessageMediaOptionals {
   /**

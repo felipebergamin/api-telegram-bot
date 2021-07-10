@@ -1,18 +1,15 @@
-/* tslint:disable:max-line-length */
-import * as Debug from "debug";
-import EventEmitter = require("events");
-import { IncomingMessage, ServerResponse } from "http";
-import { fromEvent, Observable } from "rxjs";
-import { share } from "rxjs/operators";
+import EventEmitter = require('events');
+import { IncomingMessage, ServerResponse } from 'http';
+import { fromEvent, Observable } from 'rxjs';
+import { share } from 'rxjs/operators';
 
-import { Bot } from "./Bot";
-import { Update } from "./interfaces";
+import Bot from './Bot';
+import { Update } from './interfaces';
 
-const debug = Debug("api-telegram-bot:webhook");
-
-export class Webhook {
+export default class Webhook {
   /** @ignore */
-  private _events = new EventEmitter();
+  private events = new EventEmitter();
+
   /** @ignore */
   private observable: Observable<Update>;
 
@@ -23,8 +20,8 @@ export class Webhook {
    * @param bot Bot instance
    */
   constructor(bot: Bot) {
-    this.observable = this._createObservable().pipe(share());
-    bot.webhook = this;
+    this.observable = this.createObservable().pipe(share());
+    bot.linkToWebhook(this);
   }
 
   /**
@@ -40,38 +37,34 @@ export class Webhook {
    */
   public getWebhook(): (req: IncomingMessage, res: ServerResponse) => void {
     return (req: IncomingMessage, res: ServerResponse) => {
-      if (req.method === "POST") {
+      if (req.method === 'POST') {
         const chunks: any[] = [];
         let body: string;
         let receivedData: any;
 
-        req.on("error", (err) => {
-          res.statusCode = 500;
-          this._events.emit("error", err);
-          res.end();
-        })
-          .on("data", (chunk) => {
+        req
+          .on('error', (err) => {
+            res.statusCode = 500;
+            this.events.emit('error', err);
+            res.end();
+          })
+          .on('data', (chunk) => {
             chunks.push(chunk);
           })
-          .on("end", () => {
+          .on('end', () => {
             try {
               body = Buffer.concat(chunks).toString();
               receivedData = JSON.parse(body);
               res.statusCode = 200;
               res.end();
             } catch (err) {
-              this._events.emit("error", err);
+              this.events.emit('error', err);
               res.statusCode = 400;
               res.end();
             }
-
-            debug("webhook: POST received on Webhook:");
-            debug(body);
-
-            this._events.emit("update", receivedData);
+            this.events.emit('update', receivedData);
           });
       } else {
-        debug(`webhook: ${req.method} received, but expecting POST`);
         res.statusCode = 404;
         res.end();
       }
@@ -81,7 +74,7 @@ export class Webhook {
   /**
    * @ignore
    */
-  private _createObservable(): Observable<Update> {
-    return fromEvent(this._events, "update");
+  private createObservable(): Observable<Update> {
+    return fromEvent(this.events, 'update');
   }
 }

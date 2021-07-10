@@ -1,5 +1,5 @@
-import { Message } from "./Message";
-import { User } from "./User";
+import { Message } from './Message';
+import { User } from './User';
 
 export interface CallbackQuery {
   /** Unique identifier for this query */

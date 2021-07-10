@@ -1,5 +1,5 @@
-import { MaskPosition } from "./MaskPosition";
-import { PhotoSize } from "./PhotoSize";
+import { MaskPosition } from './MaskPosition';
+import { PhotoSize } from './PhotoSize';
 
 export interface Sticker {
   /** Unique identifier for this file */

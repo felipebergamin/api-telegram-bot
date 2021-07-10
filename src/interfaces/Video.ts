@@ -1,4 +1,4 @@
-import { PhotoSize } from "./PhotoSize";
+import { PhotoSize } from './PhotoSize';
 
 export interface Video {
   /** Unique identifier for this file */

@@ -1,4 +1,4 @@
-import { MaskPosition } from "../MaskPosition";
+import { MaskPosition } from '../MaskPosition';
 
 export interface CreateNewStickerSetOptionals {
   /**

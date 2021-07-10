@@ -1,7 +1,6 @@
-import { ReadStream } from "fs";
+import { ReadStream } from 'fs';
 
-import { Bot } from "./Bot";
-import { debug } from "./debug";
+import Bot from './Bot';
 import {
   AnswerCallbackQueryOptionals,
   CallbackQuery,
@@ -15,82 +14,70 @@ import {
   ReplyKeyboardRemove,
   SendMessageOptionals,
   TelegramResponse,
-} from "./interfaces";
-
-/* export const _messageTypes = [
-  "text", "audio", "document", "game", "photo", "sticker", "video", "voice", "video_note",
-  "contact", "location", "venue", "new_chat_members", "left_chat_member", "new_chat_title",
-  "new_chat_photo", "delete_chat_photo", "group_chat_created", "supergroup_chat_created",
-  "channel_chat_created", "pinned_message", "invoice", "successful_payment",
-];
-export const _updateTypes = [
-  "message", "edited_message", "channel_post", "edited_channel_post",
-  "inline_query", "chosen_inline_result", "callback_query", "shipping_query",
-  "pre_checkout_query",
-]; */
+} from './interfaces';
 
 /** @ignore */
-export const createMessageActions = (message: Message, bot: Bot): MessageActions => {
+export const createMessageActions = (
+  message: Message,
+  bot: Bot
+): MessageActions => {
   return {
     banChatMember: (until: number = 0): Promise<TelegramResponse<boolean>> => {
-      debug("ban member");
-
       return bot.kickChatMember(message.chat.id, message.from.id, until);
     },
 
     deleteMessage: (): Promise<TelegramResponse<boolean>> => {
-      debug("deleting message");
-
       return bot.deleteMessage(message.chat.id, message.message_id);
     },
 
-    reply: (text: string, optionals?: SendMessageOptionals): Promise<TelegramResponse<Message>> => {
-      debug("replying message");
-
-      optionals = optionals || {} as SendMessageOptionals;
-      optionals.reply_to_message_id = message.message_id;
-
-      return bot.sendMessage(message.chat.id, text, optionals);
+    reply: (
+      text: string,
+      optionals: SendMessageOptionals = {}
+    ): Promise<TelegramResponse<Message>> => {
+      return bot.sendMessage(message.chat.id, text, {
+        ...optionals,
+        reply_to_message_id: message.message_id,
+      });
     },
   };
 };
 
-export const createCallbackQueryActions = (cbkQuery: CallbackQuery, bot: Bot): CallbackQueryActions => {
+export const createCallbackQueryActions = (
+  { message, ...cbkQuery }: CallbackQuery,
+  bot: Bot
+): CallbackQueryActions => {
+  if (!message) return {};
   return {
-    banChatMember: (until: number = 0) => {
-      debug(`CallbackQueryActions: ban chat member ${cbkQuery.message.chat.id} / ${cbkQuery.message.from.id}`);
-
-      return bot.kickChatMember(cbkQuery.message.chat.id, cbkQuery.message.from.id, until);
-    },
+    banChatMember: (until: number = 0) =>
+      bot.kickChatMember(message.chat.id, message.from.id, until),
 
     deleteMessage: () => {
-      debug(`CallbackQueryActions: deleting message ${cbkQuery.message.message_id}`);
-
-      return bot.deleteMessage(cbkQuery.message.chat.id, cbkQuery.message.message_id);
+      return bot.deleteMessage(message.chat.id, message.message_id);
     },
 
     answerQuery: (opt: AnswerCallbackQueryOptionals = {}) => {
-      debug(`CallbackQueryActions: answering callback_query ${cbkQuery.id}`);
       return bot.answerCallbackQuery(cbkQuery.id, opt);
     },
 
     editMessageText: (text: string, opt: EditMessageTextOptionals = {}) => {
-      debug(`CallbackQueryActions: editing message(${cbkQuery.message.message_id}) text`);
-      return bot.editMessageText(
-        text,
-        {
-          ...opt,
-          chat_id: cbkQuery.message.chat.id,
-          message_id: cbkQuery.message.message_id,
-        },
-      );
+      return bot.editMessageText(text, {
+        ...opt,
+        chat_id: message.chat.id,
+        message_id: message.message_id,
+      });
     },
 
     // tslint:disable-next-line: max-line-length
-    editMessageReplyMarkup: (reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply) => {
+    editMessageReplyMarkup: (
+      reply_markup:
+        | InlineKeyboardMarkup
+        | ReplyKeyboardMarkup
+        | ReplyKeyboardRemove
+        | ForceReply
+    ) => {
       return bot.editMessageReplyMarkup({
-        chat_id: cbkQuery.message.chat.id,
-        message_id: cbkQuery.message.message_id,
+        chat_id: message.chat.id,
+        message_id: message.message_id,
         reply_markup,
       });
     },
@@ -102,14 +89,16 @@ export const createCallbackQueryActions = (cbkQuery: CallbackQuery, bot: Bot): C
  * @ignore
  * @beta
  */
-export const stringifyFormData = (formData: any) => {
-  const objKeys = Object.keys(formData);
-
-  for (const key of objKeys) {
-    if (typeof formData[key] === "object" && !(formData[key] instanceof ReadStream)) {
-      formData[key] = JSON.stringify(formData[key]);
+export const stringifyFormData = (formData: { [key: string]: any }) => {
+  const parsedData: typeof formData = {};
+  Object.keys(formData).forEach((key) => {
+    if (
+      typeof formData[key] === 'object' &&
+      !(formData[key] instanceof ReadStream)
+    ) {
+      parsedData[key] = JSON.stringify(formData[key]);
     }
-  }
+  });
 
   return formData;
 };

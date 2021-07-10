@@ -1,4 +1,4 @@
-import { ReplyMarkup } from "../../types";
+import { ReplyMarkup } from '../../types';
 
 export interface SendPollOptionals {
   /**

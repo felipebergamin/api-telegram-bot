@@ -1,4 +1,4 @@
-import { ShippingOption } from "../ShippingOption";
+import { ShippingOption } from '../ShippingOption';
 
 export interface AnswerShippingQueryOptionals {
   /**

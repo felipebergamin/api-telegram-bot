@@ -1,4 +1,4 @@
-import { InlineKeyboardMarkup } from "../InlineKeyboardMarkup";
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
 
 export interface SendInvoiceOptionals {
   /** JSON-encoded data about the invoice, which will be shared with the payment provider */

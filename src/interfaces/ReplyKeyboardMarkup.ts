@@ -1,4 +1,4 @@
-import { KeyboardButton } from "./KeyboardButton";
+import { KeyboardButton } from './KeyboardButton';
 
 /** @see {@link https://core.telegram.org/bots/api#replykeyboardmarkup} */
 export interface ReplyKeyboardMarkup {

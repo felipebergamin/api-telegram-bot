@@ -1,4 +1,4 @@
-import { ReadStream } from "fs";
+import { ReadStream } from 'fs';
 
 export interface InputMediaDocument {
   /** Type of the result, must be document */

@@ -1,14 +1,14 @@
-import { ForceReply} from "../ForceReply";
-import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
-import { ReplyKeyboardMarkup} from "../ReplyKeyboardMarkup";
-import { ReplyKeyboardRemove} from "../ReplyKeyboardRemove";
+import { ForceReply } from '../ForceReply';
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
+import { ReplyKeyboardMarkup } from '../ReplyKeyboardMarkup';
+import { ReplyKeyboardRemove } from '../ReplyKeyboardRemove';
 
 export interface EditMessageReplyMarkupOptionals {
   /**
    * Required if `inline_message_id` is not specified.
    * Unique identifier for the target chat or username of the target channel
    */
-  chat_id?: number|string;
+  chat_id?: number | string;
   /**
    * Required if `inline_message_id` is not specified. Identifier of the sent message
    */
@@ -20,5 +20,9 @@ export interface EditMessageReplyMarkupOptionals {
   /**
    * A JSON-serialized object for an inline keyboard.
    */
-  reply_markup?: InlineKeyboardMarkup|ReplyKeyboardMarkup|ReplyKeyboardRemove|ForceReply;
+  reply_markup?:
+    | InlineKeyboardMarkup
+    | ReplyKeyboardMarkup
+    | ReplyKeyboardRemove
+    | ForceReply;
 }

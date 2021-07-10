@@ -1,4 +1,4 @@
-import { InlineKeyboardButton } from "./InlineKeyboardButton";
+import { InlineKeyboardButton } from './InlineKeyboardButton';
 
 /** @see {@link https://core.telegram.org/bots/api#inlinekeyboardmarkup} */
 export interface InlineKeyboardMarkup {

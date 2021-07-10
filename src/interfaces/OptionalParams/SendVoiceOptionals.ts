@@ -1,7 +1,7 @@
-import { ForceReply} from "../ForceReply";
-import { InlineKeyboardMarkup} from "../InlineKeyboardMarkup";
-import { ReplyKeyboardMarkup} from "../ReplyKeyboardMarkup";
-import { ReplyKeyboardRemove} from "../ReplyKeyboardRemove";
+import { ForceReply } from '../ForceReply';
+import { InlineKeyboardMarkup } from '../InlineKeyboardMarkup';
+import { ReplyKeyboardMarkup } from '../ReplyKeyboardMarkup';
+import { ReplyKeyboardRemove } from '../ReplyKeyboardRemove';
 
 export interface SendVoiceOptionals {
   /**
@@ -27,5 +27,9 @@ export interface SendVoiceOptionals {
    * A JSON-serialized object for an inline keyboard, custom reply keyboard,
    * instructions to remove reply keyboard or to force a reply from the user.
    */
-  reply_markup?: InlineKeyboardMarkup|ReplyKeyboardMarkup|ReplyKeyboardRemove|ForceReply;
+  reply_markup?:
+    | InlineKeyboardMarkup
+    | ReplyKeyboardMarkup
+    | ReplyKeyboardRemove
+    | ForceReply;
 }
