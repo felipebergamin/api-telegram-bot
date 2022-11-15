@@ -15,10 +15,12 @@ describe('Polling', () => {
   };
 
   const mockBot = {
-    getUpdates: jest.fn().mockResolvedValue(serverResponse),
+    call: jest.fn().mockResolvedValue(serverResponse),
   };
 
   const polling = new Polling(mockBot as any);
+
+  afterEach(() => jest.clearAllMocks());
 
   test('should start with status === NEW', () => {
     expect(polling.getStatus()).toBe('NEW');
@@ -32,6 +34,11 @@ describe('Polling', () => {
     polling.updates.pipe(take(2)).subscribe({
       complete: () => {
         polling.stopPolling();
+        expect(mockBot.call).toHaveBeenCalled();
+        expect(mockBot.call).toHaveBeenCalledWith(
+          'getUpdates',
+          expect.any(Object),
+        );
         done();
       },
       error: (err) => {
@@ -44,7 +51,11 @@ describe('Polling', () => {
           expect(value).toEqual(serverResponse.result.shift());
         } catch (err) {
           polling.stopPolling();
-          done.fail(err);
+          if (err instanceof Error) {
+            done.fail(err.message);
+            return;
+          }
+          done.fail();
         }
       },
     });

@@ -1,4 +1,5 @@
-import { InlineKeyboardButton, KeyboardButton } from '../interfaces';
+import type { InlineKeyboardButton } from '../@types/Entities/InlineKeyboardButton';
+import type { KeyboardButton } from '../@types/Entities/KeyboardButton';
 import { isEmpty, lastRowOf } from './utils';
 
 type Button = string | InlineKeyboardButton | KeyboardButton;
@@ -23,10 +24,10 @@ export function KeyboardBuilder(keyboard: Button[][] = [[]]) {
      * Add a button on last keyboard row
      * @param btn InlineKeyboardButton, KeyboardButton or a simple string
      */
-    button(btn: string | InlineKeyboardButton | KeyboardButton) {
+    button(btn: Button) {
       const lastRow = keyboard.length - 1;
       return KeyboardBuilder(
-        keyboard.map((row, index) => (index === lastRow ? [...row, btn] : row))
+        keyboard.map((row, index) => (index === lastRow ? [...row, btn] : row)),
       );
     },
   };

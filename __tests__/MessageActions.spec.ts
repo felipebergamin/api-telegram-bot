@@ -12,9 +12,7 @@ describe('createMessageActions', () => {
   };
 
   const bot = {
-    deleteMessage: jest.fn(),
-    kickChatMember: jest.fn(),
-    sendMessage: jest.fn(),
+    call: jest.fn(),
   };
 
   const actions = createMessageActions(message as any, bot as any);
@@ -26,32 +24,34 @@ describe('createMessageActions', () => {
   });
 
   test('deleteMessage action should call bot.deleteMessage with right arguments', () => {
-    if (!actions?.deleteMessage)
+    if (!actions.deleteMessage)
       throw new Error('actions.deleteMessage is not defined');
     actions.deleteMessage();
-    expect(bot.deleteMessage).toHaveBeenCalledWith(
-      message.chat.id,
-      message.message_id
-    );
+    expect(bot.call).toHaveBeenCalledWith('deleteMessage', {
+      chat_id: message.chat.id,
+      message_id: message.message_id,
+    });
   });
 
   test('banChatMember action should call bot.kickChatMember with right arguments', () => {
-    const until = 9000;
-    if (!actions?.banChatMember)
+    const until_date = 9000;
+    if (!actions.banChatMember)
       throw new Error('actions.banChatMember is not defined');
-    actions.banChatMember(until);
-    expect(bot.kickChatMember).toHaveBeenCalledWith(
-      message.chat.id,
-      message.from.id,
-      until
-    );
+    actions.banChatMember(until_date);
+    expect(bot.call).toHaveBeenCalledWith('banChatMember', {
+      chat_id: message.chat.id,
+      user_id: message.from.id,
+      until_date,
+    });
   });
 
   test('reply action should call bot.sendMessage with right arguments', () => {
     const replyText = 'Hey!';
 
-    actions.reply(replyText);
-    expect(bot.sendMessage).toHaveBeenCalledWith(message.chat.id, replyText, {
+    actions.reply({ text: replyText });
+    expect(bot.call).toHaveBeenCalledWith('sendMessage', {
+      chat_id: message.chat.id,
+      text: replyText,
       reply_to_message_id: message.message_id,
     });
   });
@@ -72,12 +72,7 @@ describe('createCallbackQuery action', () => {
   };
 
   const bot = {
-    answerCallbackQuery: jest.fn(),
-    deleteMessage: jest.fn(),
-    editMessageReplyMarkup: jest.fn(),
-    editMessageText: jest.fn(),
-    kickChatMember: jest.fn(),
-    sendMessage: jest.fn(),
+    call: jest.fn(),
   };
 
   const actions = createCallbackQueryActions(cbkQuery as any, bot as any);
@@ -91,43 +86,49 @@ describe('createCallbackQuery action', () => {
   });
 
   test('answerQuery should call bot.answerCallbackQuery with right arguments', () => {
-    const options = { text: 'Hey', show_alert: false };
+    const options = {
+      callback_query_id: cbkQuery.id,
+      text: 'Hey',
+      show_alert: false,
+    };
 
-    if (!actions?.answerQuery)
+    if (!actions.answerQuery)
       throw new Error('actions.answerQuery is not defined');
     actions.answerQuery(options);
-    expect(bot.answerCallbackQuery).toHaveBeenCalledWith(cbkQuery.id, options);
+    expect(bot.call).toHaveBeenCalledWith('answerCallbackQuery', {
+      ...options,
+    });
   });
 
   test('banChatMember action should call bot.kickChatMember with right arguments', () => {
-    const until = 9000;
-    if (!actions?.banChatMember)
+    const until_date = 9000;
+    if (!actions.banChatMember)
       throw new Error('actions.banChatMember is not defined');
-    actions.banChatMember(until);
-    expect(bot.kickChatMember).toHaveBeenCalledWith(
-      cbkQuery.message.chat.id,
-      cbkQuery.message.from.id,
-      until
-    );
+    actions.banChatMember(until_date);
+    expect(bot.call).toHaveBeenCalledWith('banChatMember', {
+      chat_id: cbkQuery.message.chat.id,
+      user_id: cbkQuery.message.from.id,
+      until_date,
+    });
   });
 
   test('deleteMessage action should call bot.deleteMessage with right arguments', () => {
-    if (!actions?.deleteMessage)
+    if (!actions.deleteMessage)
       throw new Error('actions.deleteMessage is not defined');
     actions.deleteMessage();
-    expect(bot.deleteMessage).toHaveBeenCalledWith(
-      cbkQuery.message.chat.id,
-      cbkQuery.message.message_id
-    );
+    expect(bot.call).toHaveBeenCalledWith('deleteMessage', {
+      chat_id: cbkQuery.message.chat.id,
+      message_id: cbkQuery.message.message_id,
+    });
   });
 
   test('editMessageReplyMarkup action should call bot.editMessageReplyMarkup with right arguments', () => {
     const markup = { inline_keyboard: [[{ text: 'Hi', callback_data: 'HI' }]] };
 
-    if (!actions?.editMessageReplyMarkup)
+    if (!actions.editMessageReplyMarkup)
       throw new Error('actions.editMessageReplyMarkup is not defined');
     actions.editMessageReplyMarkup(markup);
-    expect(bot.editMessageReplyMarkup).toHaveBeenCalledWith({
+    expect(bot.call).toHaveBeenCalledWith('editMessageReplyMarkup', {
       chat_id: cbkQuery.message.chat.id,
       message_id: cbkQuery.message.message_id,
       reply_markup: markup,
@@ -137,11 +138,15 @@ describe('createCallbackQuery action', () => {
   test('editMessageText action should call bot.editMessageText with right arguments', () => {
     const editedText = '*edited message*';
     const options = { parse_mode: 'Markdown' };
-    if (!actions?.editMessageText)
+    if (!actions.editMessageText)
       throw new Error('actions.editMessageText is not defined');
-    actions.editMessageText(editedText, options);
-    expect(bot.editMessageText).toHaveBeenCalledWith(editedText, {
+    actions.editMessageText({
+      text: editedText,
       ...options,
+    });
+    expect(bot.call).toHaveBeenCalledWith('editMessageText', {
+      ...options,
+      text: editedText,
       chat_id: cbkQuery.message.chat.id,
       message_id: cbkQuery.message.message_id,
     });
