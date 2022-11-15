@@ -1,10 +1,11 @@
-import EventEmitter = require('events');
-import { IncomingMessage, ServerResponse } from 'http';
-import { fromEvent, Observable } from 'rxjs';
+import EventEmitter from 'events';
+import type { IncomingMessage, ServerResponse } from 'http';
+import type { Observable } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { share } from 'rxjs/operators';
 
-import Bot from './Bot';
-import { Update } from './interfaces';
+import type Update from './@types/Entities/Update';
+import type Bot from './Bot';
 
 export default class Webhook {
   /** @ignore */

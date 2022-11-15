@@ -1,104 +1,72 @@
-import { ReadStream } from 'fs';
+import type CallbackQuery from './@types/Args/CallbackQuery';
+import type CallbackQueryActions from './@types/Args/CallbackQueryActions';
+import type { MessageActions } from './@types/Args/MessageActions';
+import type Message from './@types/Entities/Message';
 
-import Bot from './Bot';
-import {
-  AnswerCallbackQueryOptionals,
-  CallbackQuery,
-  CallbackQueryActions,
-  EditMessageTextOptionals,
-  ForceReply,
-  InlineKeyboardMarkup,
-  Message,
-  MessageActions,
-  ReplyKeyboardMarkup,
-  ReplyKeyboardRemove,
-  SendMessageOptionals,
-  TelegramResponse,
-} from './interfaces';
+import type Bot from './Bot';
 
 /** @ignore */
 export const createMessageActions = (
   message: Message,
-  bot: Bot
+  bot: Bot,
 ): MessageActions => {
   return {
-    banChatMember: (until: number = 0): Promise<TelegramResponse<boolean>> => {
-      return bot.kickChatMember(message.chat.id, message.from.id, until);
-    },
-
-    deleteMessage: (): Promise<TelegramResponse<boolean>> => {
-      return bot.deleteMessage(message.chat.id, message.message_id);
-    },
-
-    reply: (
-      text: string,
-      optionals: SendMessageOptionals = {}
-    ): Promise<TelegramResponse<Message>> => {
-      return bot.sendMessage(message.chat.id, text, {
-        ...optionals,
+    banChatMember: (until = 0) =>
+      bot.call('kickChatMember', {
+        chat_id: message.chat.id,
+        user_id: message.from.id,
+        until_date: until,
+      }),
+    deleteMessage: () =>
+      bot.call('deleteMessage', {
+        chat_id: message.chat.id,
+        message_id: message.message_id,
+      }),
+    reply: (args) =>
+      bot.call('sendMessage', {
+        ...args,
+        chat_id: message.chat.id,
         reply_to_message_id: message.message_id,
-      });
-    },
+      }),
   };
 };
 
 export const createCallbackQueryActions = (
   { message, ...cbkQuery }: CallbackQuery,
-  bot: Bot
+  bot: Bot,
 ): CallbackQueryActions => {
   if (!message) return {};
   return {
-    banChatMember: (until: number = 0) =>
-      bot.kickChatMember(message.chat.id, message.from.id, until),
-
-    deleteMessage: () => {
-      return bot.deleteMessage(message.chat.id, message.message_id);
-    },
-
-    answerQuery: (opt: AnswerCallbackQueryOptionals = {}) => {
-      return bot.answerCallbackQuery(cbkQuery.id, opt);
-    },
-
-    editMessageText: (text: string, opt: EditMessageTextOptionals = {}) => {
-      return bot.editMessageText(text, {
-        ...opt,
+    banChatMember: (until = 0) =>
+      bot.call('kickChatMember', {
+        chat_id: message.chat.id,
+        user_id: message.from.id,
+        until_date: until,
+      }),
+    deleteMessage: () =>
+      bot.call('deleteMessage', {
         chat_id: message.chat.id,
         message_id: message.message_id,
-      });
-    },
+      }),
 
-    // tslint:disable-next-line: max-line-length
-    editMessageReplyMarkup: (
-      reply_markup:
-        | InlineKeyboardMarkup
-        | ReplyKeyboardMarkup
-        | ReplyKeyboardRemove
-        | ForceReply
-    ) => {
-      return bot.editMessageReplyMarkup({
+    answerQuery: (opt = {}) =>
+      bot.call('answerCallbackQuery', {
+        ...opt,
+        callback_query_id: cbkQuery.id,
+      }),
+
+    editMessageText: (args) =>
+      bot.call('editMessageText', {
+        ...args,
+        chat_id: message.chat.id,
+        message_id: message.message_id,
+      }),
+
+    editMessageReplyMarkup: (reply_markup) =>
+      bot.call('editMessageReplyMarkup', {
         chat_id: message.chat.id,
         message_id: message.message_id,
         reply_markup,
-      });
-    },
+      }),
   };
-};
-
-/**
- * receive a object and stringify sub-objects to send via form-data
- * @ignore
- * @beta
- */
-export const stringifyFormData = (formData: { [key: string]: any }) => {
-  const parsedData: typeof formData = {};
-  Object.keys(formData).forEach((key) => {
-    if (
-      typeof formData[key] === 'object' &&
-      !(formData[key] instanceof ReadStream)
-    ) {
-      parsedData[key] = JSON.stringify(formData[key]);
-    }
-  });
-
-  return formData;
 };

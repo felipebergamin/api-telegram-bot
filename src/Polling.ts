@@ -1,9 +1,11 @@
 import { EventEmitter } from 'events';
-import { Observable, Observer } from 'rxjs';
+import type { Observer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
+import type PollingOptions from './@types/Entities/PollingOptions';
+import type Update from './@types/Entities/Update';
 
-import Bot from './Bot';
-import { Update, PollingOptions } from './interfaces';
+import type Bot from './Bot';
 
 export type PollingStatus =
   | 'NEW'
@@ -17,7 +19,7 @@ export class Polling {
   /**
    * Last error on polling
    */
-  public lastError: any;
+  public lastError: unknown;
 
   /** @ignore */
   private status: PollingStatus = 'NEW';
@@ -54,7 +56,7 @@ export class Polling {
       offset = 0,
       allowed_updates = [],
       timeout = 10,
-    }: PollingOptions = {}
+    }: PollingOptions = {},
   ) {
     this.events = new EventEmitter();
     this.offset = offset;
@@ -110,7 +112,7 @@ export class Polling {
                 will be received again if we call getUpdates()
               */
               this.bot
-                .getUpdates({ offset: this.offset, limit: 1 })
+                .call('getUpdates', { offset: this.offset, limit: 1 })
                 .then(() => resolve())
                 .catch((err) => reject(err));
               this.events.removeListener('STATUS_CHANGED', onStopCbk);
@@ -136,7 +138,7 @@ export class Polling {
       const getUpdates = async (): Promise<void> => {
         this.setStatus('FETCHING');
         try {
-          const updates = await this.bot.getUpdates({
+          const updates = await this.bot.call('getUpdates', {
             allowed_updates: this.allowed_updates,
             limit: this.limit,
             offset: this.offset,

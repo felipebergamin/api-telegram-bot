@@ -1,0 +1,5 @@
+export default interface KickChatMember {
+  chat_id: number | string;
+  user_id: number;
+  until_date?: number;
+}
