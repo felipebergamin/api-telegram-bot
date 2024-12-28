@@ -3,5 +3,5 @@ import type { MessageActions } from './MessageActions';
 
 export default interface WrappedMessageActions {
   update: Update;
-  actions: MessageActions | null;
+  actions: MessageActions;
 }

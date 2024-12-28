@@ -18,10 +18,15 @@ export interface MessageActions {
   /**
    * shorthand to send a reply to received message.
    * same as call `sendMessage` with `reply_to_message_id` param
-   * @param text text to be sent
-   * @param optionals optional params
+   * @param args message args to be sent
    */
-  reply: (
+  reply(
     args: Omit<SendMessage, 'chat_id' | 'reply_to_message_id'>,
-  ) => Promise<TelegramResponse<Message>>;
+  ): Promise<TelegramResponse<Message>>;
+  /**
+   * shorthand to send a reply to received message.
+   * same as call `sendMessage` with `reply_to_message_id` param
+   * @param args message args to be sent
+   */
+  reply(text: string): Promise<TelegramResponse<Message>>;
 }

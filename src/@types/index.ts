@@ -130,6 +130,22 @@ import type {
   EditUserStarSubscription,
   SetPassportDataErrors,
   UnpinChatMessage,
+  MessageId,
+  ChatInviteLink,
+  Sticker,
+  ForumTopic,
+  UserChatBoosts,
+  BusinessConnection,
+  BotCommand,
+  BotName,
+  BotDescription,
+  BotShortDescription,
+  MenuButton,
+  ChatAdministratorRights,
+  Gifts,
+  SentWebAppMessage,
+  PreparedInlineMessage,
+  StarTransactions,
 } from './generated';
 
 export type ApiMethods = {
@@ -192,83 +208,83 @@ export type ApiMethods = {
   deleteStickerFromSet: [string, boolean];
   editMessageMedia: [EditMessageMedia, Message];
   sendAnimation: [SendAnimation, Message];
-  logOut: [LogOut, unknown];
-  close: [Close, unknown];
-  forwardMessages: [ForwardMessages, unknown];
-  copyMessage: [CopyMessage, unknown];
-  copyMessages: [CopyMessages, unknown];
-  sendVideoNote: [SendVideoNote, unknown];
-  sendPaidMedia: [SendPaidMedia, unknown];
-  sendDice: [SendDice, unknown];
-  setMessageReaction: [SetMessageReaction, unknown];
-  setUserEmojiStatus: [SetUserEmojiStatus, unknown];
-  banChatMember: [BanChatMember, unknown];
-  setChatAdministratorCustomTitle: [SetChatAdministratorCustomTitle, unknown];
-  banChatSenderChat: [BanChatSenderChat, unknown];
-  unbanChatSenderChat: [UnbanChatSenderChat, unknown];
-  setChatPermissions: [SetChatPermissions, unknown];
-  createChatInviteLink: [CreateChatInviteLink, unknown];
-  editChatInviteLink: [EditChatInviteLink, unknown];
-  createChatSubscriptionInviteLink: [CreateChatSubscriptionInviteLink, unknown];
-  editChatSubscriptionInviteLink: [EditChatSubscriptionInviteLink, unknown];
-  revokeChatInviteLink: [RevokeChatInviteLink, unknown];
-  approveChatJoinRequest: [ApproveChatJoinRequest, unknown];
-  declineChatJoinRequest: [DeclineChatJoinRequest, unknown];
-  unpinAllChatMessages: [UnpinAllChatMessages, unknown];
-  getChatMemberCount: [GetChatMemberCount, unknown];
-  setChatStickerSet: [SetChatStickerSet, unknown];
-  getForumTopicIconStickers: [GetForumTopicIconStickers, unknown];
-  createForumTopic: [CreateForumTopic, unknown];
-  editForumTopic: [EditForumTopic, unknown];
-  closeForumTopic: [CloseForumTopic, unknown];
-  reopenForumTopic: [ReopenForumTopic, unknown];
-  deleteForumTopic: [DeleteForumTopic, unknown];
-  unpinAllForumTopicMessages: [UnpinAllForumTopicMessages, unknown];
-  editGeneralForumTopic: [EditGeneralForumTopic, unknown];
-  closeGeneralForumTopic: [CloseGeneralForumTopic, unknown];
-  reopenGeneralForumTopic: [ReopenGeneralForumTopic, unknown];
-  hideGeneralForumTopic: [HideGeneralForumTopic, unknown];
-  unhideGeneralForumTopic: [UnhideGeneralForumTopic, unknown];
+  logOut: [LogOut, boolean];
+  close: [Close, boolean];
+  forwardMessages: [ForwardMessages, MessageId[]];
+  copyMessage: [CopyMessage, MessageId];
+  copyMessages: [CopyMessages, MessageId[]];
+  sendVideoNote: [SendVideoNote, Message];
+  sendPaidMedia: [SendPaidMedia, Message];
+  sendDice: [SendDice, Message];
+  setMessageReaction: [SetMessageReaction, boolean];
+  setUserEmojiStatus: [SetUserEmojiStatus, boolean];
+  banChatMember: [BanChatMember, boolean];
+  setChatAdministratorCustomTitle: [SetChatAdministratorCustomTitle, boolean];
+  banChatSenderChat: [BanChatSenderChat, boolean];
+  unbanChatSenderChat: [UnbanChatSenderChat, boolean];
+  setChatPermissions: [SetChatPermissions, boolean];
+  createChatInviteLink: [CreateChatInviteLink, ChatInviteLink];
+  editChatInviteLink: [EditChatInviteLink, ChatInviteLink];
+  createChatSubscriptionInviteLink: [CreateChatSubscriptionInviteLink, ChatInviteLink];
+  editChatSubscriptionInviteLink: [EditChatSubscriptionInviteLink, ChatInviteLink];
+  revokeChatInviteLink: [RevokeChatInviteLink, ChatInviteLink];
+  approveChatJoinRequest: [ApproveChatJoinRequest, boolean];
+  declineChatJoinRequest: [DeclineChatJoinRequest, boolean];
+  unpinAllChatMessages: [UnpinAllChatMessages, boolean];
+  getChatMemberCount: [GetChatMemberCount, number];
+  setChatStickerSet: [SetChatStickerSet, boolean];
+  getForumTopicIconStickers: [GetForumTopicIconStickers, Sticker[]];
+  createForumTopic: [CreateForumTopic, ForumTopic];
+  editForumTopic: [EditForumTopic, boolean];
+  closeForumTopic: [CloseForumTopic, boolean];
+  reopenForumTopic: [ReopenForumTopic, boolean];
+  deleteForumTopic: [DeleteForumTopic, boolean];
+  unpinAllForumTopicMessages: [UnpinAllForumTopicMessages, boolean];
+  editGeneralForumTopic: [EditGeneralForumTopic, boolean];
+  closeGeneralForumTopic: [CloseGeneralForumTopic, boolean];
+  reopenGeneralForumTopic: [ReopenGeneralForumTopic, boolean];
+  hideGeneralForumTopic: [HideGeneralForumTopic, boolean];
+  unhideGeneralForumTopic: [UnhideGeneralForumTopic, boolean];
   unpinAllGeneralForumTopicMessages: [
     UnpinAllGeneralForumTopicMessages,
-    unknown,
+    boolean,
   ];
-  getUserChatBoosts: [GetUserChatBoosts, unknown];
-  getBusinessConnection: [GetBusinessConnection, unknown];
-  setMyCommands: [SetMyCommands, unknown];
-  deleteMyCommands: [DeleteMyCommands, unknown];
-  getMyCommands: [GetMyCommands, unknown];
-  setMyName: [SetMyName, unknown];
-  getMyName: [GetMyName, unknown];
-  setMyDescription: [SetMyDescription, unknown];
-  getMyDescription: [GetMyDescription, unknown];
-  setMyShortDescription: [SetMyShortDescription, unknown];
-  getMyShortDescription: [GetMyShortDescription, unknown];
-  setChatMenuButton: [SetChatMenuButton, unknown];
-  getChatMenuButton: [GetChatMenuButton, unknown];
-  setMyDefaultAdministratorRights: [SetMyDefaultAdministratorRights, unknown];
-  getMyDefaultAdministratorRights: [GetMyDefaultAdministratorRights, unknown];
-  deleteMessages: [DeleteMessages, unknown];
-  getCustomEmojiStickers: [GetCustomEmojiStickers, unknown];
-  addStickerToSet: [AddStickerToSet, unknown];
-  replaceStickerInSet: [ReplaceStickerInSet, unknown];
-  setStickerEmojiList: [SetStickerEmojiList, unknown];
-  setStickerKeywords: [SetStickerKeywords, unknown];
-  setStickerMaskPosition: [SetStickerMaskPosition, unknown];
-  setStickerSetTitle: [SetStickerSetTitle, unknown];
-  setStickerSetThumbnail: [SetStickerSetThumbnail, unknown];
+  getUserChatBoosts: [GetUserChatBoosts, UserChatBoosts];
+  getBusinessConnection: [GetBusinessConnection, BusinessConnection];
+  setMyCommands: [SetMyCommands, boolean];
+  deleteMyCommands: [DeleteMyCommands, boolean];
+  getMyCommands: [GetMyCommands, BotCommand[]];
+  setMyName: [SetMyName, boolean];
+  getMyName: [GetMyName, BotName];
+  setMyDescription: [SetMyDescription, boolean];
+  getMyDescription: [GetMyDescription, BotDescription];
+  setMyShortDescription: [SetMyShortDescription, boolean];
+  getMyShortDescription: [GetMyShortDescription, BotShortDescription];
+  setChatMenuButton: [SetChatMenuButton, boolean];
+  getChatMenuButton: [GetChatMenuButton, MenuButton];
+  setMyDefaultAdministratorRights: [SetMyDefaultAdministratorRights, boolean];
+  getMyDefaultAdministratorRights: [GetMyDefaultAdministratorRights, ChatAdministratorRights];
+  deleteMessages: [DeleteMessages, boolean];
+  getCustomEmojiStickers: [GetCustomEmojiStickers, Sticker[]];
+  addStickerToSet: [AddStickerToSet, boolean];
+  replaceStickerInSet: [ReplaceStickerInSet, boolean];
+  setStickerEmojiList: [SetStickerEmojiList, boolean];
+  setStickerKeywords: [SetStickerKeywords, boolean];
+  setStickerMaskPosition: [SetStickerMaskPosition, boolean];
+  setStickerSetTitle: [SetStickerSetTitle, boolean];
+  setStickerSetThumbnail: [SetStickerSetThumbnail, boolean];
   setCustomEmojiStickerSetThumbnail: [
     SetCustomEmojiStickerSetThumbnail,
-    unknown,
+    boolean,
   ];
-  deleteStickerSet: [DeleteStickerSet, unknown];
-  getAvailableGifts: [GetAvailableGifts, unknown];
-  sendGift: [SendGift, unknown];
-  answerWebAppQuery: [AnswerWebAppQuery, unknown];
-  savePreparedInlineMessage: [SavePreparedInlineMessage, unknown];
-  createInvoiceLink: [CreateInvoiceLink, unknown];
-  getStarTransactions: [GetStarTransactions, unknown];
-  refundStarPayment: [RefundStarPayment, unknown];
-  editUserStarSubscription: [EditUserStarSubscription, unknown];
-  setPassportDataErrors: [SetPassportDataErrors, unknown];
+  deleteStickerSet: [DeleteStickerSet, boolean];
+  getAvailableGifts: [GetAvailableGifts, Gifts];
+  sendGift: [SendGift, boolean];
+  answerWebAppQuery: [AnswerWebAppQuery, SentWebAppMessage];
+  savePreparedInlineMessage: [SavePreparedInlineMessage, PreparedInlineMessage];
+  createInvoiceLink: [CreateInvoiceLink, string];
+  getStarTransactions: [GetStarTransactions, StarTransactions];
+  refundStarPayment: [RefundStarPayment, boolean];
+  editUserStarSubscription: [EditUserStarSubscription, boolean];
+  setPassportDataErrors: [SetPassportDataErrors, boolean];
 };
