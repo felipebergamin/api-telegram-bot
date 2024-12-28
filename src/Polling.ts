@@ -2,8 +2,7 @@ import { EventEmitter } from 'events';
 import type { Observer } from 'rxjs';
 import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
-import type PollingOptions from './@types/Entities/PollingOptions';
-import type Update from './@types/Entities/Update';
+import type { GetUpdates, Update } from './@types/generated';
 
 import type Bot from './Bot';
 
@@ -56,7 +55,7 @@ export class Polling {
       offset = 0,
       allowed_updates = [],
       timeout = 10,
-    }: PollingOptions = {},
+    }: GetUpdates = {},
   ) {
     this.events = new EventEmitter();
     this.offset = offset;
@@ -149,7 +148,7 @@ export class Polling {
           if (updates.ok && updates.result.length > 0) {
             this.offset =
               updates.result[updates.result.length - 1].update_id + 1;
-            updates.result.forEach((update) => observer.next(update));
+            updates.result.forEach((update: Update) => observer.next(update));
           }
         } catch (err) {
           this.lastError = err;

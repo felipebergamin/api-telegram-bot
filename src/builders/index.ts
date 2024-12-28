@@ -1,5 +1,4 @@
-import type { InlineKeyboardButton } from '../@types/Entities/InlineKeyboardButton';
-import type { KeyboardButton } from '../@types/Entities/KeyboardButton';
+import type { InlineKeyboardButton, KeyboardButton } from '../@types/generated';
 import { isEmpty, lastRowOf } from './utils';
 
 type Button = string | InlineKeyboardButton | KeyboardButton;

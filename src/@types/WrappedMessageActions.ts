@@ -1,5 +1,5 @@
-import type { MessageActions } from './Args/MessageActions';
-import type Update from './Entities/Update';
+import type { Update } from './generated';
+import type { MessageActions } from './MessageActions';
 
 export default interface WrappedMessageActions {
   update: Update;

@@ -1,6 +1,5 @@
-import type Message from '../Entities/Message';
-import type TelegramResponse from '../Entities/TelegramResponse';
-import type SendMessage from './SendMessage';
+import type { Message, SendMessage } from './generated';
+import type TelegramResponse from './TelegramResponse';
 
 export interface MessageActions {
   /**
@@ -23,6 +22,6 @@ export interface MessageActions {
    * @param optionals optional params
    */
   reply: (
-    args: Omit<SendMessage, 'chat_id' | 'reply_to_message_id'>
+    args: Omit<SendMessage, 'chat_id' | 'reply_to_message_id'>,
   ) => Promise<TelegramResponse<Message>>;
 }

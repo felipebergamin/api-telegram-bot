@@ -16,6 +16,7 @@ import type { Message, Update } from './@types/generated';
 import type WrappedMessageActions from './@types/WrappedMessageActions';
 import type MessageType from './@types/MessageType';
 import type UpdateType from './@types/UpdateType';
+import type TelegramResponse from './@types/TelegramResponse';
 
 export default class Bot {
   #updates: Subject<Update>;

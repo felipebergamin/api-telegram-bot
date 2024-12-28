@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 import { fromEvent } from 'rxjs';
 import { share } from 'rxjs/operators';
 
-import type Update from './@types/Entities/Update';
+import type { Update } from './@types/generated';
 import type Bot from './Bot';
 
 export default class Webhook {

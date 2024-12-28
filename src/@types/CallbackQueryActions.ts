@@ -1,8 +1,10 @@
-import type Message from '../Entities/Message';
-import type TelegramResponse from '../Entities/TelegramResponse';
-import type AnswerCallbackQuery from './AnswerCallbackQuery';
-import type EditMessageText from './EditMessageText';
-import type ReplyMarkup from './ReplyMarkup';
+import type {
+  AnswerCallbackQuery,
+  EditMessageText,
+  Message,
+} from './generated';
+import type { ReplyMarkup } from './ReplyMarkup';
+import type TelegramResponse from './TelegramResponse';
 
 export default interface CallbackQueryActions {
   /**
@@ -20,14 +22,14 @@ export default interface CallbackQueryActions {
   deleteMessage?: () => Promise<TelegramResponse<boolean>>;
 
   answerQuery?: (
-    opt?: Omit<AnswerCallbackQuery, 'callback_query_id'>
+    opt?: Omit<AnswerCallbackQuery, 'callback_query_id'>,
   ) => Promise<TelegramResponse<boolean>>;
 
   editMessageText?: (
-    args: EditMessageText
+    args: EditMessageText,
   ) => Promise<TelegramResponse<Message | boolean>>;
 
   editMessageReplyMarkup?: (
-    reply_markup: ReplyMarkup
+    reply_markup: ReplyMarkup,
   ) => Promise<TelegramResponse<Message | boolean>>;
 }

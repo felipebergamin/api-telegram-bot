@@ -1,63 +1,136 @@
-import type SendMessage from './Args/SendMessage';
-import type SendPhoto from './Args/SendPhoto';
-import type ChatPhoto from './Entities/ChatPhoto';
-import type Message from './Entities/Message';
-import type User from './Entities/User';
-import type ForwardMessage from './Args/ForwardMessage';
-import type SendMediaGroup from './Args/SendMediaGroup';
-import type SendAudio from './Args/SendAudio';
-import type SendDocument from './Args/SendDocument';
-import type GetChatMember from './Args/GetChatMember';
-import type ChatMember from './Entities/ChatMember';
-import type Chat from './Entities/Chat';
-import type File from './Entities/File';
-import type SendSticker from './Args/SendSticker';
-import type SendVideo from './Args/SendVideo';
-import type SendVoice from './Args/SendVoice';
-import type SendLocation from './Args/SendLocation';
-import type EditMessageLiveLocation from './Args/EditMessageLiveLocation';
-import type StopMessageLiveLocation from './Args/StopMessageLiveLocation';
-import type SendVenue from './Args/SendVenue';
-import type SendContact from './Args/SendContact';
-import type SendPoll from './Args/SendPoll';
-import type StopPoll from './Args/StopPoll';
-import type Poll from './Entities/Poll';
-import type SendChatAction from './Args/SendChatAction';
-import type GetUserProfilePhotos from './Args/GetUserProfilePhotos';
-import type UserProfilePhotos from './Entities/UserProfilePhotos';
-import type KickChatMember from './Args/KickChatMember';
-import type UnbanChatMember from './Args/UnbanChatMember';
-import type AnswerCallbackQuery from './Args/AnswerCallbackQuery';
-import type EditMessageText from './Args/EditMessageText';
-import type EditMessageCaption from './Args/EditMessageCaption';
-import type EditMessageReplyMarkup from './Args/EditMessageReplyMarkup';
-import type AnswerInlineQuery from './Args/AnswerInlineQuery';
-import type SendGame from './Args/SendGame';
-import type SetGameScore from './Args/SetGameScore';
-import type GetGameHighScores from './Args/GetGameHighScores';
-import type GameHighScore from './Entities/GameHighScore';
-import type GetUpdates from './Args/GetUpdates';
-import type Update from './Entities/Update';
-import type SetWebhook from './Args/SetWebhook';
-import type WebhookInfo from './Entities/WebhookInfo';
-import type DeleteMessage from './Args/DeleteMessage';
-import type RestrictChatMember from './Args/RestrictChatMember';
-import type PromoteChatMember from './Args/PromoteChatMember';
-import type SetChatPhoto from './Args/SetChatPhoto';
-import type SetChatTitle from './Args/SetChatTitle';
-import type SetChatDescription from './Args/SetChatDescription';
-import type PinChatMember from './Args/PinChatMember';
-import type StickerSet from './Entities/StickerSet';
-import type UploadStickerFile from './Args/UploadSticketFile';
-import type CreateNewStickerSet from './Args/CreateNewStickerSet';
-import type SetChatSticketSet from './Args/SetChatSticketSet';
-import type AddSticketToSet from './Args/AddSticketToSet';
-import type SetStickerPositionInSet from './Args/SetSticketPositionInSet';
-import type SendInvoice from './Args/SendInvoice';
-import type AnswerShippingQuery from './Args/AnswerShippingQuery';
-import type AnswerPreCheckoutQuery from './Args/AnswerPreCheckoutQuery';
-import type EditMessageMedia from './Args/EditMessageMedia';
-import type SendAnimation from './Args/SendAnimation';
+import type {
+  SendMessage,
+  SendPhoto,
+  ChatPhoto,
+  Message,
+  User,
+  ForwardMessage,
+  SendMediaGroup,
+  SendAudio,
+  SendDocument,
+  GetChatMember,
+  ChatMember,
+  Chat,
+  File,
+  SendSticker,
+  SendVideo,
+  SendVoice,
+  SendLocation,
+  EditMessageLiveLocation,
+  StopMessageLiveLocation,
+  SendVenue,
+  SendContact,
+  SendPoll,
+  StopPoll,
+  Poll,
+  SendChatAction,
+  GetUserProfilePhotos,
+  UserProfilePhotos,
+  UnbanChatMember,
+  AnswerCallbackQuery,
+  EditMessageText,
+  EditMessageCaption,
+  EditMessageReplyMarkup,
+  AnswerInlineQuery,
+  SendGame,
+  SetGameScore,
+  GetGameHighScores,
+  GameHighScore,
+  GetUpdates,
+  Update,
+  SetWebhook,
+  WebhookInfo,
+  DeleteMessage,
+  RestrictChatMember,
+  PromoteChatMember,
+  SetChatPhoto,
+  SetChatTitle,
+  SetChatDescription,
+  StickerSet,
+  UploadStickerFile,
+  CreateNewStickerSet,
+  SetStickerPositionInSet,
+  SendInvoice,
+  AnswerShippingQuery,
+  AnswerPreCheckoutQuery,
+  EditMessageMedia,
+  SendAnimation,
+  LogOut,
+  Close,
+  ForwardMessages,
+  CopyMessage,
+  CopyMessages,
+  SendVideoNote,
+  SendPaidMedia,
+  SendDice,
+  SetMessageReaction,
+  SetUserEmojiStatus,
+  BanChatMember,
+  SetChatAdministratorCustomTitle,
+  BanChatSenderChat,
+  UnbanChatSenderChat,
+  SetChatPermissions,
+  CreateChatInviteLink,
+  EditChatInviteLink,
+  CreateChatSubscriptionInviteLink,
+  EditChatSubscriptionInviteLink,
+  RevokeChatInviteLink,
+  ApproveChatJoinRequest,
+  DeclineChatJoinRequest,
+  PinChatMessage,
+  UnpinAllChatMessages,
+  GetChatMemberCount,
+  SetChatStickerSet,
+  GetForumTopicIconStickers,
+  CreateForumTopic,
+  EditForumTopic,
+  CloseForumTopic,
+  ReopenForumTopic,
+  DeleteForumTopic,
+  UnpinAllForumTopicMessages,
+  EditGeneralForumTopic,
+  CloseGeneralForumTopic,
+  ReopenGeneralForumTopic,
+  HideGeneralForumTopic,
+  UnhideGeneralForumTopic,
+  UnpinAllGeneralForumTopicMessages,
+  GetUserChatBoosts,
+  GetBusinessConnection,
+  SetMyCommands,
+  DeleteMyCommands,
+  GetMyCommands,
+  SetMyName,
+  GetMyName,
+  SetMyDescription,
+  GetMyDescription,
+  SetMyShortDescription,
+  GetMyShortDescription,
+  SetChatMenuButton,
+  GetChatMenuButton,
+  SetMyDefaultAdministratorRights,
+  GetMyDefaultAdministratorRights,
+  DeleteMessages,
+  GetCustomEmojiStickers,
+  AddStickerToSet,
+  ReplaceStickerInSet,
+  SetStickerEmojiList,
+  SetStickerKeywords,
+  SetStickerMaskPosition,
+  SetStickerSetTitle,
+  SetStickerSetThumbnail,
+  SetCustomEmojiStickerSetThumbnail,
+  DeleteStickerSet,
+  GetAvailableGifts,
+  SendGift,
+  AnswerWebAppQuery,
+  SavePreparedInlineMessage,
+  CreateInvoiceLink,
+  GetStarTransactions,
+  RefundStarPayment,
+  EditUserStarSubscription,
+  SetPassportDataErrors,
+  UnpinChatMessage,
+} from './generated';
 
 export type ApiMethods = {
   sendMessage: [SendMessage, Message];
@@ -85,7 +158,6 @@ export type ApiMethods = {
   stopPoll: [StopPoll, Poll];
   sendChatAction: [SendChatAction, boolean];
   getUserProfilePhotos: [GetUserProfilePhotos, UserProfilePhotos];
-  kickChatMember: [KickChatMember, boolean];
   unbanChatMember: [UnbanChatMember, boolean];
   answerCallbackQuery: [AnswerCallbackQuery, boolean];
   editMessageText: [EditMessageText, Message | boolean];
@@ -107,14 +179,12 @@ export type ApiMethods = {
   deleteChatPhoto: [number | string, boolean];
   setChatTitle: [SetChatTitle, boolean];
   setChatDescription: [SetChatDescription, boolean];
-  pinChatMessage: [PinChatMember, boolean];
-  unpinChatMessage: [number | string, boolean];
+  pinChatMessage: [PinChatMessage, boolean];
+  unpinChatMessage: [UnpinChatMessage, boolean];
   getStickerSet: [string, StickerSet];
   uploadStickerFile: [UploadStickerFile, File];
   createNewStickerSet: [CreateNewStickerSet, boolean];
-  setChatStickerSet: [SetChatSticketSet, boolean];
   deleteChatStickerSet: [number | string, boolean];
-  addStickerToSet: [AddSticketToSet, boolean];
   setStickerPositionInSet: [SetStickerPositionInSet, boolean];
   sendInvoice: [SendInvoice, Message];
   answerShippingQuery: [AnswerShippingQuery, boolean];
@@ -122,4 +192,83 @@ export type ApiMethods = {
   deleteStickerFromSet: [string, boolean];
   editMessageMedia: [EditMessageMedia, Message];
   sendAnimation: [SendAnimation, Message];
+  logOut: [LogOut, unknown];
+  close: [Close, unknown];
+  forwardMessages: [ForwardMessages, unknown];
+  copyMessage: [CopyMessage, unknown];
+  copyMessages: [CopyMessages, unknown];
+  sendVideoNote: [SendVideoNote, unknown];
+  sendPaidMedia: [SendPaidMedia, unknown];
+  sendDice: [SendDice, unknown];
+  setMessageReaction: [SetMessageReaction, unknown];
+  setUserEmojiStatus: [SetUserEmojiStatus, unknown];
+  banChatMember: [BanChatMember, unknown];
+  setChatAdministratorCustomTitle: [SetChatAdministratorCustomTitle, unknown];
+  banChatSenderChat: [BanChatSenderChat, unknown];
+  unbanChatSenderChat: [UnbanChatSenderChat, unknown];
+  setChatPermissions: [SetChatPermissions, unknown];
+  createChatInviteLink: [CreateChatInviteLink, unknown];
+  editChatInviteLink: [EditChatInviteLink, unknown];
+  createChatSubscriptionInviteLink: [CreateChatSubscriptionInviteLink, unknown];
+  editChatSubscriptionInviteLink: [EditChatSubscriptionInviteLink, unknown];
+  revokeChatInviteLink: [RevokeChatInviteLink, unknown];
+  approveChatJoinRequest: [ApproveChatJoinRequest, unknown];
+  declineChatJoinRequest: [DeclineChatJoinRequest, unknown];
+  unpinAllChatMessages: [UnpinAllChatMessages, unknown];
+  getChatMemberCount: [GetChatMemberCount, unknown];
+  setChatStickerSet: [SetChatStickerSet, unknown];
+  getForumTopicIconStickers: [GetForumTopicIconStickers, unknown];
+  createForumTopic: [CreateForumTopic, unknown];
+  editForumTopic: [EditForumTopic, unknown];
+  closeForumTopic: [CloseForumTopic, unknown];
+  reopenForumTopic: [ReopenForumTopic, unknown];
+  deleteForumTopic: [DeleteForumTopic, unknown];
+  unpinAllForumTopicMessages: [UnpinAllForumTopicMessages, unknown];
+  editGeneralForumTopic: [EditGeneralForumTopic, unknown];
+  closeGeneralForumTopic: [CloseGeneralForumTopic, unknown];
+  reopenGeneralForumTopic: [ReopenGeneralForumTopic, unknown];
+  hideGeneralForumTopic: [HideGeneralForumTopic, unknown];
+  unhideGeneralForumTopic: [UnhideGeneralForumTopic, unknown];
+  unpinAllGeneralForumTopicMessages: [
+    UnpinAllGeneralForumTopicMessages,
+    unknown,
+  ];
+  getUserChatBoosts: [GetUserChatBoosts, unknown];
+  getBusinessConnection: [GetBusinessConnection, unknown];
+  setMyCommands: [SetMyCommands, unknown];
+  deleteMyCommands: [DeleteMyCommands, unknown];
+  getMyCommands: [GetMyCommands, unknown];
+  setMyName: [SetMyName, unknown];
+  getMyName: [GetMyName, unknown];
+  setMyDescription: [SetMyDescription, unknown];
+  getMyDescription: [GetMyDescription, unknown];
+  setMyShortDescription: [SetMyShortDescription, unknown];
+  getMyShortDescription: [GetMyShortDescription, unknown];
+  setChatMenuButton: [SetChatMenuButton, unknown];
+  getChatMenuButton: [GetChatMenuButton, unknown];
+  setMyDefaultAdministratorRights: [SetMyDefaultAdministratorRights, unknown];
+  getMyDefaultAdministratorRights: [GetMyDefaultAdministratorRights, unknown];
+  deleteMessages: [DeleteMessages, unknown];
+  getCustomEmojiStickers: [GetCustomEmojiStickers, unknown];
+  addStickerToSet: [AddStickerToSet, unknown];
+  replaceStickerInSet: [ReplaceStickerInSet, unknown];
+  setStickerEmojiList: [SetStickerEmojiList, unknown];
+  setStickerKeywords: [SetStickerKeywords, unknown];
+  setStickerMaskPosition: [SetStickerMaskPosition, unknown];
+  setStickerSetTitle: [SetStickerSetTitle, unknown];
+  setStickerSetThumbnail: [SetStickerSetThumbnail, unknown];
+  setCustomEmojiStickerSetThumbnail: [
+    SetCustomEmojiStickerSetThumbnail,
+    unknown,
+  ];
+  deleteStickerSet: [DeleteStickerSet, unknown];
+  getAvailableGifts: [GetAvailableGifts, unknown];
+  sendGift: [SendGift, unknown];
+  answerWebAppQuery: [AnswerWebAppQuery, unknown];
+  savePreparedInlineMessage: [SavePreparedInlineMessage, unknown];
+  createInvoiceLink: [CreateInvoiceLink, unknown];
+  getStarTransactions: [GetStarTransactions, unknown];
+  refundStarPayment: [RefundStarPayment, unknown];
+  editUserStarSubscription: [EditUserStarSubscription, unknown];
+  setPassportDataErrors: [SetPassportDataErrors, unknown];
 };

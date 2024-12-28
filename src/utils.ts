@@ -1,20 +1,18 @@
-import type CallbackQuery from './@types/Args/CallbackQuery';
-import type CallbackQueryActions from './@types/Args/CallbackQueryActions';
-import type { MessageActions } from './@types/Args/MessageActions';
-import type Message from './@types/Entities/Message';
+import type CallbackQueryActions from './@types/CallbackQueryActions';
+import type { MessageActions } from './@types/MessageActions';
+import type { Message, CallbackQuery } from './@types/generated';
 
 import type Bot from './Bot';
 
-/** @ignore */
 export const createMessageActions = (
   message: Message,
   bot: Bot,
 ): MessageActions => {
   return {
     banChatMember: (until = 0) =>
-      bot.call('kickChatMember', {
+      bot.call('banChatMember', {
         chat_id: message.chat.id,
-        user_id: message.from.id,
+        user_id: message?.from?.id,
         until_date: until,
       }),
     deleteMessage: () =>
@@ -43,9 +41,9 @@ export const createCallbackQueryActions = (
   if (!message) return {};
   return {
     banChatMember: (until = 0) =>
-      bot.call('kickChatMember', {
+      bot.call('banChatMember', {
         chat_id: message.chat.id,
-        user_id: message.from.id,
+        user_id: (message as Message).from?.id,
         until_date: until,
       }),
     deleteMessage: () =>
