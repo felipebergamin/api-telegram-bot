@@ -1,11 +1,9 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-console */
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 import { Project, SyntaxKind } from 'ts-morph';
 import camelcase from 'camelcase';
-import eslint from 'eslint';
+import { ESLint } from 'eslint';
 
 // URL of the Telegram Bot API documentation
 const TELEGRAM_API_URL = 'https://core.telegram.org/bots/api';
@@ -18,12 +16,10 @@ async function fetchHTML(url) {
 
 const isUpperCase = (char) => char === char.toUpperCase();
 
-const lintFilesAndFix = (filePaths) => {
-  const cli = new eslint.CLIEngine({
-    fix: true,
-  });
-  const report = cli.executeOnFiles(filePaths);
-  eslint.CLIEngine.outputFixes(report);
+const lintFilesAndFix = async (filePaths) => {
+  const linter = new ESLint({ fix: true });
+  const results = await linter.lintFiles(filePaths);
+  await ESLint.outputFixes(results);
 };
 
 // Parse the HTML to extract available types and their fields
