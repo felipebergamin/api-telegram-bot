@@ -1,22 +1,24 @@
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
-
-import FormData from 'form-data';
-import { ReadStream } from 'fs';
 
 import type { Polling } from './Polling';
-
-import Webhook from './Webhook';
-import { createMessageActions } from './utils';
 import type { ApiMethods } from './@types';
 import type { Message, Update } from './@types/generated';
 import type WrappedMessageActions from './@types/WrappedMessageActions';
 import type MessageType from './@types/MessageType';
 import type UpdateType from './@types/UpdateType';
 import type TelegramResponse from './@types/TelegramResponse';
+import type { HttpBotClient, HttpClientArgs } from './helpers/createHttpClient';
+
+import Webhook from './Webhook';
+import { createMessageActions } from './utils';
+import createDefaultHttpClient from './helpers/createHttpClient';
+
+export type BotConfig = {
+  bot_token: string;
+  createHttpClient?: (config: HttpClientArgs) => HttpBotClient;
+};
 
 export default class Bot {
   #updates: Subject<Update>;
@@ -25,7 +27,7 @@ export default class Bot {
 
   #polling: Polling | null;
 
-  #axios: AxiosInstance;
+  #httpClient: HttpBotClient;
 
   /**
    * Constructs bot client
@@ -34,13 +36,13 @@ export default class Bot {
    * @param bot_token Bot token
    * @param config Optional config object.
    */
-  constructor(private bot_token: string) {
-    if (!bot_token) {
-      throw new Error('bot token undefined');
-    }
+  constructor({
+    bot_token,
+    createHttpClient = createDefaultHttpClient,
+  }: BotConfig) {
     this.#updates = new Subject();
     this.#polling = null;
-    this.#axios = axios.create({
+    this.#httpClient = createHttpClient({
       baseURL: `https://api.telegram.org/bot${bot_token}`,
     });
   }
@@ -108,8 +110,7 @@ export default class Bot {
 
     return messages$.pipe(
       filter(
-        (update) =>
-          !!update.update?.message && type in update.update.message,
+        (update) => !!update.update?.message && type in update.update.message,
       ),
     );
   }
@@ -126,22 +127,11 @@ export default class Bot {
       ? [FnName]
       : [FnName, FnArgs]
   ): Promise<TelegramResponse<FnReturn>> => {
-    if (!this.bot_token) {
-      throw new Error('Telegram Bot Token undefined');
-    }
     const [methodName, methodArgs] = args;
-    const formData = new FormData();
-
-    if (methodArgs) {
-      Object.entries(methodArgs).forEach(([key, value]) => {
-        if (typeof value === 'object' && !(value instanceof ReadStream))
-          formData.append(key, JSON.stringify(value));
-        else formData.append(key, value);
-      });
-    }
-    const { data } = await this.#axios.post(methodName, formData, {
-      headers: formData.getHeaders(),
-    });
+    const { data } = await this.#httpClient.post<
+      unknown,
+      TelegramResponse<FnReturn>
+    >(methodName, methodArgs);
     return data;
   };
 

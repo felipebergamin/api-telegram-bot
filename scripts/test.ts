@@ -5,13 +5,13 @@ import { join } from 'path';
 import { setTimeout } from 'timers/promises';
 import { Bot, KeyboardBuilder, Polling } from '../src';
 
-const token = process.env.BOT_TOKEN;
+const bot_token = process.env.BOT_TOKEN;
 const chat_id = process.env.CHAT_ID;
 
-if (!token) throw new Error('BOT_TOKEN is required');
+if (!bot_token) throw new Error('BOT_TOKEN is required');
 if (!chat_id) throw new Error('CHAT_ID is required');
 
-const bot = new Bot(token);
+const bot = new Bot({ bot_token });
 
 const fn = async () => {
   try {

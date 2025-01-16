@@ -2,7 +2,7 @@ const { createServer } = require('http');
 const { Bot } = require('../dist');
 
 const BOT_TOKEN = '';
-const bot = new Bot(BOT_TOKEN);
+const bot = new Bot({ bot_token: BOT_TOKEN });
 const { log } = console;
 
 bot.call('setWebhook', {

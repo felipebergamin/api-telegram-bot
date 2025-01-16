@@ -5,7 +5,7 @@ const { Bot } = require('../dist');
 const BOT_TOKEN = '';
 const CONTACT_ID = '';
 
-const bot = new Bot(BOT_TOKEN);
+const bot = new Bot({ bot_token: BOT_TOKEN });
 const file = createReadStream(join(__dirname, 'image.png'));
 
 bot.call('sendPhoto', {
