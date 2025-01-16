@@ -1,57 +1,38 @@
-# I'm not maintaining this package anymore
-
----
-
 # Telegram Bot API for Node.js
 
 Node.js module for [Telegram Bot API](https://core.telegram.org/bots/api).
 
 Talk with [@botfather](https://telegram.me/BotFather) on Telegram to create your bot.
 
-This module is updated with Telegram API version **4.2**. Except with Telegram Passport.
-
 # API reference
 
-[Click Here](http://apitelegrambot.tech/v6.0.2)
+Please refer to the official Telegram Bot API documentation for details on the methods and types available.
 
-### Older Versions
-
-- [v4.0.2](http://apitelegrambot.tech/v4.0.2/)
-- [v5.0.x](http://apitelegrambot.tech/v5.0.0)
-- [v5.1.x](http://apitelegrambot.tech/v5.1.0)
-- [v5.2.x](http://apitelegrambot.tech/v5.2.0)
+[Click Here](https://core.telegram.org/bots/api)
 
 ### Examples
 
-There's a `examples` directory on GitHub. Take a look ;)
+There's an [examples](https://github.com/felipebergamin/api-telegram-bot/tree/master/examples) directory on GitHub. Take a look ;)
 
-Before run any example code, please install deps with `npm i` and run `npm run build` to transpile TS code to JS in dist folder.
-
-## News
-
-- Removed experimental feature `SmartMenu`
-- Implemented menus builded with js generators
-- Changes Polling
-  - Moved .startPolling() from Bot instance to Polling
+Before run any example code, please install deps with `yarn` and build the library running `yarn build`.
 
 ### Install
+
 ```sh
 npm install api-telegram-bot
 ```
-### Start coding
+
+### How to use
 
 ```js
 const { Bot, Polling } = require('api-telegram-bot');
-// or using commonjs imports
-// const { Bot } = require("api-telegram-bot");
 
-const TOKEN = "BOT_TOKEN";
-const bot = new Bot(TOKEN);
-// polling constructor accepts some options as second parameter, see docs
+const TOKEN = 'BOT_TOKEN';
+const bot = new Bot({ bot_token: TOKEN });
 const polling = new Polling(bot);
 
 // subscribe to all message types (texts, photos, videos, and others)
-bot.messages().subscribe(data => {
+bot.messages().subscribe((data) => {
   // data is a object with 2 props:
   //   data.update - is the update received,
   //   data.actions - actions object with some helper functions
@@ -60,61 +41,78 @@ bot.messages().subscribe(data => {
 });
 
 // subscribe only to text messages
-bot.messages('text').subscribe(
-  // my opinion: use object destructuring allows a more beautiful code
-  ({ update, actions }) => {
+bot.messages('text').subscribe(({ update, actions }) => {
+  /*
+   * `update` is the update object received from Telegram
+   * `actions` is an object with some functions to manipulate received message:
+   *    banChatMember: (until: number) => Promise
+   *    deleteMessage: () => Promise
+   *    reply: (text: string, optionals?) => Promise
+   *
+   * note: deleteMessage and banChatMember doesn't works on private chats
+   */
+  actions.reply(`You said: ${update.message?.text}`);
 
-    /*
-     * actions is an object with some functions to manipulate received message:
-     *    banChatMember: (until: number) => Promise
-     *    deleteMessage: () => Promise
-     *    reply: (text: string, optionals?) => Promise
-     * 
-     * note: deleteMessage and banChatMember doesn't works on private chats
-     */
-    actions.reply(update.message.text);
-
-    setTimeout(() => {
-      bot.polling.stopPolling() // stopPolling() returns a promise fulfilled when polling ends (v5.2 or newer) (see docs for details)
-        .then(() => console.log('polling stopped'));
-    }, 30000)
-  }
-);
+  setTimeout(() => {
+    polling.stopPolling();
+  }, 30000);
+});
 
 // NOTE: message actions are provided only for message updates (text, photo, ...)
-bot.messages('edited_messages').subscribe(data => {
+bot.updates('edited_message').subscribe((data) => {
   // no actions here
   console.log(data);
 });
 ```
 
-## Enable debug log
-Start your application with DEBUG env variable containing 'api-telegram-bot' value.
-[Reference to debug package](https://www.npmjs.com/package/debug)
+## Using with webhook
 
-```
-$ DEBUG=api-telegram-bot npm start
+See the `examples/webhook.js` file on GitHub [examples directory](https://github.com/felipebergamin/api-telegram-bot/tree/master/examples).
+
+### Providing a custom http client
+
+You can provide a custom http client factory to the bot constructor. The client must implements the following interface:
+
+```ts
+export type HttpClientArgs = {
+  baseURL: string;
+};
+
+export interface HttpBotClient {
+  post: <B = unknown, R = any>(
+    method: string,
+    // data is a plain object with the api method parameters (the second parameter passed to bot.call())
+    data: B,
+  ) => Promise<{ data: R }>;
+}
+
+const createHttpClient = ({ baseURL }: HttpClientArgs): HttpBotClient => {
+  return {
+    post(method, data) {
+      // your code to make the request
+      return fetch(...);
+    },
+  };
+};
+
+const bot = new Bot({
+  bot_token: '',
+  createHttpClient,
+});
 ```
 
-To see debug logs from webhook or polling:
+## Reply Markup Builders
 
-```
-$ DEBUG=api-telegram-bot:polling npm start
-```
-``` 
-$ DEBUG=api-telegram-bot:webhook npm start
-```
+Helpers to create reply markups for Telegram Bot API.
 
-# Reply Markup Builders
-
-## [Reply Keyboard Markup](https://core.telegram.org/bots/api#replykeyboardmarkup)
+### [Reply Keyboard Markup](https://core.telegram.org/bots/api#replykeyboardmarkup)
 
 ```js
 const { KeyboardBuilder } = require('api-telegram-bot');
 
 const TOKEN = 'BOT_TOKEN';
-const CONTACT_ID = 'CONTACT_ID';
-const bot = new Bot(TOKEN);
+const chat_id = 'CONTACT_ID';
+const bot = new Bot({ bot_token: TOKEN });
 
 const { keyboard } = KeyboardBuilder()
   .button({ text: "Yes" })
@@ -122,7 +120,11 @@ const { keyboard } = KeyboardBuilder()
   .newRow()
   .button('Cancel');
 
-bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup: { keyboard, resize_keyboard: true } });
+bot.call('sendMessage', {
+  chat_id,
+  reply_markup: { keyboard, resize_keyboard: true },
+  text: 'Confirm?'
+});
 ```
 
 ![Reply Keyboard Builder Result](https://image.ibb.co/h2g9N6/Screenshot_20171215_102656.png)
@@ -133,21 +135,31 @@ bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup: { keyboard, resize_keybo
 const { KeyboardBuilder, Bot } = require('api-telegram-bot');
 
 const TOKEN = 'BOT_TOKEN';
-const CONTACT_ID = 'YOUR_TELEGRAM_ID';
+const chat_id = 'YOUR_TELEGRAM_ID';
 
-const bot = new Bot(TOKEN);
+const bot = new Bot({ bot_token: TOKEN });
 
-const inline_keyboard = KeyboardBuilder()
+const { keyboard: inline_keyboard } = KeyboardBuilder()
   .newRow()
-    .button({ text: "Yes", callback_data: "YES" })
-    .button({ text: "No", callback_data: "NO" })
+  .button({ text: 'Yes', callback_data: 'YES' })
+  .button({ text: 'No', callback_data: 'NO' })
   .newRow()
-    .button({ text: "Cancel", callback_data: "CANCEL" })
-  .keyboard;
+  .button({ text: 'Cancel', callback_data: 'CANCEL' });
 
-bot.sendMessage(CONTACT_ID, "Confirm?", { reply_markup: { inline_keyboard } });
+bot.call('sendMessage', {
+  chat_id,
+  reply_markup: { inline_keyboard },
+  text: 'Confirm?',
+});
 ```
 
 See the message sent by code above:
 
 ![Inline Keyboard Builder Result](https://image.ibb.co/kQOH9m/Screenshot_20171215_095919.png)
+
+## Todo
+
+- [ ] Add more unit tests
+- [ ] Improve the web scrapper
+- [ ] Refactor the Webhook and Polling classes
+- [ ] Add more test cases to `scripts\test.ts`

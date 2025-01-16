@@ -12,12 +12,15 @@ bot.call('setWebhook', {
 // always call webhook before subscribe to updates
 // if you try to subscribe before, observables will be undefined
 createServer(bot.getWebhook())
-  .listen(3000, () => log('server listening on port 3000'));
+  .listen(8080, () => log('server listening on port 3000'));
 
-bot.messages('text').subscribe(text => {
-  log(`Received text message from @${text.update.message?.from?.username} (${text.update.message?.from?.first_name})`)
+bot.messages('text').subscribe(({ actions, update }) => {
+  log(`Received text message from @${update.message?.from?.username} (${update.message?.from?.first_name})`);
+  log(`Message: ${update.message?.text}`)
+  actions.reply(`Hi! :)`);
 });
 
-bot.messages('photo').subscribe(photo => {
-  log(`Received photo message from @${photo.update.message?.from?.username} (${photo.update.message?.from?.first_name})`)
+bot.messages('photo').subscribe(({ update, actions }) => {
+  log(`Received photo message from @${update.message?.from?.username} (${update.message?.from?.first_name})`)
+  actions.reply('Nice photo!');
 });
