@@ -147,7 +147,7 @@ export class Polling {
           this.setStatus('FETCH_DONE');
           if (updates.ok && updates.result.length > 0) {
             this.offset =
-              updates.result[updates.result.length - 1].update_id;
+              updates.result[updates.result.length - 1].update_id + 1;
             updates.result.forEach((update: Update) => observer.next(update));
           }
         } catch (err) {
