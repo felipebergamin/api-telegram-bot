@@ -14,7 +14,7 @@ Please refer to the official Telegram Bot API documentation for details on the m
 
 There's an [examples](https://github.com/felipebergamin/api-telegram-bot/tree/master/examples) directory on GitHub. Take a look ;)
 
-Before run any example code, please install deps with `yarn` and build the library running `yarn build`.
+Before running any example code, install dependencies with `yarn` and build the library with `yarn build`.
 
 ### Install
 
