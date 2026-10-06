@@ -65,4 +65,54 @@ describe('Polling', () => {
     expect(polling.isPolling).toBe(false);
     expect(polling.getStatus()).toBe('STOPPED');
   });
+
+  test('should confirm the last update in subsequent polling and when stopping', async () => {
+    const bot = {
+      call: jest
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          result: [{ update_id: 40 }, { update_id: 42 }],
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          result: [{ update_id: 50 }, { update_id: 52 }],
+        })
+        .mockResolvedValue({ ok: true, result: [] }),
+    };
+    const instance = new Polling(bot as any);
+    const receivedIds: number[] = [];
+    let stopping: Promise<void> | undefined;
+
+    await new Promise<void>((resolve, reject) => {
+      instance.updates.subscribe({
+        next: (update) => {
+          receivedIds.push(update.update_id);
+          if (update.update_id === 52) {
+            stopping = instance.stopPolling();
+          }
+        },
+        complete: resolve,
+        error: reject,
+      });
+    });
+    await stopping;
+
+    expect(receivedIds).toEqual([40, 42, 50, 52]);
+    expect(bot.call).toHaveBeenCalledTimes(3);
+    expect(bot.call).toHaveBeenNthCalledWith(
+      1,
+      'getUpdates',
+      expect.objectContaining({ offset: 0 }),
+    );
+    expect(bot.call).toHaveBeenNthCalledWith(
+      2,
+      'getUpdates',
+      expect.objectContaining({ offset: 43 }),
+    );
+    expect(bot.call).toHaveBeenNthCalledWith(3, 'getUpdates', {
+      offset: 53,
+      limit: 1,
+    });
+  });
 });
